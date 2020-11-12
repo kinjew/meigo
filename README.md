@@ -1,4 +1,4 @@
-# 美菜MEIGO框架简介
+# MEIGO框架简介
 
 MEIGO是基于gin框架，结合go语言特性设计的MVC风格的框架，使用了`Go Modules`包管理方式。 
 
