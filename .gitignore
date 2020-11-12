@@ -1,0 +1,7 @@
+*.exe
+*.test
+*.bench
+
+.vscode
+.idea/
+conf/conf.toml

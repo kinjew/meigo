@@ -1,0 +1,67 @@
+[server]
+    domain = "127.0.0.1"
+    port = ":8000"
+    runMode = "debug" # 3 mod: release,debug,test
+    readTimeout = 10
+    writeTimeout = 10
+    idleTimeout = 10
+
+
+[mysql]
+    [mysql.test]
+        dbType = "mysql"
+        host = "127.0.0.1"
+        port = "3306"
+        user = "root"
+        password = ""
+        dbName = "test"
+        parameters = "charset=utf8mb4&parseTime=True&loc=Asia%2FShanghai"
+
+
+[redis]
+	addr = "127.0.0.1:6379"
+	password  = ""
+	DB = 0
+	# MaxRetries: Maximum number of retries before giving up.
+	maxRetries = 3
+
+[zap]
+	# Filename is the file to write logs to.  Backup log files will be retained
+	# in the same directory.  It uses <processname>-lumberjack.log in
+	# os.TempDir() if empty.
+    filename = "/data/logs/zap.log"
+    # MaxSize is the maximum size in megabytes of the log file before it gets
+    # rotated. It defaults to 100 megabytes.
+    maxSize = 1
+    # MaxBackups is the maximum number of old log files to retain.  The default
+    # is to retain all old log files (though MaxAge may still cause them to get
+    # deleted.)
+    maxBackups = 30
+    # MaxAge is the maximum number of days to retain old log files based on the
+    # timestamp encoded in their filename.  Note that a day is defined as 24
+    # hours and may not exactly correspond to calendar days due to daylight
+    # savings, leap seconds, etc. The default is not to remove old log files
+    # based on age.
+    maxAge = 30
+    compress = false
+    timeKey = "time"
+    levelKey = "level"
+    nameKey = "logger"
+    callerKey = "caller"
+    messageKey = "msg"
+    stacktraceKey = "stacktrace"
+
+[ElasticSearch]
+    url = "http://127.0.0.1:9200"                          # dev
+    index = "csp_task"
+    type  = "csp_task_alias"
+    username = ""
+    password = ""
+    shards = 5
+    replicas = 1
+    sniff = false
+    healthcheck = false
+    infolog = "/data/logs/zap.log"
+    errorlog = "/data/logs/zap.log"
+    tracelog = "/data/logs/zap.log"
+
