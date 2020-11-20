@@ -121,7 +121,7 @@ meigo引入cobra框架，该框架可方便编写命令和子命令程序，并�
 ## 异常问题解决方案  
 
 1.如果第一次运行 meigo 项目出现以下错误：
-`go: git.sprucetec.com/meigo/gin-context-ext@v0.0.2: reading git.sprucetec.com/meigo/gin-context-ext/go.mod at revision v0.0.2: unknown revision v0.0.2`  
+`go: github.com/kinjew/gin-context-ext@v0.0.2: reading github.com/kinjew/gin-context-ext/go.mod at revision v0.0.2: unknown revision v0.0.2`  
 该异常是 go get 机制引起，暂时解决方案为在本地终端执行以下 3 条命令：  
 
 ```bash

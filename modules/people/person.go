@@ -7,7 +7,7 @@ import (
 	"net/http"
 	"os"
 
-	ctxExt "git.sprucetec.com/meigo/gin-context-ext"
+	ctxExt "github.com/kinjew/gin-context-ext"
 )
 
 var p peopleMod.Person

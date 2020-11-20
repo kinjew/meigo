@@ -43,9 +43,5 @@ func loadMiddle(g *gin.Engine, mw ...gin.HandlerFunc) *gin.Engine {
 		c.String(http.StatusNotFound, "404！ The incorrect API route.")
 	})
 
-	for {
-
-	}
-
 	return g
 }

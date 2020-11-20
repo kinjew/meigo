@@ -10,11 +10,11 @@ import (
 
 	"github.com/spf13/viper"
 
-	ctxExt "git.sprucetec.com/meigo/gin-context-ext"
 	elasticsearch6 "github.com/elastic/go-elasticsearch/v6"
 	"github.com/gin-gonic/gin"
 	"github.com/gin-gonic/gin/binding"
 	"github.com/go-redis/redis"
+	ctxExt "github.com/kinjew/gin-context-ext"
 	"gopkg.in/go-playground/validator.v8"
 )
 

@@ -1,8 +1,8 @@
 package index
 
 import (
-	ctxExt "git.sprucetec.com/meigo/gin-context-ext"
 	"github.com/gin-gonic/gin"
+	ctxExt "github.com/kinjew/gin-context-ext"
 )
 
 /*

@@ -3,8 +3,8 @@ package routers
 import (
 	peopleModule "meigo/modules/people"
 
-	ctxExt "git.sprucetec.com/meigo/gin-context-ext"
 	"github.com/gin-gonic/gin"
+	ctxExt "github.com/kinjew/gin-context-ext"
 )
 
 func peopleRouter(giNew *gin.Engine) {

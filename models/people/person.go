@@ -7,8 +7,8 @@ import (
 
 	"meigo/library/log"
 
-	ctxExt "git.sprucetec.com/meigo/gin-context-ext"
 	"github.com/jinzhu/gorm"
+	ctxExt "github.com/kinjew/gin-context-ext"
 )
 
 // Person 实体

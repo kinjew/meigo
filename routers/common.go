@@ -3,8 +3,8 @@ package routers
 import (
 	indexModule "meigo/modules/index"
 
-	ctxExt "git.sprucetec.com/meigo/gin-context-ext"
 	"github.com/gin-gonic/gin"
+	ctxExt "github.com/kinjew/gin-context-ext"
 )
 
 //通用路由文件

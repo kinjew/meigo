@@ -3,7 +3,7 @@ package routers
 import (
 	exampleModule "meigo/modules/example"
 
-	ctxExt "git.sprucetec.com/meigo/gin-context-ext"
+	ctxExt "github.com/kinjew/gin-context-ext"
 
 	"github.com/gin-gonic/gin"
 )
