@@ -34,7 +34,7 @@ type MySQL struct {
 	Parameters string
 }
 
-// ReadMysqlConfig 加载 myosql 参数
+// ReadMysqlConfig 加载 mysql 参数
 func ReadMysqlConfig(dbname string) (mysqlConf *MySQL) {
 	if dbname == "" {
 		log.Error("dbname is null.")
@@ -46,6 +46,6 @@ func ReadMysqlConfig(dbname string) (mysqlConf *MySQL) {
 	if err != nil {
 		panic(err)
 	}
-	//fmt.Println("ReadMysqlConfig 中的 mysql 配置信息: ", MysqlConf)
+	//fmt.Println("ReadMysqlConfig 中的 mysql 配置信息: ", dbname, mysqlConf)
 	return
 }

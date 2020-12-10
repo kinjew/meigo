@@ -18,6 +18,7 @@ function build()
   cd ../
   go build  -o bin/meigo main.go
   go build  -o bin/cmd cmd/main.go
+  go build  -o bin/mtd daemon/mtd/main.go
   echo '编译完成';
 
   #配文文件、启停脚本、运行时目录等拷贝

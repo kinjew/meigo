@@ -1,6 +1,7 @@
 package example
 
 import (
+	"context"
 	"crypto/tls"
 	"fmt"
 	"meigo/library/log"
@@ -13,7 +14,7 @@ import (
 	elasticsearch6 "github.com/elastic/go-elasticsearch/v6"
 	"github.com/gin-gonic/gin"
 	"github.com/gin-gonic/gin/binding"
-	"github.com/go-redis/redis"
+	"github.com/go-redis/redis/v8"
 	ctxExt "github.com/kinjew/gin-context-ext"
 	"gopkg.in/go-playground/validator.v8"
 )
@@ -108,48 +109,68 @@ func ValidBookable(c *ctxExt.Context) {
 
 /*
 ExampleNewRedisClient https://github.com/go-redis/redis
+适用于v6
 */
+
 func Redis(c *ctxExt.Context) {
-	client := redis.NewClient(&redis.Options{
+	rdb := redis.NewClient(&redis.Options{
 		Addr:       viper.GetString("redis.addr"),
 		Password:   viper.GetString("redis.password"), // no password set
 		DB:         viper.GetInt("redis.DB"),          // use default DB
 		MaxRetries: viper.GetInt("redis.maxRetries"),
 	})
+	var ctx = context.Background()
+
+	errList := rdb.LPush(ctx, "list-key", "{\"tool_id\":1,\"tool_type\":1,\"main_id\":5618,\"wx_system_user_id\":36,\"member_id\":20010187,\"wx_open_id\":\"ofK1R1gBLvNqt8Uyn7pp4VVghgC4\",\"client_ip\":\"119.57.93.91\",\"data_generation_at\":1607060185,\"user_identity_type\":1,\"type\":\"visit\",\"data\":{\"device_type\":\"mobile\",\"browser_type\":\"wechat\",\"channel_id\":0}}").Err()
+	if errList != nil {
+		panic(errList)
+	}
+
+	errList1 := rdb.LPush(ctx, "list-key", "{\"tool_id\":18053,\"tool_type\":1,\"main_id\":5371,\"wx_system_user_id\":36,\"member_id\":20010187,\"wx_open_id\":\"ofK1R1gBLvNqt8Uyn7pp4VVghgC4\",\"client_ip\":\"119.57.93.91\",\"data_generation_at\":1607060185,\"user_identity_type\":1,\"type\":\"visit\",\"data\":{\"device_type\":\"mobile\",\"browser_type\":\"wechat\",\"channel_id\":0}}").Err()
+	if errList1 != nil {
+		panic(errList)
+	}
 
 	/*
-		哨兵模式客户端
-		rdb := redis.NewFailoverClient(&redis.FailoverOptions{
-			MasterName:    "crm_api",
-			SentinelAddrs: []string{"192.168.2.10:26400", "192.168.2.13:26400"},
-		})
-		pong_sentinel, err_sentinel := rdb.Ping().Result()
-		log.Info("pong_sentinel ", pong_sentinel, err_sentinel)
+		listValue1, errList_new := rdb.RPop(ctx, "list-key").Result()
+		if errList_new != nil {
+			panic(errList_new)
+			rdb.RPush(ctx, "list-key", "888")
+
+		}
+		listValue2, errList_new := rdb.RPop(ctx, "list-key").Result()
+		listValue3, errList_new := rdb.RPop(ctx, "list-key").Result()
+
+		fmt.Println("listValue1", listValue1)
+		fmt.Println("listValue2", listValue2)
+		fmt.Println("listValue3", listValue3)
 	*/
-
-	pong, err := client.Ping().Result()
-	log.Info("pong ", pong, err)
-	// Output: PONG <nil>
-	err = client.Set("key", "value", 0).Err()
+	/*
+		rdb.RPush(ctx, "list-key", "888")
+		rdb.RPush(ctx, "list-key", "999")
+		listValue9, errList_new := rdb.RPop(ctx, "list-key").Result()
+		fmt.Println("listValue9", listValue9)
+		listValue8, errList_new := rdb.RPop(ctx, "list-key").Result()
+		fmt.Println("listValue8", listValue8)
+	*/
+	err := rdb.Set(ctx, "key", "value", 0).Err()
 	if err != nil {
-		log.Info("err", err)
 		panic(err)
 	}
 
-	val, err := client.Get("key").Result()
+	val, err := rdb.Get(ctx, "key").Result()
 	if err != nil {
-		log.Info("err", err)
 		panic(err)
 	}
-	log.Info("key", val)
+	fmt.Println("key", val)
 
-	val2, err := client.Get("key2").Result()
+	val2, err := rdb.Get(ctx, "key2").Result()
 	if err == redis.Nil {
-		log.Info("key2 does not exist")
+		fmt.Println("key2 does not exist")
 	} else if err != nil {
 		panic(err)
 	} else {
-		log.Info("key2", val2)
+		fmt.Println("key2", val2)
 	}
 	// Output: key value
 	// key2 does not exist

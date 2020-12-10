@@ -22,6 +22,7 @@ func InitRouter() *gin.Engine {
 	commonRouter(g)
 	peopleRouter(g)
 	exampleRouter(g)
+	mtdRouter(g)
 
 	return g
 }

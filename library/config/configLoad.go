@@ -43,7 +43,7 @@ func LoadConfigFile() {
 		//conf := viper.New()
 		viper.AddConfigPath(cDir)*/
 	//viper.AddConfigPath("/data/www/go_meigo/conf/")
-	viper.AddConfigPath("/Users/danderui/meigo/conf/")
+	viper.AddConfigPath("/Users/danderui/test/meigo/conf/")
 	viper.SetConfigName("conf")
 	viper.SetConfigType("toml") // toml 或者 yaml
 	// viper.AutomaticEnv()            // 读取匹配的环境变量

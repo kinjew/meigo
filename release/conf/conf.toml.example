@@ -17,6 +17,15 @@
         dbName = "test"
         parameters = "charset=utf8mb4&parseTime=True&loc=Asia%2FShanghai"
 
+    [mysql.marketing_tool_data]
+        dbType = "mysql"
+        host = "127.0.0.1"
+        port = "3306"
+        user = "root"
+        password = ""
+        dbName = "marketing_tool_data"
+        parameters = "charset=utf8mb4&parseTime=True&loc=Asia%2FShanghai"
+
 
 [redis]
 	addr = "127.0.0.1:6379"
@@ -65,3 +74,5 @@
     errorlog = "/data/logs/zap.log"
     tracelog = "/data/logs/zap.log"
 
+[const]
+    sourceDataProcessUrl = "http://wwww.baidu.com"
