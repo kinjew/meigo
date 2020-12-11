@@ -16,6 +16,8 @@ var page = "1"
 var pageSize = "20"
 var totalCount = 0
 
+var orderBy = "id desc"
+
 // InitPersonDB 初始化数据库
 func InitMarketingToolDataDB() {
 

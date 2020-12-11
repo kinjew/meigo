@@ -1,9 +1,12 @@
 package main
 
 import (
+	"bytes"
 	"context"
 	"encoding/json"
 	"fmt"
+	"io"
+	"io/ioutil"
 	mgInit "meigo/library/init"
 	"meigo/library/log"
 	"net/http"
@@ -36,11 +39,39 @@ type OtherSourceData struct {
 	ChannelId   int    `gorm:"column:channel_id;" json:"channel_id" form:"channel_id"`
 }
 
-var strList = []string{"ch1", "ch2", "ch3", "ch4", "ch5", "ch6", "ch7", "ch8", "ch9"}
-
 var ch0, ch1, ch2, ch3, ch4, ch5, ch6, ch7, ch8, ch9, chN chan string
 
+var strList = []string{"ch1", "ch2", "ch3", "ch4", "ch5", "ch6", "ch7", "ch8", "ch9"}
+
 func main() {
+	/*
+		timer2 := time.NewTimer(time.Second)
+		go func() {
+			<-timer2.C
+			fmt.Println("Timer 2 expired")
+		}()
+		stop2 := timer2.Stop()
+		if stop2 {
+			fmt.Println("Timer 2 stopped")
+		}
+
+		/*
+			ticker := time.NewTicker(time.Millisecond * 500)
+			go func() {
+				for t := range ticker.C {
+					fmt.Println("Tick at", t)
+				}
+			}()
+			time.Sleep(time.Second)
+
+	*/
+	/*
+		for key, _ := range chanList {
+			temKey := key
+			chanList[temKey] = make(chan string, 5)
+			fmt.Println("chanList[temKey]: ", chanList[temKey])
+		}
+	*/
 	// 配置读取加载
 	mgInit.ConfInit()
 
@@ -56,6 +87,19 @@ func main() {
 	ch8 = make(chan string)
 	ch9 = make(chan string)
 	chN = make(chan string)
+	/*
+		ch0 = make(chan string, 5)
+		ch1 = make(chan string, 5)
+		ch2 = make(chan string, 5)
+		ch3 = make(chan string, 5)
+		ch4 = make(chan string, 5)
+		ch5 = make(chan string, 5)
+		ch6 = make(chan string, 5)
+		ch7 = make(chan string, 5)
+		ch8 = make(chan string, 5)
+		ch9 = make(chan string, 5)
+		chN = make(chan string, 5)
+	*/
 	//fmt.Println("redisAddr: ", viper.GetString("redis.addr"))
 	//连接redis
 	rdb := redis.NewClient(&redis.Options{
@@ -107,6 +151,18 @@ func main() {
 	//time.Sleep(time.Second)
 
 	fmt.Println("runing: ", "end")
+
+	defer close(ch0)
+	defer close(ch1)
+	defer close(ch2)
+	defer close(ch3)
+	defer close(ch4)
+	defer close(ch5)
+	defer close(ch6)
+	defer close(ch7)
+	defer close(ch8)
+	defer close(ch9)
+	defer close(chN)
 }
 
 //readRedis 读取redis数据，存入channel
@@ -168,6 +224,8 @@ func readRedis(ctx context.Context, rdb *redis.Client) {
 }
 
 //readRedisOnce 读取redis数据
+//go 发起http请求 https://www.cnblogs.com/tigerzhouv587/p/11458772.html
+//go 发起http请求 https://blog.csdn.net/zangdaiyang1991/article/details/107071529/
 func readRedisOnce(ctx context.Context, rdb *redis.Client) (remainder int, listValue string) {
 	listValue, err := rdb.RPop(ctx, "list-key").Result()
 	fmt.Println("listValue: ", listValue)
@@ -219,9 +277,69 @@ func requestOuterApiOnce(sourceDataJson string, ctx context.Context, rdb *redis.
 	}
 	//defer resp.Body.Close()
 	if resp != nil {
+		/*
+			body, _ := ioutil.ReadAll(resp.Body)
+			fmt.Println("responseBody: ", string(body))
+		*/
+		fmt.Println("requestOuterApiEnd: ", resp.StatusCode, sourceDataJson, resp.Body)
+		log.Error("requestOuterApiEnd: ", resp.StatusCode, sourceDataJson, resp.Body)
 		resp.Body.Close()
+	} else {
+		return
 	}
-	fmt.Println("requestOuterApiEnd: ", resp.StatusCode, sourceDataJson, resp.Body)
-	log.Error("requestOuterApiEnd: ", resp.StatusCode, sourceDataJson, resp.Body)
 	//return
+}
+
+/*
+https://github.com/valyala/fasthttp
+golang使用fasthttp 发起http请求 https://www.jianshu.com/p/1f546747cb09
+*/
+/*
+备用函数
+*/
+// 发送GET请求
+// url：         请求地址
+// response：    请求返回的内容
+func Get(url string) string {
+
+	// 超时时间：5秒
+	client := &http.Client{Timeout: 5 * time.Second}
+	resp, err := client.Get(url)
+	if err != nil {
+		panic(err)
+	}
+	defer resp.Body.Close()
+	var buffer [512]byte
+	result := bytes.NewBuffer(nil)
+	for {
+		n, err := resp.Body.Read(buffer[0:])
+		result.Write(buffer[0:n])
+		if err != nil && err == io.EOF {
+			break
+		} else if err != nil {
+			panic(err)
+		}
+	}
+
+	return result.String()
+}
+
+// 发送POST请求
+// url：         请求地址
+// data：        POST请求提交的数据
+// contentType： 请求体格式，如：application/json
+// content：     请求放回的内容
+func Post(url string, data interface{}, contentType string) string {
+
+	// 超时时间：5秒
+	client := &http.Client{Timeout: 5 * time.Second}
+	jsonStr, _ := json.Marshal(data)
+	resp, err := client.Post(url, contentType, bytes.NewBuffer(jsonStr))
+	if err != nil {
+		panic(err)
+	}
+	defer resp.Body.Close()
+
+	result, _ := ioutil.ReadAll(resp.Body)
+	return string(result)
 }

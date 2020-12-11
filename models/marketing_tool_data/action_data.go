@@ -1,9 +1,11 @@
 package marketing_tool_data
 
 import (
+	"fmt"
 	"meigo/library/db/common"
 	"meigo/library/log"
 	"strconv"
+	"strings"
 
 	"github.com/jinzhu/gorm"
 	ctxExt "github.com/kinjew/gin-context-ext"
@@ -11,18 +13,18 @@ import (
 
 // ActionData 实体
 type ActionData struct {
-	common.BaseModelV1
-	MainId int `gorm:"column:main_id;" json:"main_id" form:"main_id" binding:"required"`
 	//WxSystemUserId              int    `gorm:"column:wx_system_user_id;" json:"wx_system_user_id" form:"wx_system_user_id" binding:"required"`
 	//ToolId                      int    `gorm:"column:tool_id;" json:"tool_id" form:"tool_id" binding:"required"`
 	//ToolType                    int8   `gorm:"column:tool_type;" json:"tool_type" form:"tool_type" binding:"required"`
+	//UserIdentityType            int    `gorm:"column:user_identity_type;" json:"user_identity_type" form:"user_identity_type"`
+	common.BaseModelV1
+	MainId                      int    `gorm:"column:main_id;" json:"main_id" form:"main_id" binding:"required"`
 	WxSystemUserId              int    `gorm:"column:wx_system_user_id;" json:"wx_system_user_id" form:"wx_system_user_id" `
 	ToolId                      int    `gorm:"column:tool_id;" json:"tool_id" form:"tool_id"`
 	ToolType                    int8   `gorm:"column:tool_type;" json:"tool_type" form:"tool_type"`
 	MemberId                    int    `gorm:"column:member_id;" json:"member_id" form:"member_id"`
 	WxOpenId                    string `gorm:"column:wx_open_id;" json:"wx_open_id" form:"wx_open_id"`
 	ClientIp                    string `gorm:"column:client_ip;" json:"client_ip" form:"client_ip"`
-	UserIdentityType            int    `gorm:"column:user_identity_type;" json:"user_identity_type" form:"user_identity_type"`
 	FirstVisitBrowser           string `gorm:"column:first_visit_browser;" json:"first_visit_browser" form:"first_visit_browser"`
 	FirstVisitClient            int    `gorm:"column:first_visit_client;" json:"first_visit_client" form:"first_visit_client"`
 	FirstVisitEquipment         string `gorm:"column:first_visit_equipment;" json:"first_visit_equipment" form:"first_visit_equipment"`
@@ -55,7 +57,7 @@ type ActionData struct {
 	IsClickGeneratePosterButton *int   `gorm:"column:is_click_generate_poster_button;" json:"is_click_generate_poster_button" form:"is_click_generate_poster_button"`
 	IsClickEnterLiveButton      *int   `gorm:"column:is_click_enter_live_button;" json:"is_click_enter_live_button" form:"is_click_enter_live_button"`
 	IsClickWatchReplayButton    *int   `gorm:"column:is_click_watch_replay_button;" json:"is_click_watch_replay_button" form:"is_click_watch_replay_button"`
-	//ActionDataId                *uint  `gorm:"column:action_data_id;" json:"action_data_id" form:"action_data_id"`
+	IsDel                       *int   `gorm:"column:is_del;" json:"is_del" form:"is_del"`
 	ActionLiveData
 }
 
@@ -74,6 +76,10 @@ type ActionLiveData struct {
 	LastReplayLoginCity   string `gorm:"column:last_replay_login_city;" json:"last_replay_login_city" form:"last_replay_login_city"`
 	TotalWatchTime        int    `gorm:"column:total_watch_time;" json:"total_watch_time" form:"total_watch_time"`
 }
+
+//ActionLiveData 实体表需要返回的有限字段
+var ActionLiveDataColumn = "action_data_id,live_platform_type,last_live_watch_client,last_live_leave_time,last_live_login_city,live_watch_time," +
+	"first_replay_enter_time,replay_watch_time,replay_watch_times,last_replay_watch_client,last_replay_login_city,total_watch_time"
 
 /*
 var operatorList = []string{"=", ">", ">=", "<", "<=", "<>"}
@@ -150,6 +156,9 @@ func (ad *ActionData) QueryByParams(c *ctxExt.Context) (list []ActionData, suppl
 	//根据操作符查询
 	tx = operatorQueryGenerator(params, tx, c)
 
+	//范围查询，该方法放置于join操作之前
+	tx = inQueryGenerator(params, tx, c)
+
 	//表left join操作
 	tx = tx.Joins("left join " + liveTableSegmentation + " on " + liveTableSegmentation + ".action_data_id = " + tableSegmentation + ".id")
 
@@ -166,8 +175,12 @@ func (ad *ActionData) QueryByParams(c *ctxExt.Context) (list []ActionData, suppl
 	//获取总数
 	tx.Count(&totalCount)
 
+	//排序处理
+	orderBy = c.DefaultQuery("orderBy", orderBy)
+
 	//err = tx.Select("*").Scan(&list).Error
-	err = tx.Select("*").Offset(offSet).Limit(pageSizeInt).Scan(&list).Error
+	//err = tx.Select("*").Order(orderBy).Offset(offSet).Limit(pageSizeInt).Scan(&list).Error
+	err = tx.Select(tableSegmentation + ".*, " + ActionLiveDataColumn).Order(orderBy).Offset(offSet).Limit(pageSizeInt).Scan(&list).Error
 
 	supplementData["page"] = pageInt
 	supplementData["pageSize"] = pageSizeInt
@@ -179,7 +192,7 @@ func (ad *ActionData) QueryByParams(c *ctxExt.Context) (list []ActionData, suppl
 	return list, supplementData, err
 }
 
-//构造mapQuery对象
+//mapQueryGenerator构造mapQuery对象
 func mapQueryGenerator(params ActionData, mapQuery map[string]interface{}, c *ctxExt.Context) map[string]interface{} {
 	//return mapQuery
 	if params.MainId > 0 {
@@ -204,9 +217,11 @@ func mapQueryGenerator(params ActionData, mapQuery map[string]interface{}, c *ct
 	if params.ClientIp != "" {
 		mapQuery["client_ip"] = params.ClientIp
 	}
-	if params.ClientIp != "" {
-		mapQuery["user_identity_type"] = params.UserIdentityType
-	}
+	/*
+		if params.UserIdentityType != "" {
+			mapQuery["user_identity_type"] = params.UserIdentityType
+		}
+	*/
 	if params.FirstVisitBrowser != "" {
 		mapQuery["first_visit_browser"] = params.FirstVisitBrowser
 	}
@@ -303,10 +318,15 @@ func mapQueryGenerator(params ActionData, mapQuery map[string]interface{}, c *ct
 	if params.IsClickWatchReplayButton != nil && *params.IsClickWatchReplayButton >= 0 && IsClickWatchReplayButton != "" {
 		mapQuery["is_click_watch_replay_button"] = *params.IsClickWatchReplayButton
 	}
+	//验证是否有参数is_click_enroll_button请求进来
+	IsDel := c.Query("is_del")
+	if params.IsDel != nil && *params.IsDel >= 0 && IsDel != "" {
+		mapQuery["is_del"] = *params.IsDel
+	}
 	return mapQuery
 }
 
-//构造mapQuery对象
+//operatorQueryGenerator构造基于操作符的查询
 func operatorQueryGenerator(params ActionData, tx *gorm.DB, c *ctxExt.Context) *gorm.DB {
 
 	//验证是否有参数pay_money请求进来
@@ -395,7 +415,7 @@ func joinQueryGenerator(params ActionData, liveTableSegmentation string, c *ctxE
 	//根据操作符查询
 	LastLiveLeaveTimeOperator := c.Query("last_live_leave_time_operator")
 	if params.LastLiveLeaveTime >= 0 && LastLiveLeaveTimeOperator != "" && isPermittedOperator(LastLiveLeaveTimeOperator, operatorList) {
-		tx = tx.Where("last_live_leave_time "+LastLiveLeaveTimeOperator+"  ?", params.LastLiveLeaveTime)
+		tx = tx.Where(liveTableSegmentation+".last_live_leave_time "+LastLiveLeaveTimeOperator+"  ?", params.LastLiveLeaveTime)
 	}
 	LastLiveLoginCity := c.Query("last_live_login_city")
 	if LastLiveLoginCity != "" {
@@ -404,19 +424,19 @@ func joinQueryGenerator(params ActionData, liveTableSegmentation string, c *ctxE
 	}
 	LiveWatchTimeOperator := c.Query("live_watch_time_operator")
 	if params.LiveWatchTime >= 0 && LiveWatchTimeOperator != "" && isPermittedOperator(LiveWatchTimeOperator, operatorList) {
-		tx = tx.Where("live_watch_time "+LastLiveLeaveTimeOperator+"  ?", params.LiveWatchTime)
+		tx = tx.Where(liveTableSegmentation+".live_watch_time "+LastLiveLeaveTimeOperator+"  ?", params.LiveWatchTime)
 	}
 	FirstReplayEnterTimeOperator := c.Query("first_replay_enter_time_operator")
 	if params.FirstReplayEnterTime >= 0 && FirstReplayEnterTimeOperator != "" && isPermittedOperator(FirstReplayEnterTimeOperator, operatorList) {
-		tx = tx.Where("first_replay_enter_time "+LastLiveLeaveTimeOperator+"  ?", params.FirstReplayEnterTime)
+		tx = tx.Where(liveTableSegmentation+".first_replay_enter_time "+LastLiveLeaveTimeOperator+"  ?", params.FirstReplayEnterTime)
 	}
 	ReplayWatchTimeOperator := c.Query("replay_watch_time_operator")
 	if params.ReplayWatchTime >= 0 && ReplayWatchTimeOperator != "" && isPermittedOperator(ReplayWatchTimeOperator, operatorList) {
-		tx = tx.Where("replay_watch_time "+ReplayWatchTimeOperator+"  ?", params.ReplayWatchTime)
+		tx = tx.Where(liveTableSegmentation+".replay_watch_time "+ReplayWatchTimeOperator+"  ?", params.ReplayWatchTime)
 	}
 	ReplayWatchTimesOperator := c.Query("replay_watch_times_operator")
 	if params.ReplayWatchTimes >= 0 && ReplayWatchTimesOperator != "" && isPermittedOperator(ReplayWatchTimesOperator, operatorList) {
-		tx = tx.Where("replay_watch_times "+ReplayWatchTimesOperator+"  ?", params.ReplayWatchTimes)
+		tx = tx.Where(liveTableSegmentation+".replay_watch_times "+ReplayWatchTimesOperator+"  ?", params.ReplayWatchTimes)
 	}
 	LastReplayWatchClient := c.Query("last_replay_watch_client")
 	if LastReplayWatchClient != "" {
@@ -430,7 +450,23 @@ func joinQueryGenerator(params ActionData, liveTableSegmentation string, c *ctxE
 	}
 	TotalWatchTimeOperator := c.Query("total_watch_time_operator")
 	if params.TotalWatchTime >= 0 && TotalWatchTimeOperator != "" && isPermittedOperator(TotalWatchTimeOperator, operatorList) {
-		tx = tx.Where("total_watch_time "+TotalWatchTimeOperator+"  ?", params.TotalWatchTime)
+		tx = tx.Where(liveTableSegmentation+".total_watch_time "+TotalWatchTimeOperator+"  ?", params.TotalWatchTime)
 	}
+	return tx
+}
+
+//inQueryGenerator 构造in查询
+func inQueryGenerator(params ActionData, tx *gorm.DB, c *ctxExt.Context) *gorm.DB {
+	//member_id_list为member_id以逗号分割的字符串
+	MemberIdList := c.Query("member_id_list")
+	if MemberIdList != "" {
+		MemberIdArr := strings.Split(MemberIdList, ",")
+		if len(MemberIdArr) != 0 {
+			fmt.Println("MemberIdArr: ", MemberIdArr)
+			//fmt.Println("member_id_arr: ", []int{29, 30})
+			tx = tx.Where("member_id IN (?) ", MemberIdArr)
+		}
+	}
+
 	return tx
 }
