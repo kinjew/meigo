@@ -28,12 +28,12 @@ type GeneralStatData struct {
 	WatchLiveTimeAverage       uint   `gorm:"column:watch_live_time_average;" json:"watch_live_time_average" form:"watch_live_time_average"`
 	OnlyWatchReplayNum         uint   `gorm:"column:only_watch_replay_num;" json:"only_watch_replay_num" form:"only_watch_replay_num"`
 	OnlyWatchReplayTimeAverage uint   `gorm:"column:only_watch_replay_time_average;" json:"only_watch_replay_time_average" form:"only_watch_replay_time_average"`
-	SendToEmailTotalTimes      uint   `gorm:"column:send_to_email_total_times;" json:"send_to_email_total_times" form:"send_to_email_total_times"`
-	SendToEmailTotalNum        uint   `gorm:"column:send_to_email_total_num;" json:"send_to_email_total_num" form:"send_to_email_total_num"`
+	DownloadTotalTimes         uint   `gorm:"column:download_total_times;" json:"download_total_times" form:"download_total_times"`
+	DownloadNum                uint   `gorm:"column:download_num;" json:"download_num" form:"download_num"`
 	ShareTotalTimes            uint   `gorm:"column:share_total_times;" json:"share_total_times" form:"share_total_times"`
 	ShowNum                    uint   `gorm:"column:show_num;" json:"show_num" form:"show_num"`
-	CollectTotalTimes          uint   `gorm:"column:collect_total_times;" json:"collect_total_times" form:"collect_total_times"`
-	CollectNum                 uint   `gorm:"column:collect_num;" json:"collect_num" form:"collect_num"`
+	FavoriteTotalTimes         uint   `gorm:"column:favorite_total_times;" json:"favorite_total_times" form:"favorite_total_times"`
+	FavoriteNum                uint   `gorm:"column:favorite_num;" json:"favorite_num" form:"favorite_num"`
 	ViewMaterialTotalTimes     uint   `gorm:"column:view_material_total_times;" json:"view_material_total_times" form:"view_material_total_times"`
 	ViewMaterialNum            uint   `gorm:"column:view_material_num;" json:"view_material_num" form:"view_material_num"`
 	NewFansNum                 uint   `gorm:"column:new_fans_num;" json:"new_fans_num" form:"new_fans_num"`

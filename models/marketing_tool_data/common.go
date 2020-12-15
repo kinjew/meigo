@@ -9,9 +9,17 @@ import (
 
 // sqlDB 是 *gorm.DB
 var sqlDB *gorm.DB
-var err error
 
-var operatorList = []string{"=", ">", ">=", "<", "<=", "<>"}
+//var err error
+
+//var operatorList = []string{"=", ">", ">=", "<", "<=", "<>"}
+//类型one操作符
+var operatorTypeOneMap = map[string]string{"eq": "=", "neq": "<>", "gt": ">", "lt": "<", "gte": ">=", "lte": "<="}
+
+//类型two操作符
+var operatorTypeTwo = []string{"between", "lbetween", "rbetween", "ibetween"}
+var operatorTypeTwoMap = map[string][]string{"between": []string{">=", "<="}, "lbetween": []string{">=", "<"}, "rbetween": []string{">", "<="}, "ibetween": []string{">", "<"}}
+
 var page = "1"
 var pageSize = "20"
 var totalCount = 0
@@ -20,11 +28,21 @@ var orderBy = "id desc"
 
 // InitPersonDB 初始化数据库
 func InitMarketingToolDataDB() {
-
+	var err error
 	if sqlDB, err = db.ConnDB("marketing_tool_data"); err != nil {
 		panic(err)
 	}
 	//sqlDB.AutoMigrate(&Person{})
+}
+
+//判断key是否在map中 isPermittedExpression
+func isPermittedExpression(target string, operatorMap map[string]string) bool {
+	_, exists := operatorMap[target]
+	//fmt.Println(value, exists)
+	if exists {
+		return true
+	}
+	return false
 }
 
 //判断操作符是否在切片中

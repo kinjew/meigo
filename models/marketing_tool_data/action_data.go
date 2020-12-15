@@ -1,6 +1,7 @@
 package marketing_tool_data
 
 import (
+	"errors"
 	"fmt"
 	"meigo/library/db/common"
 	"meigo/library/log"
@@ -47,9 +48,9 @@ type ActionData struct {
 	IsWatchLive                 *int   `gorm:"column:is_watch_live;" json:"is_watch_live" form:"is_watch_live"`
 	IsWatchReplay               *int   `gorm:"column:is_watch_replay;" json:"is_watch_replay" form:"is_watch_replay"`
 	VisitTimes                  *int   `gorm:"column:visit_times;" json:"visit_times" form:"visit_times"`
-	SendToEmailTimes            *int   `gorm:"column:send_to_email_times;" json:"send_to_email_times" form:"send_to_email_times"`
+	DownloadTimes               *int   `gorm:"column:download_times;" json:"download_times" form:"download_times"`
 	ShareTimes                  *int   `gorm:"column:share_times;" json:"share_times" form:"share_times"`
-	CollectTimes                *int   `gorm:"column:collect_times;" json:"collect_times" form:"collect_times"`
+	FavoriteTimes               *int   `gorm:"column:favorite_times;" json:"favorite_times" form:"favorite_times"`
 	ViewMaterialTimes           *int   `gorm:"column:view_material_times;" json:"view_material_times" form:"view_material_times"`
 	SeatNumber                  string `gorm:"column:seat_number;" json:"seat_number" form:"seat_number"`
 	IsClickEnrollButton         *int   `gorm:"column:is_click_enroll_button;" json:"is_click_enroll_button" form:"is_click_enroll_button"`
@@ -82,7 +83,7 @@ var ActionLiveDataColumn = "action_data_id,live_platform_type,last_live_watch_cl
 	"first_replay_enter_time,replay_watch_time,replay_watch_times,last_replay_watch_client,last_replay_login_city,total_watch_time"
 
 /*
-var operatorList = []string{"=", ">", ">=", "<", "<=", "<>"}
+var operatorTypeOneMap = []string{"=", ">", ">=", "<", "<=", "<>"}
 var page = "1"
 var pageSize = "20"
 var totalCount = 0
@@ -112,6 +113,7 @@ func (p *ActionData) QueryByParams(c *ctxExt.Context) (people []ActionData, err 
 /*
 QueryByParams 获取行为数据
 */
+
 func (ad *ActionData) QueryByParams(c *ctxExt.Context) (list []ActionData, supplementData map[string]interface{}, err error) {
 	/*
 		err = sqlDB.Find(&list).Error
@@ -154,7 +156,10 @@ func (ad *ActionData) QueryByParams(c *ctxExt.Context) (list []ActionData, suppl
 		return list, err
 	*/
 	//根据操作符查询
-	tx = operatorQueryGenerator(params, tx, c)
+	tx, err = operatorQueryGenerator(params, tx, c)
+	if err != nil {
+		return
+	}
 
 	//范围查询，该方法放置于join操作之前
 	tx = inQueryGenerator(params, tx, c)
@@ -327,76 +332,154 @@ func mapQueryGenerator(params ActionData, mapQuery map[string]interface{}, c *ct
 }
 
 //operatorQueryGenerator构造基于操作符的查询
-func operatorQueryGenerator(params ActionData, tx *gorm.DB, c *ctxExt.Context) *gorm.DB {
+func operatorQueryGenerator(params ActionData, tx *gorm.DB, c *ctxExt.Context) (txNew *gorm.DB, err error) {
 
 	//验证是否有参数pay_money请求进来
-	PayMoney := c.Query("pay_money")
+	/*
+		PayMoney := c.Query("pay_money")
+		payMoneyOperator := c.Query("pay_money_operator")
+		fmt.Println("PayMoney,payMoneyOperator", PayMoney, payMoneyOperator)
+		if params.PayMoney != nil && *params.PayMoney >= 0 && PayMoney != "" && payMoneyOperator != "" {
+			if isPermittedExpression(payMoneyOperator, operatorTypeOneMap) {
+				tx = tx.Where("pay_money "+payMoneyOperator+"  ?", *params.PayMoney)
+			} else if isPermittedExpression(payMoneyOperator, operatorTypeTwo) {
+				PayMoneyLow := c.Query("pay_money_low")
+				PayMoneyHigh := c.Query("pay_money_high")
+				if PayMoneyLow == "" || PayMoneyHigh == "" {
+					fmt.Println("here", PayMoneyLow, PayMoneyHigh)
+					err = errors.New("pay_money_low或pay_money_high为空")
+					return tx, err
+				}
+				tx = tx.Where("pay_money "+operatorTypeTwoMap[payMoneyOperator][0]+"  ?", *params.PayMoney).Where("pay_money "+operatorTypeTwoMap[payMoneyOperator][1]+"  ?", *params.PayMoney)
+			} else {
+				err = errors.New("invalid operator")
+				return tx, err
+			}
+		}
+		return tx, err
+
+	*/
+	/*
+		PayMoney := c.Query("pay_money")
+		payMoneyOperator := c.Query("pay_money_operator")
+		fmt.Println("PayMoney,payMoneyOperator", PayMoney, payMoneyOperator)
+		if params.PayMoney != nil && *params.PayMoney >= 0 && PayMoney != "" && payMoneyOperator != "" {
+			tx, err = operatorQueryAbstract(tx, c, "pay_money", payMoneyOperator, *params.PayMoney)
+			if err != nil {
+				return tx, err
+			}
+		}
+	*/
+
+	var PayMoney interface{}
+	if params.PayMoney != nil {
+		PayMoney = *params.PayMoney
+	}
 	payMoneyOperator := c.Query("pay_money_operator")
-	if params.PayMoney != nil && *params.PayMoney >= 0 && PayMoney != "" && payMoneyOperator != "" && isPermittedOperator(payMoneyOperator, operatorList) {
-		tx = tx.Where("pay_money "+payMoneyOperator+"  ?", *params.PayMoney)
+	if payMoneyOperator != "" {
+		tx, err = operatorQueryAbstract(tx, c, "pay_money", payMoneyOperator, PayMoney)
+		if err != nil {
+			return tx, err
+		}
 	}
 
-	//验证是否有参数poster_invite_follow_num请求进来
-	PosterInviteFollowNum := c.Query("poster_invite_follow_num")
+	var PosterInviteFollowNum interface{}
+	if params.PosterInviteFollowNum != nil {
+		PosterInviteFollowNum = *params.PosterInviteFollowNum
+	}
 	PosterInviteFollowNumOperator := c.Query("poster_invite_follow_num_operator")
-	if params.PosterInviteFollowNum != nil && *params.PosterInviteFollowNum >= 0 && PosterInviteFollowNum != "" && PosterInviteFollowNumOperator != "" && isPermittedOperator(PosterInviteFollowNumOperator, operatorList) {
-		/*
-			fmt.Println("PosterInviteFollowNum: ", *params.PosterInviteFollowNum)
-			fmt.Println("PosterInviteFollowNumOperator: ", PosterInviteFollowNumOperator)
-		*/
-		tx = tx.Where("poster_invite_follow_num "+PosterInviteFollowNumOperator+"  ?", *params.PosterInviteFollowNum)
+	if PosterInviteFollowNumOperator != "" {
+		tx, err = operatorQueryAbstract(tx, c, "poster_invite_follow_num", PosterInviteFollowNumOperator, PosterInviteFollowNum)
+		if err != nil {
+			return tx, err
+		}
 	}
 
-	//验证是否有参数pay_money请求进来
-	EnrollTime := c.Query("enroll_time")
 	EnrollTimeOperator := c.Query("enroll_time_operator")
-	if params.EnrollTime >= 0 && EnrollTime != "" && EnrollTimeOperator != "" && isPermittedOperator(EnrollTimeOperator, operatorList) {
-		tx = tx.Where("enroll_time "+EnrollTimeOperator+"  ?", params.EnrollTime)
+	if EnrollTimeOperator != "" {
+		tx, err = operatorQueryAbstract(tx, c, "enroll_time", EnrollTimeOperator, params.EnrollTime)
+		if err != nil {
+			return tx, err
+		}
 	}
-	CreatedAt := c.Query("created_at")
+
 	CreatedAtOperator := c.Query("created_at_operator")
-	if params.CreatedAt >= 0 && CreatedAt != "" && CreatedAtOperator != "" && isPermittedOperator(CreatedAtOperator, operatorList) {
-		tx = tx.Where("created_at "+CreatedAtOperator+"  ?", params.CreatedAt)
+	if CreatedAtOperator != "" {
+		tx, err = operatorQueryAbstract(tx, c, "created_at", CreatedAtOperator, params.CreatedAt)
+		if err != nil {
+			return tx, err
+		}
 	}
-	UpdatedAt := c.Query("updated_at")
+
 	UpdatedAtOperator := c.Query("updated_at_operator")
-	if params.UpdatedAt >= 0 && UpdatedAt != "" && UpdatedAtOperator != "" && isPermittedOperator(UpdatedAtOperator, operatorList) {
-		tx = tx.Where("updated_at "+UpdatedAtOperator+"  ?", params.UpdatedAt)
+	if UpdatedAtOperator != "" {
+		tx, err = operatorQueryAbstract(tx, c, "updated_at", UpdatedAtOperator, params.UpdatedAt)
+		if err != nil {
+			return tx, err
+		}
 	}
 
-	//验证是否有参数visit_times请求进来
-	VisitTimes := c.Query("visit_times")
+	var VisitTimes interface{}
+	if params.VisitTimes != nil {
+		VisitTimes = *params.VisitTimes
+	}
 	VisitTimesOperator := c.Query("visit_times_operator")
-	if params.VisitTimes != nil && *params.VisitTimes >= 0 && VisitTimes != "" && VisitTimesOperator != "" && isPermittedOperator(VisitTimesOperator, operatorList) {
-		tx = tx.Where("visit_times "+VisitTimesOperator+"  ?", *params.VisitTimes)
+	if VisitTimesOperator != "" {
+		tx, err = operatorQueryAbstract(tx, c, "visit_times", VisitTimesOperator, VisitTimes)
+		if err != nil {
+			return tx, err
+		}
 	}
 
-	//验证是否有参数send_to_email_times请求进来
-	SendToEmailTimes := c.Query("send_to_email_times")
-	SendToEmailTimesOperator := c.Query("send_to_email_times_operator")
-	if params.SendToEmailTimes != nil && *params.SendToEmailTimes >= 0 && SendToEmailTimes != "" && SendToEmailTimesOperator != "" && isPermittedOperator(SendToEmailTimesOperator, operatorList) {
-		tx = tx.Where("send_to_email_times "+SendToEmailTimesOperator+"  ?", *params.SendToEmailTimes)
+	var DownloadTimes interface{}
+	if params.DownloadTimes != nil {
+		DownloadTimes = *params.DownloadTimes
 	}
-	//验证是否有参数share_times请求进来
-	ShareTimes := c.Query("share_times")
+	DownloadTimesOperator := c.Query("download_times_operator")
+	if DownloadTimesOperator != "" {
+		tx, err = operatorQueryAbstract(tx, c, "download_times", DownloadTimesOperator, DownloadTimes)
+		if err != nil {
+			return tx, err
+		}
+	}
+
+	var ShareTimes interface{}
+	if params.ShareTimes != nil {
+		ShareTimes = *params.ShareTimes
+	}
 	ShareTimesOperator := c.Query("share_times_operator")
-	if params.ShareTimes != nil && *params.ShareTimes >= 0 && ShareTimes != "" && ShareTimesOperator != "" && isPermittedOperator(ShareTimesOperator, operatorList) {
-		tx = tx.Where("share_times "+SendToEmailTimesOperator+"  ?", *params.ShareTimes)
-	}
-	//验证是否有参数share_times请求进来
-	CollectTimes := c.Query("collect_times")
-	CollectTimesOperator := c.Query("collect_times_operator")
-	if params.CollectTimes != nil && *params.CollectTimes >= 0 && CollectTimes != "" && CollectTimesOperator != "" && isPermittedOperator(CollectTimesOperator, operatorList) {
-		tx = tx.Where("collect_times "+CollectTimesOperator+"  ?", *params.CollectTimes)
+	if ShareTimesOperator != "" {
+		tx, err = operatorQueryAbstract(tx, c, "share_times", ShareTimesOperator, ShareTimes)
+		if err != nil {
+			return tx, err
+		}
 	}
 
-	//验证是否有参数view_material_times请求进来
-	ViewMaterialTimes := c.Query("view_material_times")
-	ViewMaterialTimesOperator := c.Query("view_material_times_operator")
-	if params.ViewMaterialTimes != nil && *params.ViewMaterialTimes >= 0 && ViewMaterialTimes != "" && ViewMaterialTimesOperator != "" && isPermittedOperator(ViewMaterialTimesOperator, operatorList) {
-		tx = tx.Where("view_material_times "+ViewMaterialTimesOperator+"  ?", *params.ViewMaterialTimes)
+	var FavoriteTimes interface{}
+	if params.FavoriteTimes != nil {
+		FavoriteTimes = *params.FavoriteTimes
 	}
-	return tx
+	FavoriteTimesOperator := c.Query("favorite_times_operator")
+	if FavoriteTimesOperator != "" {
+		tx, err = operatorQueryAbstract(tx, c, "favorite_times", FavoriteTimesOperator, FavoriteTimes)
+		if err != nil {
+			return tx, err
+		}
+	}
+
+	var ViewMaterialTimes interface{}
+	if params.ViewMaterialTimes != nil {
+		ViewMaterialTimes = *params.ViewMaterialTimes
+	}
+	ViewMaterialTimesOperator := c.Query("view_material_times_operator")
+	if ViewMaterialTimesOperator != "" {
+		tx, err = operatorQueryAbstract(tx, c, "view_material_times", ViewMaterialTimesOperator, ViewMaterialTimes)
+		if err != nil {
+			return tx, err
+		}
+	}
+
+	return tx, err
 }
 
 //join查询
@@ -414,7 +497,7 @@ func joinQueryGenerator(params ActionData, liveTableSegmentation string, c *ctxE
 	}
 	//根据操作符查询
 	LastLiveLeaveTimeOperator := c.Query("last_live_leave_time_operator")
-	if params.LastLiveLeaveTime >= 0 && LastLiveLeaveTimeOperator != "" && isPermittedOperator(LastLiveLeaveTimeOperator, operatorList) {
+	if params.LastLiveLeaveTime >= 0 && LastLiveLeaveTimeOperator != "" && isPermittedExpression(LastLiveLeaveTimeOperator, operatorTypeOneMap) {
 		tx = tx.Where(liveTableSegmentation+".last_live_leave_time "+LastLiveLeaveTimeOperator+"  ?", params.LastLiveLeaveTime)
 	}
 	LastLiveLoginCity := c.Query("last_live_login_city")
@@ -423,19 +506,19 @@ func joinQueryGenerator(params ActionData, liveTableSegmentation string, c *ctxE
 		tx = tx.Where(liveTableSegmentation+".last_live_login_city LIKE ?", "%"+LastLiveLoginCity+"%")
 	}
 	LiveWatchTimeOperator := c.Query("live_watch_time_operator")
-	if params.LiveWatchTime >= 0 && LiveWatchTimeOperator != "" && isPermittedOperator(LiveWatchTimeOperator, operatorList) {
+	if params.LiveWatchTime >= 0 && LiveWatchTimeOperator != "" && isPermittedExpression(LiveWatchTimeOperator, operatorTypeOneMap) {
 		tx = tx.Where(liveTableSegmentation+".live_watch_time "+LastLiveLeaveTimeOperator+"  ?", params.LiveWatchTime)
 	}
 	FirstReplayEnterTimeOperator := c.Query("first_replay_enter_time_operator")
-	if params.FirstReplayEnterTime >= 0 && FirstReplayEnterTimeOperator != "" && isPermittedOperator(FirstReplayEnterTimeOperator, operatorList) {
+	if params.FirstReplayEnterTime >= 0 && FirstReplayEnterTimeOperator != "" && isPermittedExpression(FirstReplayEnterTimeOperator, operatorTypeOneMap) {
 		tx = tx.Where(liveTableSegmentation+".first_replay_enter_time "+LastLiveLeaveTimeOperator+"  ?", params.FirstReplayEnterTime)
 	}
 	ReplayWatchTimeOperator := c.Query("replay_watch_time_operator")
-	if params.ReplayWatchTime >= 0 && ReplayWatchTimeOperator != "" && isPermittedOperator(ReplayWatchTimeOperator, operatorList) {
+	if params.ReplayWatchTime >= 0 && ReplayWatchTimeOperator != "" && isPermittedExpression(ReplayWatchTimeOperator, operatorTypeOneMap) {
 		tx = tx.Where(liveTableSegmentation+".replay_watch_time "+ReplayWatchTimeOperator+"  ?", params.ReplayWatchTime)
 	}
 	ReplayWatchTimesOperator := c.Query("replay_watch_times_operator")
-	if params.ReplayWatchTimes >= 0 && ReplayWatchTimesOperator != "" && isPermittedOperator(ReplayWatchTimesOperator, operatorList) {
+	if params.ReplayWatchTimes >= 0 && ReplayWatchTimesOperator != "" && isPermittedExpression(ReplayWatchTimesOperator, operatorTypeOneMap) {
 		tx = tx.Where(liveTableSegmentation+".replay_watch_times "+ReplayWatchTimesOperator+"  ?", params.ReplayWatchTimes)
 	}
 	LastReplayWatchClient := c.Query("last_replay_watch_client")
@@ -449,7 +532,7 @@ func joinQueryGenerator(params ActionData, liveTableSegmentation string, c *ctxE
 		tx = tx.Where(liveTableSegmentation+".last_replay_login_city LIKE ?", "%"+LastReplayLoginCity+"%")
 	}
 	TotalWatchTimeOperator := c.Query("total_watch_time_operator")
-	if params.TotalWatchTime >= 0 && TotalWatchTimeOperator != "" && isPermittedOperator(TotalWatchTimeOperator, operatorList) {
+	if params.TotalWatchTime >= 0 && TotalWatchTimeOperator != "" && isPermittedExpression(TotalWatchTimeOperator, operatorTypeOneMap) {
 		tx = tx.Where(liveTableSegmentation+".total_watch_time "+TotalWatchTimeOperator+"  ?", params.TotalWatchTime)
 	}
 	return tx
@@ -469,4 +552,35 @@ func inQueryGenerator(params ActionData, tx *gorm.DB, c *ctxExt.Context) *gorm.D
 	}
 
 	return tx
+}
+
+//operatorQueryAbstract 抽象特殊查询操作符
+func operatorQueryAbstract(tx *gorm.DB, c *ctxExt.Context, fieldName, operator string, operatorValue interface{}) (txNew *gorm.DB, err error) {
+	//fmt.Println("operator", operator)
+	if isPermittedExpression(operator, operatorTypeOneMap) {
+		//fmt.Println("isPermittedExpression", "ok")
+		tx = tx.Where(fieldName+" "+operatorTypeOneMap[operator]+" ?", operatorValue)
+	} else if isPermittedOperator(operator, operatorTypeTwo) {
+		fieldNameLow := c.Query(fieldName + "_low")
+		fieldNameHigh := c.Query(fieldName + "_high")
+		//fmt.Println("fieldName,fieldNameLow,fieldNameHigh", fieldName, fieldNameLow, fieldNameHigh)
+		if fieldNameLow == "" || fieldNameHigh == "" {
+			//fmt.Println("here", fieldNameLow, fieldNameHigh)
+			err := errors.New(fieldName + "_low" + "或" + fieldName + "_high" + "为空")
+			return tx, err
+		}
+		fmt.Println("operatorTypeTwoMap", operatorTypeTwoMap[operator][0], operatorTypeTwoMap[operator][1])
+		tx = tx.Where(fieldName+" "+operatorTypeTwoMap[operator][0]+"  ?", fieldNameLow).Where(fieldName+" "+operatorTypeTwoMap[operator][1]+"  ?", fieldNameHigh)
+	} else {
+		err := errors.New("invalid operator")
+		return tx, err
+	}
+	return tx, err
+}
+
+// 下划线写法转为驼峰写法
+func Case2Camel(name string) string {
+	name = strings.Replace(name, "_", " ", -1)
+	name = strings.Title(name)
+	return strings.Replace(name, " ", "", -1)
 }

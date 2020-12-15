@@ -39,11 +39,12 @@ type OtherSourceData struct {
 	ChannelId   int    `gorm:"column:channel_id;" json:"channel_id" form:"channel_id"`
 }
 
-var ch0, ch1, ch2, ch3, ch4, ch5, ch6, ch7, ch8, ch9, chN chan string
+var ch0, ch1, ch2, ch3, ch4, ch5, ch6, ch7, ch8, ch9 chan string
 
-var strList = []string{"ch1", "ch2", "ch3", "ch4", "ch5", "ch6", "ch7", "ch8", "ch9"}
+//var strList = []string{"ch1", "ch2", "ch3", "ch4", "ch5", "ch6", "ch7", "ch8", "ch9"}
 
 func main() {
+
 	/*
 		timer2 := time.NewTimer(time.Second)
 		go func() {
@@ -86,7 +87,7 @@ func main() {
 	ch7 = make(chan string)
 	ch8 = make(chan string)
 	ch9 = make(chan string)
-	chN = make(chan string)
+	//chN = make(chan string)
 	/*
 		ch0 = make(chan string, 5)
 		ch1 = make(chan string, 5)
@@ -151,18 +152,21 @@ func main() {
 	//time.Sleep(time.Second)
 
 	fmt.Println("runing: ", "end")
-
-	defer close(ch0)
-	defer close(ch1)
-	defer close(ch2)
-	defer close(ch3)
-	defer close(ch4)
-	defer close(ch5)
-	defer close(ch6)
-	defer close(ch7)
-	defer close(ch8)
-	defer close(ch9)
-	defer close(chN)
+	/*
+		defer func() {
+			close(ch0)
+			close(ch1)
+			close(ch2)
+			close(ch3)
+			close(ch4)
+			close(ch5)
+			close(ch6)
+			close(ch7)
+			close(ch8)
+			close(ch9)
+			close(chN)
+		}()
+	*/
 }
 
 //readRedis 读取redis数据，存入channel
