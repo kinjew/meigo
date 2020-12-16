@@ -19,46 +19,46 @@ type ActionData struct {
 	//ToolType                    int8   `gorm:"column:tool_type;" json:"tool_type" form:"tool_type" binding:"required"`
 	//UserIdentityType            int    `gorm:"column:user_identity_type;" json:"user_identity_type" form:"user_identity_type"`
 	common.BaseModelV1
-	MainId                      int    `gorm:"column:main_id;" json:"main_id" form:"main_id" binding:"required"`
-	WxSystemUserId              int    `gorm:"column:wx_system_user_id;" json:"wx_system_user_id" form:"wx_system_user_id" `
-	ToolId                      int    `gorm:"column:tool_id;" json:"tool_id" form:"tool_id"`
-	ToolType                    int8   `gorm:"column:tool_type;" json:"tool_type" form:"tool_type"`
-	MemberId                    int    `gorm:"column:member_id;" json:"member_id" form:"member_id"`
-	WxOpenId                    string `gorm:"column:wx_open_id;" json:"wx_open_id" form:"wx_open_id"`
-	ClientIp                    string `gorm:"column:client_ip;" json:"client_ip" form:"client_ip"`
-	FirstVisitBrowser           string `gorm:"column:first_visit_browser;" json:"first_visit_browser" form:"first_visit_browser"`
-	FirstVisitClient            int    `gorm:"column:first_visit_client;" json:"first_visit_client" form:"first_visit_client"`
-	FirstVisitEquipment         string `gorm:"column:first_visit_equipment;" json:"first_visit_equipment" form:"first_visit_equipment"`
-	FirstVisitChannelId         int    `gorm:"column:first_visit_channel_id;" json:"first_visit_channel_id" form:"first_visit_channel_id"`
-	FollowChannelId             int    `gorm:"column:follow_channel_id;" json:"follow_channel_id" form:"follow_channel_id"`
-	EnrollChannelId             int    `gorm:"column:enroll_channel_id;" json:"enroll_channel_id" form:"enroll_channel_id"`
-	WxFollowInviterId           int    `gorm:"column:wx_follow_inviter_id;" json:"wx_follow_inviter_id" form:"wx_follow_inviter_id"`
-	MeetingEnrollInviterId      int    `gorm:"column:meeting_enroll_inviter_id;" json:"meeting_enroll_inviter_id" form:"meeting_enroll_inviter_id"`
-	IsEnroll                    *int   `gorm:"column:is_enroll;" json:"is_enroll" form:"is_enroll"`
-	EnrollType                  int    `gorm:"column:enroll_type;" json:"enroll_type" form:"enroll_type"`
-	EnrollWay                   int    `gorm:"column:enroll_way;" json:"enroll_way" form:"enroll_way"`
-	EnrollTime                  int    `gorm:"column:enroll_time;" json:"enroll_time" form:"enroll_time"`
-	EnrollMeetingStatus         int    `gorm:"column:enroll_meeting_status;" json:"enroll_meeting_status" form:"enroll_meeting_status"`
-	EnrollApproveStatus         int    `gorm:"column:enroll_approve_status;" json:"enroll_approve_status" form:"enroll_approve_status"`
-	IsSign                      *int   `gorm:"column:is_sign;" json:"is_sign" form:"is_sign"`
-	IsNewFans                   *int   `gorm:"column:is_new_fans;" json:"is_new_fans" form:"is_new_fans"`
-	IsNewMember                 *int   `gorm:"column:is_new_member;" json:"is_new_member" form:"is_new_member"`
-	PosterInviteFollowNum       *int   `gorm:"column:poster_invite_follow_num;" json:"poster_invite_follow_num" form:"poster_invite_follow_num"`
-	PayMoney                    *int   `gorm:"column:pay_money;" json:"pay_money" form:"pay_money"`
-	IsWatchLive                 *int   `gorm:"column:is_watch_live;" json:"is_watch_live" form:"is_watch_live"`
-	IsWatchReplay               *int   `gorm:"column:is_watch_replay;" json:"is_watch_replay" form:"is_watch_replay"`
-	VisitTimes                  *int   `gorm:"column:visit_times;" json:"visit_times" form:"visit_times"`
-	DownloadTimes               *int   `gorm:"column:download_times;" json:"download_times" form:"download_times"`
-	ShareTimes                  *int   `gorm:"column:share_times;" json:"share_times" form:"share_times"`
-	FavoriteTimes               *int   `gorm:"column:favorite_times;" json:"favorite_times" form:"favorite_times"`
-	ViewMaterialTimes           *int   `gorm:"column:view_material_times;" json:"view_material_times" form:"view_material_times"`
-	SeatNumber                  string `gorm:"column:seat_number;" json:"seat_number" form:"seat_number"`
-	IsClickEnrollButton         *int   `gorm:"column:is_click_enroll_button;" json:"is_click_enroll_button" form:"is_click_enroll_button"`
-	IsClickPayButton            *int   `gorm:"column:is_click_pay_button;" json:"is_click_pay_button" form:"is_click_pay_button"`
-	IsClickGeneratePosterButton *int   `gorm:"column:is_click_generate_poster_button;" json:"is_click_generate_poster_button" form:"is_click_generate_poster_button"`
-	IsClickEnterLiveButton      *int   `gorm:"column:is_click_enter_live_button;" json:"is_click_enter_live_button" form:"is_click_enter_live_button"`
-	IsClickWatchReplayButton    *int   `gorm:"column:is_click_watch_replay_button;" json:"is_click_watch_replay_button" form:"is_click_watch_replay_button"`
-	IsDel                       *int   `gorm:"column:is_del;" json:"is_del" form:"is_del"`
+	MainId            int    `gorm:"column:main_id;" json:"main_id" form:"main_id" binding:"required"`
+	WxSystemUserId    int    `gorm:"column:wx_system_user_id;" json:"wx_system_user_id" form:"wx_system_user_id" `
+	ToolId            int    `gorm:"column:tool_id;" json:"tool_id" form:"tool_id"`
+	ToolType          int8   `gorm:"column:tool_type;" json:"tool_type" form:"tool_type"`
+	MemberId          int    `gorm:"column:member_id;" json:"member_id" form:"member_id"`
+	WxOpenId          string `gorm:"column:wx_open_id;" json:"wx_open_id" form:"wx_open_id"`
+	ClientIp          string `gorm:"column:client_ip;" json:"client_ip" form:"client_ip"`
+	FirstVisitBrowser string `gorm:"column:first_visit_browser;" json:"first_visit_browser" form:"first_visit_browser"`
+	FirstVisitClient  int    `gorm:"column:first_visit_client;" json:"first_visit_client" form:"first_visit_client"`
+	//FirstVisitEquipment         string `gorm:"column:first_visit_equipment;" json:"first_visit_equipment" form:"first_visit_equipment"`
+	FirstVisitChannelId          int    `gorm:"column:first_visit_channel_id;" json:"first_visit_channel_id" form:"first_visit_channel_id"`
+	FollowChannelId              int    `gorm:"column:follow_channel_id;" json:"follow_channel_id" form:"follow_channel_id"`
+	EnrollChannelId              int    `gorm:"column:enroll_channel_id;" json:"enroll_channel_id" form:"enroll_channel_id"`
+	WxFollowInviterId            int    `gorm:"column:wx_follow_inviter_id;" json:"wx_follow_inviter_id" form:"wx_follow_inviter_id"`
+	MeetingEnrollInviterId       int    `gorm:"column:meeting_enroll_inviter_id;" json:"meeting_enroll_inviter_id" form:"meeting_enroll_inviter_id"`
+	IsEnroll                     *int   `gorm:"column:is_enroll;" json:"is_enroll" form:"is_enroll"`
+	EnrollType                   int    `gorm:"column:enroll_type;" json:"enroll_type" form:"enroll_type"`
+	EnrollWay                    int    `gorm:"column:enroll_way;" json:"enroll_way" form:"enroll_way"`
+	EnrollTime                   int    `gorm:"column:enroll_time;" json:"enroll_time" form:"enroll_time"`
+	EnrollMeetingStatus          int    `gorm:"column:enroll_meeting_status;" json:"enroll_meeting_status" form:"enroll_meeting_status"`
+	EnrollApproveStatus          int    `gorm:"column:enroll_approve_status;" json:"enroll_approve_status" form:"enroll_approve_status"`
+	IsSign                       *int   `gorm:"column:is_sign;" json:"is_sign" form:"is_sign"`
+	IsNewFans                    *int   `gorm:"column:is_new_fans;" json:"is_new_fans" form:"is_new_fans"`
+	IsNewMember                  *int   `gorm:"column:is_new_member;" json:"is_new_member" form:"is_new_member"`
+	PosterInviteFollowNum        *int   `gorm:"column:poster_invite_follow_num;" json:"poster_invite_follow_num" form:"poster_invite_follow_num"`
+	PayMoney                     *int   `gorm:"column:pay_money;" json:"pay_money" form:"pay_money"`
+	IsWatchLive                  *int   `gorm:"column:is_watch_live;" json:"is_watch_live" form:"is_watch_live"`
+	IsWatchReplay                *int   `gorm:"column:is_watch_replay;" json:"is_watch_replay" form:"is_watch_replay"`
+	VisitTimes                   *int   `gorm:"column:visit_times;" json:"visit_times" form:"visit_times"`
+	DownloadTimes                *int   `gorm:"column:download_times;" json:"download_times" form:"download_times"`
+	ShareTimes                   *int   `gorm:"column:share_times;" json:"share_times" form:"share_times"`
+	FavoriteTimes                *int   `gorm:"column:favorite_times;" json:"favorite_times" form:"favorite_times"`
+	ViewMaterialTimes            *int   `gorm:"column:view_material_times;" json:"view_material_times" form:"view_material_times"`
+	SeatNumber                   string `gorm:"column:seat_number;" json:"seat_number" form:"seat_number"`
+	IsClickEnrollButton          *int   `gorm:"column:is_click_enroll_button;" json:"is_click_enroll_button" form:"is_click_enroll_button"`
+	IsClickPayButton             *int   `gorm:"column:is_click_pay_button;" json:"is_click_pay_button" form:"is_click_pay_button"`
+	IsClickGenerateFissionButton *int   `gorm:"column:is_click_generate_fission_button;" json:"is_click_generate_fission_button" form:"is_click_generate_fission_button"`
+	IsClickEnterLiveButton       *int   `gorm:"column:is_click_enter_live_button;" json:"is_click_enter_live_button" form:"is_click_enter_live_button"`
+	IsClickWatchReplayButton     *int   `gorm:"column:is_click_watch_replay_button;" json:"is_click_watch_replay_button" form:"is_click_watch_replay_button"`
+	IsDel                        *int   `gorm:"column:is_del;" json:"is_del" form:"is_del"`
 	ActionLiveData
 }
 
@@ -70,6 +70,8 @@ type ActionLiveData struct {
 	LastLiveLeaveTime     int    `gorm:"column:last_live_leave_time;" json:"last_live_leave_time" form:"last_live_leave_time"`
 	LastLiveLoginCity     string `gorm:"column:last_live_login_city;" json:"last_live_login_city" form:"last_live_login_city"`
 	LiveWatchTime         int    `gorm:"column:live_watch_time;" json:"live_watch_time" form:"live_watch_time"`
+	LiveWatchTimes        int    `gorm:"column:live_watch_times;" json:"live_watch_times" form:"live_watch_times"`
+	FirstLiveEnterTime    int    `gorm:"column:first_live_enter_time;" json:"first_live_enter_time" form:"first_live_enter_time"`
 	FirstReplayEnterTime  int    `gorm:"column:first_replay_enter_time;" json:"first_replay_enter_time" form:"first_replay_enter_time"`
 	ReplayWatchTime       int    `gorm:"column:replay_watch_time;" json:"replay_watch_time" form:"replay_watch_time"`
 	ReplayWatchTimes      int    `gorm:"column:replay_watch_times;" json:"replay_watch_times" form:"replay_watch_times"`
@@ -80,7 +82,7 @@ type ActionLiveData struct {
 
 //ActionLiveData 实体表需要返回的有限字段
 var ActionLiveDataColumn = "action_data_id,live_platform_type,last_live_watch_client,last_live_leave_time,last_live_login_city,live_watch_time," +
-	"first_replay_enter_time,replay_watch_time,replay_watch_times,last_replay_watch_client,last_replay_login_city,total_watch_time"
+	"live_watch_times,first_live_enter_time,first_replay_enter_time,replay_watch_time,replay_watch_times,last_replay_watch_client,last_replay_login_city,total_watch_time"
 
 /*
 var operatorTypeOneMap = []string{"=", ">", ">=", "<", "<=", "<>"}
@@ -155,7 +157,7 @@ func (ad *ActionData) QueryByParams(c *ctxExt.Context) (list []ActionData, suppl
 		err = tx.Select("*").Scan(&list).Error
 		return list, err
 	*/
-	//根据操作符查询
+	//主表根据操作符查询
 	tx, err = operatorQueryGenerator(params, tx, c)
 	if err != nil {
 		return
@@ -168,6 +170,12 @@ func (ad *ActionData) QueryByParams(c *ctxExt.Context) (list []ActionData, suppl
 	tx = tx.Joins("left join " + liveTableSegmentation + " on " + liveTableSegmentation + ".action_data_id = " + tableSegmentation + ".id")
 
 	tx = joinQueryGenerator(params, liveTableSegmentation, c, tx)
+
+	//join操作的表根据操作符查询
+	tx, err = joinOperatorQueryGenerator(params, liveTableSegmentation, tx, c)
+	if err != nil {
+		return
+	}
 
 	//执行查询操作
 	page = c.DefaultQuery("page", page)
@@ -233,9 +241,11 @@ func mapQueryGenerator(params ActionData, mapQuery map[string]interface{}, c *ct
 	if params.FirstVisitClient > 0 {
 		mapQuery["first_visit_client"] = params.FirstVisitClient
 	}
-	if params.FirstVisitEquipment != "" {
-		mapQuery["first_visit_equipment"] = params.FirstVisitEquipment
-	}
+	/*
+		if params.FirstVisitEquipment != "" {
+			mapQuery["first_visit_equipment"] = params.FirstVisitEquipment
+		}
+	*/
 	if params.FirstVisitChannelId > 0 {
 		mapQuery["first_visit_channel_id"] = params.FirstVisitChannelId
 	}
@@ -309,9 +319,9 @@ func mapQueryGenerator(params ActionData, mapQuery map[string]interface{}, c *ct
 		mapQuery["is_click_pay_button"] = *params.IsClickPayButton
 	}
 	//验证是否有参数is_click_enroll_button请求进来
-	IsClickGeneratePosterButton := c.Query("is_click_generate_poster_button")
-	if params.IsClickGeneratePosterButton != nil && *params.IsClickGeneratePosterButton >= 0 && IsClickGeneratePosterButton != "" {
-		mapQuery["is_click_generate_poster_button"] = *params.IsClickGeneratePosterButton
+	IsClickGenerateFissionButton := c.Query("is_click_generate_fission_button")
+	if params.IsClickGenerateFissionButton != nil && *params.IsClickGenerateFissionButton >= 0 && IsClickGenerateFissionButton != "" {
+		mapQuery["is_click_generate_fission_button"] = *params.IsClickGenerateFissionButton
 	}
 	//验证是否有参数is_click_enroll_button请求进来
 	IsClickEnterLiveButton := c.Query("is_click_enter_live_button")
@@ -371,7 +381,7 @@ func operatorQueryGenerator(params ActionData, tx *gorm.DB, c *ctxExt.Context) (
 		}
 	*/
 
-	var PayMoney interface{}
+	var PayMoney = 0
 	if params.PayMoney != nil {
 		PayMoney = *params.PayMoney
 	}
@@ -383,7 +393,7 @@ func operatorQueryGenerator(params ActionData, tx *gorm.DB, c *ctxExt.Context) (
 		}
 	}
 
-	var PosterInviteFollowNum interface{}
+	var PosterInviteFollowNum = 0
 	if params.PosterInviteFollowNum != nil {
 		PosterInviteFollowNum = *params.PosterInviteFollowNum
 	}
@@ -419,7 +429,7 @@ func operatorQueryGenerator(params ActionData, tx *gorm.DB, c *ctxExt.Context) (
 		}
 	}
 
-	var VisitTimes interface{}
+	var VisitTimes = 0
 	if params.VisitTimes != nil {
 		VisitTimes = *params.VisitTimes
 	}
@@ -431,7 +441,7 @@ func operatorQueryGenerator(params ActionData, tx *gorm.DB, c *ctxExt.Context) (
 		}
 	}
 
-	var DownloadTimes interface{}
+	var DownloadTimes = 0
 	if params.DownloadTimes != nil {
 		DownloadTimes = *params.DownloadTimes
 	}
@@ -443,7 +453,7 @@ func operatorQueryGenerator(params ActionData, tx *gorm.DB, c *ctxExt.Context) (
 		}
 	}
 
-	var ShareTimes interface{}
+	var ShareTimes = 0
 	if params.ShareTimes != nil {
 		ShareTimes = *params.ShareTimes
 	}
@@ -455,7 +465,7 @@ func operatorQueryGenerator(params ActionData, tx *gorm.DB, c *ctxExt.Context) (
 		}
 	}
 
-	var FavoriteTimes interface{}
+	var FavoriteTimes = 0
 	if params.FavoriteTimes != nil {
 		FavoriteTimes = *params.FavoriteTimes
 	}
@@ -467,7 +477,7 @@ func operatorQueryGenerator(params ActionData, tx *gorm.DB, c *ctxExt.Context) (
 		}
 	}
 
-	var ViewMaterialTimes interface{}
+	var ViewMaterialTimes = 0
 	if params.ViewMaterialTimes != nil {
 		ViewMaterialTimes = *params.ViewMaterialTimes
 	}
@@ -496,31 +506,43 @@ func joinQueryGenerator(params ActionData, liveTableSegmentation string, c *ctxE
 		tx = tx.Where(liveTableSegmentation+".last_live_watch_client LIKE ?", "%"+LastLiveWatchClient+"%")
 	}
 	//根据操作符查询
-	LastLiveLeaveTimeOperator := c.Query("last_live_leave_time_operator")
-	if params.LastLiveLeaveTime >= 0 && LastLiveLeaveTimeOperator != "" && isPermittedExpression(LastLiveLeaveTimeOperator, operatorTypeOneMap) {
-		tx = tx.Where(liveTableSegmentation+".last_live_leave_time "+LastLiveLeaveTimeOperator+"  ?", params.LastLiveLeaveTime)
-	}
+	/*
+		LastLiveLeaveTimeOperator := c.Query("last_live_leave_time_operator")
+		if params.LastLiveLeaveTime >= 0 && LastLiveLeaveTimeOperator != "" && isPermittedExpression(LastLiveLeaveTimeOperator, operatorTypeOneMap) {
+			tx = tx.Where(liveTableSegmentation+".last_live_leave_time "+LastLiveLeaveTimeOperator+"  ?", params.LastLiveLeaveTime)
+		}
+	*/
 	LastLiveLoginCity := c.Query("last_live_login_city")
 	if LastLiveLoginCity != "" {
 		//fmt.Println("LastLiveLoginCity: ", LastLiveLoginCity)
 		tx = tx.Where(liveTableSegmentation+".last_live_login_city LIKE ?", "%"+LastLiveLoginCity+"%")
 	}
-	LiveWatchTimeOperator := c.Query("live_watch_time_operator")
-	if params.LiveWatchTime >= 0 && LiveWatchTimeOperator != "" && isPermittedExpression(LiveWatchTimeOperator, operatorTypeOneMap) {
-		tx = tx.Where(liveTableSegmentation+".live_watch_time "+LastLiveLeaveTimeOperator+"  ?", params.LiveWatchTime)
-	}
-	FirstReplayEnterTimeOperator := c.Query("first_replay_enter_time_operator")
-	if params.FirstReplayEnterTime >= 0 && FirstReplayEnterTimeOperator != "" && isPermittedExpression(FirstReplayEnterTimeOperator, operatorTypeOneMap) {
-		tx = tx.Where(liveTableSegmentation+".first_replay_enter_time "+LastLiveLeaveTimeOperator+"  ?", params.FirstReplayEnterTime)
-	}
-	ReplayWatchTimeOperator := c.Query("replay_watch_time_operator")
-	if params.ReplayWatchTime >= 0 && ReplayWatchTimeOperator != "" && isPermittedExpression(ReplayWatchTimeOperator, operatorTypeOneMap) {
-		tx = tx.Where(liveTableSegmentation+".replay_watch_time "+ReplayWatchTimeOperator+"  ?", params.ReplayWatchTime)
-	}
-	ReplayWatchTimesOperator := c.Query("replay_watch_times_operator")
-	if params.ReplayWatchTimes >= 0 && ReplayWatchTimesOperator != "" && isPermittedExpression(ReplayWatchTimesOperator, operatorTypeOneMap) {
-		tx = tx.Where(liveTableSegmentation+".replay_watch_times "+ReplayWatchTimesOperator+"  ?", params.ReplayWatchTimes)
-	}
+	/*
+		LiveWatchTimeOperator := c.Query("live_watch_time_operator")
+		if params.LiveWatchTime >= 0 && LiveWatchTimeOperator != "" && isPermittedExpression(LiveWatchTimeOperator, operatorTypeOneMap) {
+			tx = tx.Where(liveTableSegmentation+".live_watch_time "+LiveWatchTimeOperator+"  ?", params.LiveWatchTime)
+		}
+		LiveWatchTimesOperator := c.Query("live_watch_times_operator")
+		if params.LiveWatchTimes >= 0 && LiveWatchTimesOperator != "" && isPermittedExpression(LiveWatchTimesOperator, operatorTypeOneMap) {
+			tx = tx.Where(liveTableSegmentation+".live_watch_times "+LiveWatchTimesOperator+"  ?", params.LiveWatchTimes)
+		}
+		FirstLiveEnterTimeOperator := c.Query("first_live_enter_time_operator")
+		if params.FirstLiveEnterTime >= 0 && FirstLiveEnterTimeOperator != "" && isPermittedExpression(FirstLiveEnterTimeOperator, operatorTypeOneMap) {
+			tx = tx.Where(liveTableSegmentation+".first_live_enter_time "+FirstLiveEnterTimeOperator+"  ?", params.FirstLiveEnterTime)
+		}
+		FirstReplayEnterTimeOperator := c.Query("first_replay_enter_time_operator")
+		if params.FirstReplayEnterTime >= 0 && FirstReplayEnterTimeOperator != "" && isPermittedExpression(FirstReplayEnterTimeOperator, operatorTypeOneMap) {
+			tx = tx.Where(liveTableSegmentation+".first_replay_enter_time "+FirstReplayEnterTimeOperator+"  ?", params.FirstReplayEnterTime)
+		}
+		ReplayWatchTimeOperator := c.Query("replay_watch_time_operator")
+		if params.ReplayWatchTime >= 0 && ReplayWatchTimeOperator != "" && isPermittedExpression(ReplayWatchTimeOperator, operatorTypeOneMap) {
+			tx = tx.Where(liveTableSegmentation+".replay_watch_time "+ReplayWatchTimeOperator+"  ?", params.ReplayWatchTime)
+		}
+		ReplayWatchTimesOperator := c.Query("replay_watch_times_operator")
+		if params.ReplayWatchTimes >= 0 && ReplayWatchTimesOperator != "" && isPermittedExpression(ReplayWatchTimesOperator, operatorTypeOneMap) {
+			tx = tx.Where(liveTableSegmentation+".replay_watch_times "+ReplayWatchTimesOperator+"  ?", params.ReplayWatchTimes)
+		}
+	*/
 	LastReplayWatchClient := c.Query("last_replay_watch_client")
 	if LastReplayWatchClient != "" {
 		//fmt.Println("LastLiveLoginCity: ", LastLiveLoginCity)
@@ -531,10 +553,12 @@ func joinQueryGenerator(params ActionData, liveTableSegmentation string, c *ctxE
 		//fmt.Println("LastLiveLoginCity: ", LastLiveLoginCity)
 		tx = tx.Where(liveTableSegmentation+".last_replay_login_city LIKE ?", "%"+LastReplayLoginCity+"%")
 	}
-	TotalWatchTimeOperator := c.Query("total_watch_time_operator")
-	if params.TotalWatchTime >= 0 && TotalWatchTimeOperator != "" && isPermittedExpression(TotalWatchTimeOperator, operatorTypeOneMap) {
-		tx = tx.Where(liveTableSegmentation+".total_watch_time "+TotalWatchTimeOperator+"  ?", params.TotalWatchTime)
-	}
+	/*
+		TotalWatchTimeOperator := c.Query("total_watch_time_operator")
+		if params.TotalWatchTime >= 0 && TotalWatchTimeOperator != "" && isPermittedExpression(TotalWatchTimeOperator, operatorTypeOneMap) {
+			tx = tx.Where(liveTableSegmentation+".total_watch_time "+TotalWatchTimeOperator+"  ?", params.TotalWatchTime)
+		}
+	*/
 	return tx
 }
 
@@ -554,6 +578,75 @@ func inQueryGenerator(params ActionData, tx *gorm.DB, c *ctxExt.Context) *gorm.D
 	return tx
 }
 
+//joinOperatorQueryGenerator，提供join操作的表名，构造基于操作符的查询
+func joinOperatorQueryGenerator(params ActionData, liveTableSegmentation string, tx *gorm.DB, c *ctxExt.Context) (txNew *gorm.DB, err error) {
+
+	LastLiveLeaveTimeOperator := c.Query("last_live_leave_time_operator")
+	if LastLiveLeaveTimeOperator != "" {
+		tx, err = operatorQueryAbstract(tx, c, liveTableSegmentation+".last_live_leave_time", LastLiveLeaveTimeOperator, params.LastLiveLeaveTime)
+		if err != nil {
+			return tx, err
+		}
+	}
+
+	LiveWatchTimeOperator := c.Query("live_watch_time_operator")
+	if LiveWatchTimeOperator != "" {
+		tx, err = operatorQueryAbstract(tx, c, liveTableSegmentation+".last_live_leave_time", LiveWatchTimeOperator, params.LiveWatchTime)
+		if err != nil {
+			return tx, err
+		}
+	}
+
+	LiveWatchTimesOperator := c.Query("live_watch_times_operator")
+	if LiveWatchTimesOperator != "" {
+		tx, err = operatorQueryAbstract(tx, c, liveTableSegmentation+".live_watch_times", LiveWatchTimesOperator, params.LiveWatchTimes)
+		if err != nil {
+			return tx, err
+		}
+	}
+
+	FirstLiveEnterTimeOperator := c.Query("first_live_enter_time_operator")
+	if FirstLiveEnterTimeOperator != "" {
+		tx, err = operatorQueryAbstract(tx, c, liveTableSegmentation+".first_live_enter_time", FirstLiveEnterTimeOperator, params.FirstLiveEnterTime)
+		if err != nil {
+			return tx, err
+		}
+	}
+
+	FirstReplayEnterTimeOperator := c.Query("first_replay_enter_time_operator")
+	if FirstReplayEnterTimeOperator != "" {
+		tx, err = operatorQueryAbstract(tx, c, liveTableSegmentation+".first_replay_enter_time", FirstReplayEnterTimeOperator, params.FirstReplayEnterTime)
+		if err != nil {
+			return tx, err
+		}
+	}
+
+	ReplayWatchTimeOperator := c.Query("replay_watch_time_operator")
+	if ReplayWatchTimeOperator != "" {
+		tx, err = operatorQueryAbstract(tx, c, liveTableSegmentation+".replay_watch_time", ReplayWatchTimeOperator, params.ReplayWatchTime)
+		if err != nil {
+			return tx, err
+		}
+	}
+
+	ReplayWatchTimesOperator := c.Query("replay_watch_times_operator")
+	if ReplayWatchTimesOperator != "" {
+		tx, err = operatorQueryAbstract(tx, c, liveTableSegmentation+".replay_watch_times", ReplayWatchTimesOperator, params.ReplayWatchTimes)
+		if err != nil {
+			return tx, err
+		}
+	}
+
+	TotalWatchTimeOperator := c.Query("total_watch_time_operator")
+	if TotalWatchTimeOperator != "" {
+		tx, err = operatorQueryAbstract(tx, c, liveTableSegmentation+".total_watch_time", TotalWatchTimeOperator, params.TotalWatchTime)
+		if err != nil {
+			return tx, err
+		}
+	}
+	return tx, err
+}
+
 //operatorQueryAbstract 抽象特殊查询操作符
 func operatorQueryAbstract(tx *gorm.DB, c *ctxExt.Context, fieldName, operator string, operatorValue interface{}) (txNew *gorm.DB, err error) {
 	//fmt.Println("operator", operator)
@@ -561,12 +654,14 @@ func operatorQueryAbstract(tx *gorm.DB, c *ctxExt.Context, fieldName, operator s
 		//fmt.Println("isPermittedExpression", "ok")
 		tx = tx.Where(fieldName+" "+operatorTypeOneMap[operator]+" ?", operatorValue)
 	} else if isPermittedOperator(operator, operatorTypeTwo) {
-		fieldNameLow := c.Query(fieldName + "_low")
-		fieldNameHigh := c.Query(fieldName + "_high")
+		//取数据表名称，排除数据库名称
+		fieldNameSlice := strings.Split(fieldName, ".")
+		fieldNameLow := c.Query(fieldNameSlice[len(fieldNameSlice)-1] + "_low")
+		fieldNameHigh := c.Query(fieldNameSlice[len(fieldNameSlice)-1] + "_high")
 		//fmt.Println("fieldName,fieldNameLow,fieldNameHigh", fieldName, fieldNameLow, fieldNameHigh)
 		if fieldNameLow == "" || fieldNameHigh == "" {
 			//fmt.Println("here", fieldNameLow, fieldNameHigh)
-			err := errors.New(fieldName + "_low" + "或" + fieldName + "_high" + "为空")
+			err := errors.New(fieldNameSlice[len(fieldNameSlice)-1] + "_low" + "或" + fieldNameSlice[len(fieldNameSlice)-1] + "_high" + "为空")
 			return tx, err
 		}
 		fmt.Println("operatorTypeTwoMap", operatorTypeTwoMap[operator][0], operatorTypeTwoMap[operator][1])
