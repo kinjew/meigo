@@ -20,6 +20,10 @@ var operatorTypeOneMap = map[string]string{"eq": "=", "neq": "<>", "gt": ">", "l
 var operatorTypeTwo = []string{"between", "lbetween", "rbetween", "ibetween"}
 var operatorTypeTwoMap = map[string][]string{"between": []string{">=", "<="}, "lbetween": []string{">=", "<"}, "rbetween": []string{">", "<="}, "ibetween": []string{">", "<"}}
 
+//类型three操作符
+var operatorTypeThree = []string{"nBetween", "lNBetween", "rNBetween", "iNBetween"}
+var operatorTypeThreeMap = map[string][]string{"nBetween": []string{"<=", ">="}, "lNBetween": []string{"<=", ">"}, "rNBetween": []string{"<", ">="}, "iNBetween": []string{"<", ">"}}
+
 var page = "1"
 var pageSize = "20"
 var totalCount = 0
@@ -46,7 +50,7 @@ func isPermittedExpression(target string, operatorMap map[string]string) bool {
 }
 
 //判断操作符是否在切片中
-func isPermittedOperator(target string, str_array []string) bool {
+func isStringInSlice(target string, str_array []string) bool {
 	sort.Strings(str_array)
 	index := sort.SearchStrings(str_array, target)
 	if index < len(str_array) && str_array[index] == target {

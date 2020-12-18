@@ -177,6 +177,15 @@ func (ad *ActionData) QueryByParams(c *ctxExt.Context) (list []ActionData, suppl
 		return
 	}
 
+	//内部or查询
+	orClauseSql, err := orQueryGenerator(c, liveTableSegmentation)
+	orClauseSql = strings.TrimRight(orClauseSql, "or ")
+	if err != nil {
+		return
+	}
+
+	tx = tx.Where(orClauseSql)
+
 	//执行查询操作
 	page = c.DefaultQuery("page", page)
 	pageSize = c.DefaultQuery("pageSize", pageSize)
@@ -653,7 +662,7 @@ func operatorQueryAbstract(tx *gorm.DB, c *ctxExt.Context, fieldName, operator s
 	if isPermittedExpression(operator, operatorTypeOneMap) {
 		//fmt.Println("isPermittedExpression", "ok")
 		tx = tx.Where(fieldName+" "+operatorTypeOneMap[operator]+" ?", operatorValue)
-	} else if isPermittedOperator(operator, operatorTypeTwo) {
+	} else if isStringInSlice(operator, operatorTypeTwo) {
 		//取数据表名称，排除数据库名称
 		fieldNameSlice := strings.Split(fieldName, ".")
 		fieldNameLow := c.Query(fieldNameSlice[len(fieldNameSlice)-1] + "_low")
@@ -666,11 +675,89 @@ func operatorQueryAbstract(tx *gorm.DB, c *ctxExt.Context, fieldName, operator s
 		}
 		fmt.Println("operatorTypeTwoMap", operatorTypeTwoMap[operator][0], operatorTypeTwoMap[operator][1])
 		tx = tx.Where(fieldName+" "+operatorTypeTwoMap[operator][0]+"  ?", fieldNameLow).Where(fieldName+" "+operatorTypeTwoMap[operator][1]+"  ?", fieldNameHigh)
+	} else if isStringInSlice(operator, operatorTypeThree) {
+		//取数据表名称，排除数据库名称
+		fieldNameSlice := strings.Split(fieldName, ".")
+		fieldNameLow := c.Query(fieldNameSlice[len(fieldNameSlice)-1] + "_low")
+		fieldNameHigh := c.Query(fieldNameSlice[len(fieldNameSlice)-1] + "_high")
+		//fmt.Println("fieldName,fieldNameLow,fieldNameHigh", fieldName, fieldNameLow, fieldNameHigh)
+		if fieldNameLow == "" || fieldNameHigh == "" {
+			//fmt.Println("here", fieldNameLow, fieldNameHigh)
+			err := errors.New(fieldNameSlice[len(fieldNameSlice)-1] + "_low" + "或" + fieldNameSlice[len(fieldNameSlice)-1] + "_high" + "为空")
+			return tx, err
+		}
+		fmt.Println("operatorTypeThree", operatorTypeThreeMap[operator][0], operatorTypeThreeMap[operator][1])
+		tx = tx.Where(fieldName+" "+operatorTypeThreeMap[operator][0]+"  ?", fieldNameLow).Where(fieldName+" "+operatorTypeThreeMap[operator][1]+"  ?", fieldNameHigh)
 	} else {
 		err := errors.New("invalid operator")
 		return tx, err
 	}
 	return tx, err
+}
+
+//orQueryGenerator执行内部or查询
+func orQueryGenerator(c *ctxExt.Context, liveTableSegmentation string) (orClauseSql string, err error) {
+	orClause := c.QueryMap("orClause")
+	//循环map
+	for _, value := range orClause {
+		var valueArr = strings.Split(value, ",")
+		//操作符
+		if valueArr[0] == "" {
+			err := errors.New("操作符为空")
+			return orClauseSql, err
+		}
+		if isPermittedExpression(valueArr[0], operatorTypeOneMap) {
+			if len(valueArr) < 3 {
+				err := errors.New("操作值为空")
+				return orClauseSql, err
+			}
+		} else if isStringInSlice(valueArr[0], operatorTypeTwo) || isStringInSlice(valueArr[0], operatorTypeThree) {
+			if len(valueArr) < 4 {
+				err := errors.New("操作值不足")
+				return orClauseSql, err
+			}
+		}
+		//操作字段
+		fieldName := valueArr[1]
+		//判断字段所在的数据表
+		ActionLiveDataColumnArr := strings.Split(ActionLiveDataColumn, "，")
+		if isStringInSlice(fieldName, ActionLiveDataColumnArr) {
+			fieldName = liveTableSegmentation + "." + fieldName
+		}
+		//构造条件语句
+		orWhere, err := operatorQueryAbstractInner(fieldName, valueArr[0], valueArr)
+		if err != nil {
+			return orClauseSql, err
+		}
+		orClauseSql += orWhere
+
+	}
+	return orClauseSql, err
+}
+
+//operatorQueryAbstract 抽象特殊查询操作符
+func operatorQueryAbstractInner(fieldName, operator string, operatorArr []string) (orWhere string, err error) {
+	//fmt.Println("operator", operator)
+	if isPermittedExpression(operator, operatorTypeOneMap) {
+		//fmt.Println("isPermittedExpression", "ok")
+		temp := fieldName + " " + operatorTypeOneMap[operator] + " '" + operatorArr[2] + "' or "
+		orWhere += temp
+		//tx = tx.Where(fieldName+" "+operatorTypeOneMap[operator]+" ?", operatorArr[2])
+	} else if isStringInSlice(operator, operatorTypeTwo) {
+		//fmt.Println("operatorTypeTwoMap", operatorTypeTwoMap[operator][0], operatorTypeTwoMap[operator][1])
+		temp := "(" + fieldName + " " + operatorTypeTwoMap[operator][0] + " '" + operatorArr[2] + "' and " + fieldName + " " + operatorTypeTwoMap[operator][1] + " '" + operatorArr[3] + "') or "
+		orWhere += temp
+		//tx = tx.Where(fieldName+" "+operatorTypeTwoMap[operator][0]+"  ?", operatorArr[2]).Where(fieldName+" "+operatorTypeTwoMap[operator][1]+"  ?", operatorArr[3])
+	} else if isStringInSlice(operator, operatorTypeThree) {
+		//fmt.Println("operatorTypeThree", operatorTypeThreeMap[operator][0], operatorTypeThreeMap[operator][1])
+		temp := "(" + fieldName + " " + operatorTypeThreeMap[operator][0] + " '" + operatorArr[2] + "' and " + fieldName + " " + operatorTypeThreeMap[operator][1] + " '" + operatorArr[3] + "') or "
+		orWhere += temp
+		//tx = tx.Where(fieldName+" "+operatorTypeThreeMap[operator][0]+"  ?", operatorArr[2]).Where(fieldName+" "+operatorTypeThreeMap[operator][1]+"  ?", operatorArr[3])
+	} else {
+		err := errors.New("operatorQueryAbstractInner:invalid operator," + operator)
+		return orWhere, err
+	}
+	return orWhere, err
 }
 
 // 下划线写法转为驼峰写法
