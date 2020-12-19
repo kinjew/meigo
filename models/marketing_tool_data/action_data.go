@@ -3,6 +3,7 @@ package marketing_tool_data
 import (
 	"errors"
 	"fmt"
+	"html"
 	"meigo/library/db/common"
 	"meigo/library/log"
 	"strconv"
@@ -740,17 +741,17 @@ func operatorQueryAbstractInner(fieldName, operator string, operatorArr []string
 	//fmt.Println("operator", operator)
 	if isPermittedExpression(operator, operatorTypeOneMap) {
 		//fmt.Println("isPermittedExpression", "ok")
-		temp := fieldName + " " + operatorTypeOneMap[operator] + " '" + operatorArr[2] + "' or "
+		temp := fieldName + " " + operatorTypeOneMap[operator] + " '" + html.EscapeString(operatorArr[2]) + "' or "
 		orWhere += temp
 		//tx = tx.Where(fieldName+" "+operatorTypeOneMap[operator]+" ?", operatorArr[2])
 	} else if isStringInSlice(operator, operatorTypeTwo) {
 		//fmt.Println("operatorTypeTwoMap", operatorTypeTwoMap[operator][0], operatorTypeTwoMap[operator][1])
-		temp := "(" + fieldName + " " + operatorTypeTwoMap[operator][0] + " '" + operatorArr[2] + "' and " + fieldName + " " + operatorTypeTwoMap[operator][1] + " '" + operatorArr[3] + "') or "
+		temp := "(" + fieldName + " " + operatorTypeTwoMap[operator][0] + " '" + html.EscapeString(operatorArr[2]) + "' and " + fieldName + " " + operatorTypeTwoMap[operator][1] + " '" + html.EscapeString(operatorArr[3]) + "') or "
 		orWhere += temp
 		//tx = tx.Where(fieldName+" "+operatorTypeTwoMap[operator][0]+"  ?", operatorArr[2]).Where(fieldName+" "+operatorTypeTwoMap[operator][1]+"  ?", operatorArr[3])
 	} else if isStringInSlice(operator, operatorTypeThree) {
 		//fmt.Println("operatorTypeThree", operatorTypeThreeMap[operator][0], operatorTypeThreeMap[operator][1])
-		temp := "(" + fieldName + " " + operatorTypeThreeMap[operator][0] + " '" + operatorArr[2] + "' and " + fieldName + " " + operatorTypeThreeMap[operator][1] + " '" + operatorArr[3] + "') or "
+		temp := "(" + fieldName + " " + operatorTypeThreeMap[operator][0] + " '" + html.EscapeString(operatorArr[2]) + "' and " + fieldName + " " + operatorTypeThreeMap[operator][1] + " '" + html.EscapeString(operatorArr[3]) + "') or "
 		orWhere += temp
 		//tx = tx.Where(fieldName+" "+operatorTypeThreeMap[operator][0]+"  ?", operatorArr[2]).Where(fieldName+" "+operatorTypeThreeMap[operator][1]+"  ?", operatorArr[3])
 	} else {
