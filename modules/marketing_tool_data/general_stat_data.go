@@ -15,7 +15,7 @@ import (
 var gst mtdMod.GeneralStatData
 
 /*
-gstQueryByParams 获取ActionData列表
+gstQueryByParams 获取GeneralStatData列表
 */
 func GstQueryByParams(c *ctxExt.Context) {
 

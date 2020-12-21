@@ -9,13 +9,16 @@ require (
 	github.com/go-playground/validator/v10 v10.4.1 // indirect
 	github.com/go-redis/redis v6.15.5+incompatible
 	github.com/go-redis/redis/v8 v8.4.2
+	github.com/golang-sql/civil v0.0.0-20190719163853-cb61b32ac6fe
 	github.com/jinzhu/gorm v1.9.16
 	github.com/kinjew/gin-context-ext v0.0.0-20201120065252-bef92e1b1b75
 	github.com/lib/pq v1.3.0 // indirect
 	github.com/mitchellh/go-homedir v1.1.0
+	github.com/mkevac/debugcharts v0.0.0-20191222103121-ae1c48aa8615
 	github.com/modern-go/concurrent v0.0.0-20180306012644-bacd9c7ef1dd // indirect
 	github.com/modern-go/reflect2 v1.0.1 // indirect
 	github.com/pkg/errors v0.9.1 // indirect
+	github.com/prometheus/client_golang v0.9.3
 	github.com/spf13/afero v1.2.2 // indirect
 	github.com/spf13/cobra v0.0.5
 	github.com/spf13/viper v1.4.0

@@ -13,5 +13,6 @@ func mtdRouter(giNew *gin.Engine) {
 	{
 		mtd.GET("/ad_query", ctxExt.Handle(mtdModule.QueryByParams))
 		mtd.GET("/gst_query", ctxExt.Handle(mtdModule.GstQueryByParams))
+		mtd.GET("/gsat_query", ctxExt.Handle(mtdModule.GsatQueryByParams))
 	}
 }

@@ -657,45 +657,6 @@ func joinOperatorQueryGenerator(params ActionData, liveTableSegmentation string,
 	return tx, err
 }
 
-//operatorQueryAbstract 抽象特殊查询操作符
-func operatorQueryAbstract(tx *gorm.DB, c *ctxExt.Context, fieldName, operator string, operatorValue interface{}) (txNew *gorm.DB, err error) {
-	//fmt.Println("operator", operator)
-	if isPermittedExpression(operator, operatorTypeOneMap) {
-		//fmt.Println("isPermittedExpression", "ok")
-		tx = tx.Where(fieldName+" "+operatorTypeOneMap[operator]+" ?", operatorValue)
-	} else if isStringInSlice(operator, operatorTypeTwo) {
-		//取数据表名称，排除数据库名称
-		fieldNameSlice := strings.Split(fieldName, ".")
-		fieldNameLow := c.Query(fieldNameSlice[len(fieldNameSlice)-1] + "_low")
-		fieldNameHigh := c.Query(fieldNameSlice[len(fieldNameSlice)-1] + "_high")
-		//fmt.Println("fieldName,fieldNameLow,fieldNameHigh", fieldName, fieldNameLow, fieldNameHigh)
-		if fieldNameLow == "" || fieldNameHigh == "" {
-			//fmt.Println("here", fieldNameLow, fieldNameHigh)
-			err := errors.New(fieldNameSlice[len(fieldNameSlice)-1] + "_low" + "或" + fieldNameSlice[len(fieldNameSlice)-1] + "_high" + "为空")
-			return tx, err
-		}
-		fmt.Println("operatorTypeTwoMap", operatorTypeTwoMap[operator][0], operatorTypeTwoMap[operator][1])
-		tx = tx.Where(fieldName+" "+operatorTypeTwoMap[operator][0]+"  ?", fieldNameLow).Where(fieldName+" "+operatorTypeTwoMap[operator][1]+"  ?", fieldNameHigh)
-	} else if isStringInSlice(operator, operatorTypeThree) {
-		//取数据表名称，排除数据库名称
-		fieldNameSlice := strings.Split(fieldName, ".")
-		fieldNameLow := c.Query(fieldNameSlice[len(fieldNameSlice)-1] + "_low")
-		fieldNameHigh := c.Query(fieldNameSlice[len(fieldNameSlice)-1] + "_high")
-		//fmt.Println("fieldName,fieldNameLow,fieldNameHigh", fieldName, fieldNameLow, fieldNameHigh)
-		if fieldNameLow == "" || fieldNameHigh == "" {
-			//fmt.Println("here", fieldNameLow, fieldNameHigh)
-			err := errors.New(fieldNameSlice[len(fieldNameSlice)-1] + "_low" + "或" + fieldNameSlice[len(fieldNameSlice)-1] + "_high" + "为空")
-			return tx, err
-		}
-		fmt.Println("operatorTypeThree", operatorTypeThreeMap[operator][0], operatorTypeThreeMap[operator][1])
-		tx = tx.Where(fieldName+" "+operatorTypeThreeMap[operator][0]+"  ?", fieldNameLow).Where(fieldName+" "+operatorTypeThreeMap[operator][1]+"  ?", fieldNameHigh)
-	} else {
-		err := errors.New("invalid operator")
-		return tx, err
-	}
-	return tx, err
-}
-
 //orQueryGenerator执行内部or查询
 func orQueryGenerator(c *ctxExt.Context, liveTableSegmentation string) (orClauseSql string, err error) {
 	orClause := c.QueryMap("orClause")

@@ -110,8 +110,11 @@ func (gst *GeneralStatData) GstQueryByParams(c *ctxExt.Context) (list []GeneralS
 		err = tx.Select("*").Scan(&list).Error
 		return list, err
 	*/
-	//根据操作符查询
-	tx = gstOperatorQueryGenerator(params, tx, c)
+	//主表根据操作符查询
+	tx, err = gstOperatorQueryGenerator(params, tx, c)
+	if err != nil {
+		return
+	}
 
 	//执行查询操作
 	page = c.DefaultQuery("page", page)
@@ -160,8 +163,20 @@ func gstMapQueryGenerator(params GeneralStatData, mapQuery map[string]interface{
 	return mapQuery
 }
 
-//构造新tx
-func gstOperatorQueryGenerator(params GeneralStatData, tx *gorm.DB, c *ctxExt.Context) *gorm.DB {
-
-	return tx
+//gstOperatorQueryGenerator构造基于操作符的查询
+func gstOperatorQueryGenerator(params GeneralStatData, tx *gorm.DB, c *ctxExt.Context) (txNew *gorm.DB, err error) {
+	/*
+		var ViewMaterialTimes = 0
+		if params.ViewMaterialTimes != nil {
+			ViewMaterialTimes = *params.ViewMaterialTimes
+		}
+		ViewMaterialTimesOperator := c.Query("view_material_times_operator")
+		if ViewMaterialTimesOperator != "" {
+			tx, err = operatorQueryAbstract(tx, c, "view_material_times", ViewMaterialTimesOperator, ViewMaterialTimes)
+			if err != nil {
+				return tx, err
+			}
+		}
+	*/
+	return tx, err
 }
