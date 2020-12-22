@@ -10,6 +10,8 @@ import (
 	mgInit "meigo/library/init"
 	"meigo/library/log"
 	"net/http"
+	"os"
+	"path/filepath"
 	"time"
 
 	"github.com/spf13/viper"
@@ -42,6 +44,7 @@ type OtherSourceData struct {
 var ch0, ch1, ch2, ch3, ch4, ch5, ch6, ch7, ch8, ch9 chan string
 
 //var strList = []string{"ch1", "ch2", "ch3", "ch4", "ch5", "ch6", "ch7", "ch8", "ch9"}
+var ExeDir string
 
 func main() {
 
@@ -73,8 +76,15 @@ func main() {
 			fmt.Println("chanList[temKey]: ", chanList[temKey])
 		}
 	*/
+	path, err := os.Executable()
+	if err != nil {
+		fmt.Println(err)
+	}
+	ExeDir = filepath.Dir(path)
+	//fmt.Println(path) // for example /home/user/main
+	//fmt.Println(dir)  // for example /home/user
 	// 配置读取加载
-	mgInit.ConfInit()
+	mgInit.ConfInit(ExeDir)
 
 	//初始化channel
 	ch0 = make(chan string)
@@ -265,7 +275,7 @@ func requestOuterApiOnce(sourceDataJson string, ctx context.Context, rdb *redis.
 	log.Error("requestOuterApiStart: ", "start")
 	//获取配置数据
 	sourceDataProcessUrl := viper.GetString("const.sourceDataProcessUrl")
-	url := sourceDataProcessUrl + "?sourceDataJson=" + sourceDataJson
+	url := sourceDataProcessUrl + "?source_data=" + sourceDataJson
 	fmt.Println("requestOuterApiUrl: ", url)
 	/*
 		url := "http://www.baidu.com" + "?sourceDataJson=" + sourceDataJson

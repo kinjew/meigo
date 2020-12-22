@@ -19,10 +19,16 @@ function build()
   go build  -o bin/meigo main.go
   go build  -o bin/cmd cmd/main.go
   go build  -o bin/mtd daemon/mtd/main.go
-  echo '编译完成';
+  echo '本地编译完成';
+  #交叉编译
+  CGO_ENABLED=0 GOOS=linux GOARCH=amd64 go build  -o linux_bin/meigo main.go
+  CGO_ENABLED=0 GOOS=linux GOARCH=amd64 go build  -o linux_bin/cmd cmd/main.go
+  CGO_ENABLED=0 GOOS=linux GOARCH=amd64 go build  -o linux_bin/mtd daemon/mtd/main.go
+  echo 'linux版本编译完成';
 
   #配文文件、启停脚本、运行时目录等拷贝
   cp -R bin release
+  cp -R linux_bin release
   cp -R conf release
   cp -R scripts release
 

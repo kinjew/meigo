@@ -18,12 +18,15 @@ package cmd
 import (
 	"fmt"
 	"os"
+	"path/filepath"
 
 	mgInit "meigo/library/init"
 	peopleModule "meigo/modules/people"
 
 	"github.com/spf13/cobra"
 )
+
+var ExeDir string
 
 // indexCmd represents the index command
 var indexCmd = &cobra.Command{
@@ -60,8 +63,16 @@ func init() {
 
 func index() {
 	fmt.Println(os.Args[1:])
+	path, err := os.Executable()
+	if err != nil {
+		fmt.Println(err)
+	}
+	ExeDir = filepath.Dir(path)
+	//fmt.Println(path) // for example /home/user/main
+	//fmt.Println(dir)  // for example /home/user
 	// 配置读取加载
-	mgInit.ConfInit()
+	mgInit.ConfInit(ExeDir)
+
 	// 初始化数据库连接
 	mgInit.DBInit()
 	defer mgInit.DBClose()

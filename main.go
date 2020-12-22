@@ -1,11 +1,14 @@
 package main
 
 import (
+	"fmt"
 	mgInit "meigo/library/init"
 	"meigo/library/log"
 	Server "meigo/library/server"
 	"meigo/routers"
 	"net/http"
+	"os"
+	"path/filepath"
 
 	_ "net/http/pprof"
 
@@ -13,9 +16,19 @@ import (
 	"github.com/prometheus/client_golang/prometheus/promhttp"
 )
 
+var ExeDir string
+
 func main() {
+
+	path, err := os.Executable()
+	if err != nil {
+		fmt.Println(err)
+	}
+	ExeDir = filepath.Dir(path)
+	//fmt.Println(path) // for example /home/user/main
+	//fmt.Println(dir)  // for example /home/user
 	// 配置读取加载
-	mgInit.ConfInit()
+	mgInit.ConfInit(ExeDir)
 
 	// 初始化数据库连接
 	mgInit.DBInit()

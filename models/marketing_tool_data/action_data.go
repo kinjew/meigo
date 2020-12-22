@@ -1,6 +1,7 @@
 package marketing_tool_data
 
 import (
+	"encoding/json"
 	"errors"
 	"fmt"
 	"html"
@@ -180,7 +181,7 @@ func (ad *ActionData) QueryByParams(c *ctxExt.Context) (list []ActionData, suppl
 
 	//内部or查询
 	orClauseSql, err := orQueryGenerator(c, liveTableSegmentation)
-	orClauseSql = strings.TrimRight(orClauseSql, "or ")
+	orClauseSql = strings.TrimRight(orClauseSql, "and ")
 	if err != nil {
 		return
 	}
@@ -660,63 +661,86 @@ func joinOperatorQueryGenerator(params ActionData, liveTableSegmentation string,
 //orQueryGenerator执行内部or查询
 func orQueryGenerator(c *ctxExt.Context, liveTableSegmentation string) (orClauseSql string, err error) {
 	orClause := c.QueryMap("orClause")
+	var orClauseSqlOuter = ""
 	//循环map
 	for _, value := range orClause {
-		var valueArr = strings.Split(value, ",")
-		//操作符
-		if valueArr[0] == "" {
-			err := errors.New("操作符为空")
-			return orClauseSql, err
-		}
-		if isPermittedExpression(valueArr[0], operatorTypeOneMap) {
-			if len(valueArr) < 3 {
-				err := errors.New("操作值为空")
-				return orClauseSql, err
-			}
-		} else if isStringInSlice(valueArr[0], operatorTypeTwo) || isStringInSlice(valueArr[0], operatorTypeThree) {
-			if len(valueArr) < 4 {
-				err := errors.New("操作值不足")
-				return orClauseSql, err
-			}
-		}
-		//操作字段
-		fieldName := valueArr[1]
-		//判断字段所在的数据表
-		ActionLiveDataColumnArr := strings.Split(ActionLiveDataColumn, "，")
-		if isStringInSlice(fieldName, ActionLiveDataColumnArr) {
-			fieldName = liveTableSegmentation + "." + fieldName
-		}
-		//构造条件语句
-		orWhere, err := operatorQueryAbstractInner(fieldName, valueArr[0], valueArr)
+		//定义内部语句切片
+		var innerClause []OperateFormat
+		var orClauseSql = ""
+		//json解码
+		err := json.Unmarshal([]byte(value), &innerClause)
 		if err != nil {
-			return orClauseSql, err
+			return orClauseSqlOuter, err
 		}
-		orClauseSql += orWhere
+		//fmt.Println("innerClause", innerClause)
+		for _, item := range innerClause {
+			operator := item.Operator
+			field := item.Field
+			value_one := item.ValueOne
+			value_two := item.ValueTwo
 
+			//var valueArr = strings.Split(value, ",")
+			//操作符
+			if operator == "" {
+				err := errors.New("操作符为空")
+				return orClauseSql, err
+			}
+			if isPermittedExpression(operator, operatorTypeOneMap) {
+				if value_one == "" {
+					err := errors.New("操作值为空")
+					return orClauseSql, err
+				}
+			} else if isStringInSlice(operator, operatorTypeTwo) || isStringInSlice(operator, operatorTypeThree) {
+				if value_one == "" || value_two == "" {
+					err := errors.New("操作值不足")
+					return orClauseSql, err
+				}
+			}
+			//操作字段
+			fieldName := field
+			//判断字段所在的数据表
+			ActionLiveDataColumnArr := strings.Split(ActionLiveDataColumn, "，")
+			if isStringInSlice(fieldName, ActionLiveDataColumnArr) {
+				fieldName = liveTableSegmentation + "." + fieldName
+			}
+			//构造条件语句
+			var operatorArr = []string{operator, fieldName, Strval(value_one), Strval(value_two)}
+			orWhere, err := operatorQueryAbstractInner(operatorArr)
+			if err != nil {
+				return orClauseSql, err
+			}
+			orClauseSql += orWhere
+		}
+		//去除无用or
+		orClauseSql = strings.TrimRight(orClauseSql, "or ")
+		//拼接orClause
+		orClauseSqlOuter = orClauseSqlOuter + "(" + orClauseSql + ") and "
+		//fmt.Println(orClauseSql, orClauseSqlOuter)
 	}
-	return orClauseSql, err
+
+	return orClauseSqlOuter, err
 }
 
 //operatorQueryAbstract 抽象特殊查询操作符
-func operatorQueryAbstractInner(fieldName, operator string, operatorArr []string) (orWhere string, err error) {
+func operatorQueryAbstractInner(operatorArr []string) (orWhere string, err error) {
 	//fmt.Println("operator", operator)
-	if isPermittedExpression(operator, operatorTypeOneMap) {
+	if isPermittedExpression(operatorArr[0], operatorTypeOneMap) {
 		//fmt.Println("isPermittedExpression", "ok")
-		temp := fieldName + " " + operatorTypeOneMap[operator] + " '" + html.EscapeString(operatorArr[2]) + "' or "
+		temp := operatorArr[1] + " " + operatorTypeOneMap[operatorArr[0]] + " '" + html.EscapeString(operatorArr[2]) + "' or "
 		orWhere += temp
 		//tx = tx.Where(fieldName+" "+operatorTypeOneMap[operator]+" ?", operatorArr[2])
-	} else if isStringInSlice(operator, operatorTypeTwo) {
+	} else if isStringInSlice(operatorArr[0], operatorTypeTwo) {
 		//fmt.Println("operatorTypeTwoMap", operatorTypeTwoMap[operator][0], operatorTypeTwoMap[operator][1])
-		temp := "(" + fieldName + " " + operatorTypeTwoMap[operator][0] + " '" + html.EscapeString(operatorArr[2]) + "' and " + fieldName + " " + operatorTypeTwoMap[operator][1] + " '" + html.EscapeString(operatorArr[3]) + "') or "
+		temp := "(" + operatorArr[1] + " " + operatorTypeTwoMap[operatorArr[0]][0] + " '" + html.EscapeString(operatorArr[2]) + "' and " + operatorArr[1] + " " + operatorTypeTwoMap[operatorArr[0]][1] + " '" + html.EscapeString(operatorArr[3]) + "') or "
 		orWhere += temp
 		//tx = tx.Where(fieldName+" "+operatorTypeTwoMap[operator][0]+"  ?", operatorArr[2]).Where(fieldName+" "+operatorTypeTwoMap[operator][1]+"  ?", operatorArr[3])
-	} else if isStringInSlice(operator, operatorTypeThree) {
+	} else if isStringInSlice(operatorArr[0], operatorTypeThree) {
 		//fmt.Println("operatorTypeThree", operatorTypeThreeMap[operator][0], operatorTypeThreeMap[operator][1])
-		temp := "(" + fieldName + " " + operatorTypeThreeMap[operator][0] + " '" + html.EscapeString(operatorArr[2]) + "' and " + fieldName + " " + operatorTypeThreeMap[operator][1] + " '" + html.EscapeString(operatorArr[3]) + "') or "
+		temp := "(" + operatorArr[1] + " " + operatorTypeThreeMap[operatorArr[0]][0] + " '" + html.EscapeString(operatorArr[2]) + "' and " + operatorArr[1] + " " + operatorTypeThreeMap[operatorArr[0]][1] + " '" + html.EscapeString(operatorArr[3]) + "') or "
 		orWhere += temp
 		//tx = tx.Where(fieldName+" "+operatorTypeThreeMap[operator][0]+"  ?", operatorArr[2]).Where(fieldName+" "+operatorTypeThreeMap[operator][1]+"  ?", operatorArr[3])
 	} else {
-		err := errors.New("operatorQueryAbstractInner:invalid operator," + operator)
+		err := errors.New("operatorQueryAbstractInner:invalid operator," + operatorArr[0])
 		return orWhere, err
 	}
 	return orWhere, err
@@ -727,4 +751,62 @@ func Case2Camel(name string) string {
 	name = strings.Replace(name, "_", " ", -1)
 	name = strings.Title(name)
 	return strings.Replace(name, " ", "", -1)
+}
+
+// Strval 获取变量的字符串值
+// 浮点型 3.0将会转换成字符串3, "3"
+// 非数值或字符类型的变量将会被转换成JSON格式字符串
+func Strval(value interface{}) string {
+	var key string
+	if value == nil {
+		return key
+	}
+
+	switch value.(type) {
+	case float64:
+		ft := value.(float64)
+		key = strconv.FormatFloat(ft, 'f', -1, 64)
+	case float32:
+		ft := value.(float32)
+		key = strconv.FormatFloat(float64(ft), 'f', -1, 64)
+	case int:
+		it := value.(int)
+		key = strconv.Itoa(it)
+	case uint:
+		it := value.(uint)
+		key = strconv.Itoa(int(it))
+	case int8:
+		it := value.(int8)
+		key = strconv.Itoa(int(it))
+	case uint8:
+		it := value.(uint8)
+		key = strconv.Itoa(int(it))
+	case int16:
+		it := value.(int16)
+		key = strconv.Itoa(int(it))
+	case uint16:
+		it := value.(uint16)
+		key = strconv.Itoa(int(it))
+	case int32:
+		it := value.(int32)
+		key = strconv.Itoa(int(it))
+	case uint32:
+		it := value.(uint32)
+		key = strconv.Itoa(int(it))
+	case int64:
+		it := value.(int64)
+		key = strconv.FormatInt(it, 10)
+	case uint64:
+		it := value.(uint64)
+		key = strconv.FormatUint(it, 10)
+	case string:
+		key = value.(string)
+	case []byte:
+		key = string(value.([]byte))
+	default:
+		newValue, _ := json.Marshal(value)
+		key = string(newValue)
+	}
+
+	return key
 }

@@ -35,6 +35,13 @@ var totalCount = 0
 
 var orderBy = "id desc"
 
+type OperateFormat struct {
+	Operator string      `json:"operator"`
+	Field    string      `json:"field"`
+	ValueOne interface{} `json:"value_one"`
+	ValueTwo interface{} `json:"value_two"`
+}
+
 // InitPersonDB 初始化数据库
 func InitMarketingToolDataDB() {
 	var err error

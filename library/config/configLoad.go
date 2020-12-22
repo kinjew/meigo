@@ -33,7 +33,7 @@ type RedisConf struct {
 }
 
 // LoadConfigFile 读取并加载 conf/conf.yaml(toml) 配置文件
-func LoadConfigFile() {
+func LoadConfigFile(MainDir string) {
 	//从控制台读取标识
 	/*
 		var cDir string
@@ -44,6 +44,7 @@ func LoadConfigFile() {
 		viper.AddConfigPath(cDir)*/
 	//viper.AddConfigPath("/data/www/go_meigo/conf/")
 	viper.AddConfigPath("/Users/danderui/test/meigo/conf/")
+	//viper.AddConfigPath(MainDir + "/conf/")
 	viper.SetConfigName("conf")
 	viper.SetConfigType("toml") // toml 或者 yaml
 	// viper.AutomaticEnv()            // 读取匹配的环境变量
