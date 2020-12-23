@@ -31,7 +31,7 @@ type GeneralStatData struct {
 	DownloadTimes          uint   `gorm:"column:download_times;" json:"download_times" form:"download_times"`
 	DownloadNum            uint   `gorm:"column:download_num;" json:"download_num" form:"download_num"`
 	ShareTimes             uint   `gorm:"column:share_times;" json:"share_times" form:"share_times"`
-	ShowNum                uint   `gorm:"column:show_num;" json:"show_num" form:"show_num"`
+	ShareNum               uint   `gorm:"column:share_num;" json:"share_num" form:"share_num"`
 	FavoriteTimes          uint   `gorm:"column:favorite_times;" json:"favorite_times" form:"favorite_times"`
 	FavoriteNum            uint   `gorm:"column:favorite_num;" json:"favorite_num" form:"favorite_num"`
 	ViewMaterialTimes      uint   `gorm:"column:view_material_times;" json:"view_material_times" form:"view_material_times"`

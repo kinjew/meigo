@@ -241,7 +241,7 @@ func readRedis(ctx context.Context, rdb *redis.Client) {
 //go 发起http请求 https://www.cnblogs.com/tigerzhouv587/p/11458772.html
 //go 发起http请求 https://blog.csdn.net/zangdaiyang1991/article/details/107071529/
 func readRedisOnce(ctx context.Context, rdb *redis.Client) (remainder int, listValue string) {
-	listValue, err := rdb.RPop(ctx, "list-key").Result()
+	listValue, err := rdb.RPop(ctx, "data_collection_stat_queue").Result()
 	fmt.Println("listValue: ", listValue)
 	log.Info("listValue:", listValue)
 	if err != nil {
