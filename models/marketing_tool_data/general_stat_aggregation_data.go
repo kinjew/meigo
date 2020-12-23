@@ -19,6 +19,7 @@ type GeneralStatAggregationData struct {
 	WxSystemUserId                        uint `gorm:"column:wx_system_user_id;" json:"wx_system_user_id" form:"wx_system_user_id"`
 	ToolId                                uint `gorm:"column:tool_id;" json:"tool_id" form:"tool_id"`
 	ToolType                              int8 `gorm:"column:tool_type;" json:"tool_type" form:"tool_type"`
+	MeetingEndTime                        int8 `gorm:"column:meeting_end_time;" json:"meeting_end_time" form:"meeting_end_time"`
 	VisitTotalTimes                       uint `gorm:"column:visit_total_times;" json:"visit_total_times" form:"visit_total_times"`
 	VisitTotalNum                         uint `gorm:"column:visit_total_num;" json:"visit_total_num" form:"visit_total_num"`
 	BMeetingOnlineEnrollNum               uint `gorm:"column:b_meeting_online_enroll_num;" json:"b_meeting_online_enroll_num" form:"b_meeting_online_enroll_num"`
@@ -29,6 +30,10 @@ type GeneralStatAggregationData struct {
 	AMeetingEnrollApprovePassedNum        uint `gorm:"column:a_meeting_enroll_approve_passed_num;" json:"a_meeting_enroll_approve_passed_num" form:"a_meeting_enroll_approve_passed_num"`
 	EnrollNum                             uint `gorm:"column:enroll_num;" json:"enroll_num" form:"enroll_num"`
 	EnrollApprovePassedNum                uint `gorm:"column:enroll_approve_passed_num;" json:"enroll_approve_passed_num" form:"enroll_approve_passed_num"`
+	ClickEnterLiveTimes                   uint `gorm:"column:click_enter_live_times;" json:"click_enter_live_times" form:"click_enter_live_times"`
+	ClickEnterLiveNum                     uint `gorm:"column:click_enter_live_num;" json:"click_enter_live_num" form:"click_enter_live_num"`
+	ClickWatchReplayTimes                 uint `gorm:"column:click_watch_replay_times;" json:"click_watch_replay_times" form:"click_watch_replay_times"`
+	ClickWatchReplayNum                   uint `gorm:"column:click_watch_replay_num;" json:"click_watch_replay_num" form:"click_watch_replay_num"`
 	WatchLiveNum                          uint `gorm:"column:watch_live_num;" json:"watch_live_num" form:"watch_live_num"`
 	WatchLiveTimeAverage                  uint `gorm:"column:watch_live_time_average;" json:"watch_live_time_average" form:"watch_live_time_average"`
 	OnlyWatchReplayNum                    uint `gorm:"column:only_watch_replay_num;" json:"only_watch_replay_num" form:"only_watch_replay_num"`

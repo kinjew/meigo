@@ -58,8 +58,8 @@ type ActionData struct {
 	IsClickEnrollButton          *int   `gorm:"column:is_click_enroll_button;" json:"is_click_enroll_button" form:"is_click_enroll_button"`
 	IsClickPayButton             *int   `gorm:"column:is_click_pay_button;" json:"is_click_pay_button" form:"is_click_pay_button"`
 	IsClickGenerateFissionButton *int   `gorm:"column:is_click_generate_fission_button;" json:"is_click_generate_fission_button" form:"is_click_generate_fission_button"`
-	IsClickEnterLiveButton       *int   `gorm:"column:is_click_enter_live_button;" json:"is_click_enter_live_button" form:"is_click_enter_live_button"`
-	IsClickWatchReplayButton     *int   `gorm:"column:is_click_watch_replay_button;" json:"is_click_watch_replay_button" form:"is_click_watch_replay_button"`
+	ClickEnterLiveTimes          *int   `gorm:"column:click_enter_live_times;" json:"click_enter_live_times" form:"click_enter_live_times"`
+	ClickWatchReplayTimes        *int   `gorm:"column:click_watch_replay_times;" json:"click_watch_replay_times" form:"click_watch_replay_times"`
 	IsDel                        *int   `gorm:"column:is_del;" json:"is_del" form:"is_del"`
 	ActionLiveData
 }
@@ -335,14 +335,14 @@ func mapQueryGenerator(params ActionData, mapQuery map[string]interface{}, c *ct
 		mapQuery["is_click_generate_fission_button"] = *params.IsClickGenerateFissionButton
 	}
 	//验证是否有参数is_click_enroll_button请求进来
-	IsClickEnterLiveButton := c.Query("is_click_enter_live_button")
-	if params.IsClickEnterLiveButton != nil && *params.IsClickEnterLiveButton >= 0 && IsClickEnterLiveButton != "" {
-		mapQuery["is_click_enter_live_button"] = *params.IsClickEnterLiveButton
+	ClickEnterLiveTimes := c.Query("click_enter_live_times")
+	if params.ClickEnterLiveTimes != nil && *params.ClickEnterLiveTimes >= 0 && ClickEnterLiveTimes != "" {
+		mapQuery["click_enter_live_times"] = *params.ClickEnterLiveTimes
 	}
 	//验证是否有参数is_click_enroll_button请求进来
-	IsClickWatchReplayButton := c.Query("is_click_watch_replay_button")
-	if params.IsClickWatchReplayButton != nil && *params.IsClickWatchReplayButton >= 0 && IsClickWatchReplayButton != "" {
-		mapQuery["is_click_watch_replay_button"] = *params.IsClickWatchReplayButton
+	ClickWatchReplayTimes := c.Query("click_watch_replay_times")
+	if params.ClickWatchReplayTimes != nil && *params.ClickWatchReplayTimes >= 0 && ClickWatchReplayTimes != "" {
+		mapQuery["click_watch_replay_times"] = *params.ClickWatchReplayTimes
 	}
 	//验证是否有参数is_click_enroll_button请求进来
 	IsDel := c.Query("is_del")

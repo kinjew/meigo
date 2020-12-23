@@ -5,6 +5,7 @@ import (
 	Log "meigo/library/log"
 	"meigo/library/redis"
 	"meigo/library/server"
+	"runtime"
 
 	"github.com/fsnotify/fsnotify"
 	"github.com/spf13/viper"
@@ -43,8 +44,14 @@ func LoadConfigFile(MainDir string) {
 		//conf := viper.New()
 		viper.AddConfigPath(cDir)*/
 	//viper.AddConfigPath("/data/www/go_meigo/conf/")
-	viper.AddConfigPath("/Users/danderui/test/meigo/conf/")
-	//viper.AddConfigPath(MainDir + "/conf/")
+	//viper.AddConfigPath("/Users/danderui/test/meigo/conf/")
+	//switch runtime.GOOS { case "darwin": case "windows": case "linux": }
+	confDir := MainDir + "/conf/"
+	//mac本地调试使用
+	if runtime.GOOS == "darwin" {
+		confDir = "/Users/danderui/test/meigo/conf/"
+	}
+	viper.AddConfigPath(confDir)
 	viper.SetConfigName("conf")
 	viper.SetConfigType("toml") // toml 或者 yaml
 	// viper.AutomaticEnv()            // 读取匹配的环境变量
