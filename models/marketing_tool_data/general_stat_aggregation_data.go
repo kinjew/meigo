@@ -11,7 +11,7 @@ import (
 
 // GeneralStatAggregationData 实体
 type GeneralStatAggregationData struct {
-	common.BaseModelV2
+	common.BaseModelV1
 	MainId uint `gorm:"column:main_id;" json:"main_id" form:"main_id" binding:"required"`
 	//WxSystemUserId              int    `gorm:"column:wx_system_user_id;" json:"wx_system_user_id" form:"wx_system_user_id" binding:"required"`
 	//ToolId                      int    `gorm:"column:tool_id;" json:"tool_id" form:"tool_id" binding:"required"`
@@ -20,8 +20,8 @@ type GeneralStatAggregationData struct {
 	ToolId                                uint `gorm:"column:tool_id;" json:"tool_id" form:"tool_id"`
 	ToolType                              int8 `gorm:"column:tool_type;" json:"tool_type" form:"tool_type"`
 	MeetingEndTime                        int8 `gorm:"column:meeting_end_time;" json:"meeting_end_time" form:"meeting_end_time"`
-	VisitTotalTimes                       uint `gorm:"column:visit_total_times;" json:"visit_total_times" form:"visit_total_times"`
-	VisitTotalNum                         uint `gorm:"column:visit_total_num;" json:"visit_total_num" form:"visit_total_num"`
+	VisitTimes                            uint `gorm:"column:visit_times;" json:"visit_times" form:"visit_times"`
+	VisitNum                              uint `gorm:"column:visit_num;" json:"visit_num" form:"visit_num"`
 	BMeetingOnlineEnrollNum               uint `gorm:"column:b_meeting_online_enroll_num;" json:"b_meeting_online_enroll_num" form:"b_meeting_online_enroll_num"`
 	BMeetingOnlineEnrollApprovePassedNum  uint `gorm:"column:b_meeting_online_enroll_approve_passed_num;" json:"b_meeting_online_enroll_approve_passed_num" form:"b_meeting_online_enroll_approve_passed_num"`
 	BMeetingOfflineEnrollNum              uint `gorm:"column:b_meeting_offline_enroll_num;" json:"b_meeting_offline_enroll_num" form:"b_meeting_offline_enroll_num"`
@@ -38,13 +38,13 @@ type GeneralStatAggregationData struct {
 	WatchLiveTimeAverage                  uint `gorm:"column:watch_live_time_average;" json:"watch_live_time_average" form:"watch_live_time_average"`
 	OnlyWatchReplayNum                    uint `gorm:"column:only_watch_replay_num;" json:"only_watch_replay_num" form:"only_watch_replay_num"`
 	OnlyWatchReplayTimeAverage            uint `gorm:"column:only_watch_replay_time_average;" json:"only_watch_replay_time_average" form:"only_watch_replay_time_average"`
-	DownloadTotalTimes                    uint `gorm:"column:download_total_times;" json:"download_total_times" form:"download_total_times"`
+	DownloadTimes                         uint `gorm:"column:download_times;" json:"download_times" form:"download_times"`
 	DownloadNum                           uint `gorm:"column:download_num;" json:"download_num" form:"download_num"`
-	ShareTotalTimes                       uint `gorm:"column:share_total_times;" json:"share_total_times" form:"share_total_times"`
+	ShareTimes                            uint `gorm:"column:share_times;" json:"share_times" form:"share_times"`
 	ShowNum                               uint `gorm:"column:show_num;" json:"show_num" form:"show_num"`
-	FavoriteTotalTimes                    uint `gorm:"column:favorite_total_times;" json:"favorite_total_times" form:"favorite_total_times"`
+	FavoriteTimes                         uint `gorm:"column:favorite_times;" json:"favorite_times" form:"favorite_times"`
 	FavoriteNum                           uint `gorm:"column:favorite_num;" json:"favorite_num" form:"favorite_num"`
-	ViewMaterialTotalTimes                uint `gorm:"column:view_material_total_times;" json:"view_material_total_times" form:"view_material_total_times"`
+	ViewMaterialTimes                     uint `gorm:"column:view_material_times;" json:"view_material_times" form:"view_material_times"`
 	ViewMaterialNum                       uint `gorm:"column:view_material_num;" json:"view_material_num" form:"view_material_num"`
 	NewFansNum                            uint `gorm:"column:new_fans_num;" json:"new_fans_num" form:"new_fans_num"`
 	NewMemberNum                          uint `gorm:"column:new_member_num;" json:"new_member_num" form:"new_member_num"`

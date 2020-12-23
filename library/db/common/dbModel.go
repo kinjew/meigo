@@ -21,7 +21,7 @@ type BaseModelV1 struct {
 	UpdatedAt uint `gorm:"column:updated_at;" json:"updated_at" form:"updated_at"`    // 更新时间
 }
 
-// BaseModelV1 是数据库的基本结构体
+// BaseModelV2 是数据库的基本结构体
 type BaseModelV2 struct {
 	ID        uint `gorm:"column:id;primary_key;auto_increment;" json:"id" form:"id"`                       // 主键
 	CreatedAt uint `gorm:"column:created_at;" json:"created_at" form:"created_at"`                          // 创建时间
