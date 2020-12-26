@@ -28,6 +28,7 @@ type ActionData struct {
 	MemberId          int    `gorm:"column:member_id;" json:"member_id" form:"member_id"`
 	WxOpenId          string `gorm:"column:wx_open_id;" json:"wx_open_id" form:"wx_open_id"`
 	ClientIp          string `gorm:"column:client_ip;" json:"client_ip" form:"client_ip"`
+	UserIdentityType  int    `gorm:"column:user_identity_type;" json:"user_identity_type" form:"user_identity_type"`
 	FirstVisitBrowser string `gorm:"column:first_visit_browser;" json:"first_visit_browser" form:"first_visit_browser"`
 	FirstVisitClient  int    `gorm:"column:first_visit_client;" json:"first_visit_client" form:"first_visit_client"`
 	//FirstVisitEquipment         string `gorm:"column:first_visit_equipment;" json:"first_visit_equipment" form:"first_visit_equipment"`
@@ -230,6 +231,9 @@ func mapQueryGenerator(params ActionData, mapQuery map[string]interface{}, c *ct
 	}
 	if params.ToolType > 0 {
 		mapQuery["tool_type"] = params.ToolType
+	}
+	if params.UserIdentityType > 0 {
+		mapQuery["user_identity_type"] = params.UserIdentityType
 	}
 	//其他查询参数
 	if params.MemberId > 0 {

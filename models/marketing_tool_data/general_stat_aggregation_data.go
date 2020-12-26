@@ -16,12 +16,22 @@ type GeneralStatAggregationData struct {
 	//WxSystemUserId              int    `gorm:"column:wx_system_user_id;" json:"wx_system_user_id" form:"wx_system_user_id" binding:"required"`
 	//ToolId                      int    `gorm:"column:tool_id;" json:"tool_id" form:"tool_id" binding:"required"`
 	//ToolType                    int8   `gorm:"column:tool_type;" json:"tool_type" form:"tool_type" binding:"required"`
-	WxSystemUserId                        uint `gorm:"column:wx_system_user_id;" json:"wx_system_user_id" form:"wx_system_user_id"`
-	ToolId                                uint `gorm:"column:tool_id;" json:"tool_id" form:"tool_id"`
-	ToolType                              int8 `gorm:"column:tool_type;" json:"tool_type" form:"tool_type"`
-	MeetingEndTime                        int8 `gorm:"column:meeting_end_time;" json:"meeting_end_time" form:"meeting_end_time"`
-	VisitTimes                            uint `gorm:"column:visit_times;" json:"visit_times" form:"visit_times"`
-	VisitNum                              uint `gorm:"column:visit_num;" json:"visit_num" form:"visit_num"`
+	WxSystemUserId         uint `gorm:"column:wx_system_user_id;" json:"wx_system_user_id" form:"wx_system_user_id"`
+	ToolId                 uint `gorm:"column:tool_id;" json:"tool_id" form:"tool_id"`
+	ToolType               int8 `gorm:"column:tool_type;" json:"tool_type" form:"tool_type"`
+	MeetingEndTime         int8 `gorm:"column:meeting_end_time;" json:"meeting_end_time" form:"meeting_end_time"`
+	VisitTimes             uint `gorm:"column:visit_times;" json:"visit_times" form:"visit_times"`
+	VisitTimesUnidentified uint `gorm:"column:visit_times_unidentified;" json:"visit_times_unidentified" form:"visit_times_unidentified"`
+	VisitTimesFans         uint `gorm:"column:visit_times_fans;" json:"visit_times_fans" form:"visit_times_fans"`
+	VisitTimesMember       uint `gorm:"column:visit_times_member;" json:"visit_times_member" form:"visit_times_member"`
+	VisitTimesEmployee     uint `gorm:"column:visit_times_employee;" json:"visit_times_employee" form:"visit_times_employee"`
+
+	VisitNum             uint `gorm:"column:visit_num;" json:"visit_num" form:"visit_num"`
+	VisitNumUnidentified uint `gorm:"column:visit_num_unidentified;" json:"visit_num_unidentified" form:"visit_num_unidentified"`
+	VisitNumFans         uint `gorm:"column:visit_num_fans;" json:"visit_num_fans" form:"visit_num_fans"`
+	VisitNumMember       uint `gorm:"column:visit_num_member;" json:"visit_num_member" form:"visit_num_member"`
+	VisitNumEmployee     uint `gorm:"column:visit_num_employee;" json:"visit_num_employee" form:"visit_num_employee"`
+
 	BMeetingOnlineEnrollNum               uint `gorm:"column:b_meeting_online_enroll_num;" json:"b_meeting_online_enroll_num" form:"b_meeting_online_enroll_num"`
 	BMeetingOnlineEnrollApprovePassedNum  uint `gorm:"column:b_meeting_online_enroll_approve_passed_num;" json:"b_meeting_online_enroll_approve_passed_num" form:"b_meeting_online_enroll_approve_passed_num"`
 	BMeetingOfflineEnrollNum              uint `gorm:"column:b_meeting_offline_enroll_num;" json:"b_meeting_offline_enroll_num" form:"b_meeting_offline_enroll_num"`
@@ -29,32 +39,53 @@ type GeneralStatAggregationData struct {
 	AMeetingEnrollNum                     uint `gorm:"column:a_meeting_enroll_num;" json:"a_meeting_enroll_num" form:"a_meeting_enroll_num"`
 	AMeetingEnrollApprovePassedNum        uint `gorm:"column:a_meeting_enroll_approve_passed_num;" json:"a_meeting_enroll_approve_passed_num" form:"a_meeting_enroll_approve_passed_num"`
 	EnrollNum                             uint `gorm:"column:enroll_num;" json:"enroll_num" form:"enroll_num"`
-	EnrollApprovePassedNum                uint `gorm:"column:enroll_approve_passed_num;" json:"enroll_approve_passed_num" form:"enroll_approve_passed_num"`
-	ClickEnterLiveTimes                   uint `gorm:"column:click_enter_live_times;" json:"click_enter_live_times" form:"click_enter_live_times"`
-	ClickEnterLiveNum                     uint `gorm:"column:click_enter_live_num;" json:"click_enter_live_num" form:"click_enter_live_num"`
-	ClickWatchReplayTimes                 uint `gorm:"column:click_watch_replay_times;" json:"click_watch_replay_times" form:"click_watch_replay_times"`
-	ClickWatchReplayNum                   uint `gorm:"column:click_watch_replay_num;" json:"click_watch_replay_num" form:"click_watch_replay_num"`
-	WatchLiveNum                          uint `gorm:"column:watch_live_num;" json:"watch_live_num" form:"watch_live_num"`
-	WatchLiveTimeAverage                  uint `gorm:"column:watch_live_time_average;" json:"watch_live_time_average" form:"watch_live_time_average"`
-	OnlyWatchReplayNum                    uint `gorm:"column:only_watch_replay_num;" json:"only_watch_replay_num" form:"only_watch_replay_num"`
-	OnlyWatchReplayTimeAverage            uint `gorm:"column:only_watch_replay_time_average;" json:"only_watch_replay_time_average" form:"only_watch_replay_time_average"`
-	DownloadTimes                         uint `gorm:"column:download_times;" json:"download_times" form:"download_times"`
-	DownloadNum                           uint `gorm:"column:download_num;" json:"download_num" form:"download_num"`
-	ShareTimes                            uint `gorm:"column:share_times;" json:"share_times" form:"share_times"`
-	ShareNum                              uint `gorm:"column:share_num;" json:"share_num" form:"share_num"`
-	FavoriteTimes                         uint `gorm:"column:favorite_times;" json:"favorite_times" form:"favorite_times"`
-	FavoriteNum                           uint `gorm:"column:favorite_num;" json:"favorite_num" form:"favorite_num"`
-	ViewMaterialTimes                     uint `gorm:"column:view_material_times;" json:"view_material_times" form:"view_material_times"`
-	ViewMaterialNum                       uint `gorm:"column:view_material_num;" json:"view_material_num" form:"view_material_num"`
-	NewFansNum                            uint `gorm:"column:new_fans_num;" json:"new_fans_num" form:"new_fans_num"`
-	NewMemberNum                          uint `gorm:"column:new_member_num;" json:"new_member_num" form:"new_member_num"`
-	SignNum                               uint `gorm:"column:sign_num;" json:"sign_num" form:"sign_num"`
-	JoinNum                               uint `gorm:"column:join_num;" json:"join_num" form:"join_num"`
-	JoinRate                              uint `gorm:"column:join_rate;" json:"join_rate" form:"join_rate"`
-	TransferToLeadsNum                    uint `gorm:"column:transfer_to_leads_num;" json:"transfer_to_leads_num" form:"transfer_to_leads_num"`
-	TransferToLeadsRate                   uint `gorm:"column:transfer_to_leads_rate;" json:"transfer_to_leads_rate" form:"transfer_to_leads_rate"`
-	AcceptAsLeadsNum                      uint `gorm:"column:accept_as_leads_num;" json:"accept_as_leads_num" form:"accept_as_leads_num"`
-	AcceptAsLeadsRate                     uint `gorm:"column:accept_as_leads_rate;" json:"accept_as_leads_rate" form:"accept_as_leads_rate"`
+	EnrollNumUnidentified                 uint `gorm:"column:enroll_num_unidentified;" json:"enroll_num_unidentified" form:"enroll_num_unidentified"`
+	EnrollNumFans                         uint `gorm:"column:enroll_num_fans;" json:"enroll_num_fans" form:"enroll_num_fans"`
+	EnrollNumMember                       uint `gorm:"column:enroll_num_member;" json:"enroll_num_member" form:"enroll_num_member"`
+	EnrollNumEmployee                     uint `gorm:"column:enroll_num_employee;" json:"enroll_num_employee" form:"enroll_num_employee"`
+
+	EnrollApprovePassedNum     uint `gorm:"column:enroll_approve_passed_num;" json:"enroll_approve_passed_num" form:"enroll_approve_passed_num"`
+	ClickEnterLiveTimes        uint `gorm:"column:click_enter_live_times;" json:"click_enter_live_times" form:"click_enter_live_times"`
+	ClickEnterLiveNum          uint `gorm:"column:click_enter_live_num;" json:"click_enter_live_num" form:"click_enter_live_num"`
+	ClickWatchReplayTimes      uint `gorm:"column:click_watch_replay_times;" json:"click_watch_replay_times" form:"click_watch_replay_times"`
+	ClickWatchReplayNum        uint `gorm:"column:click_watch_replay_num;" json:"click_watch_replay_num" form:"click_watch_replay_num"`
+	WatchLiveNum               uint `gorm:"column:watch_live_num;" json:"watch_live_num" form:"watch_live_num"`
+	WatchLiveTimeAverage       uint `gorm:"column:watch_live_time_average;" json:"watch_live_time_average" form:"watch_live_time_average"`
+	OnlyWatchReplayNum         uint `gorm:"column:only_watch_replay_num;" json:"only_watch_replay_num" form:"only_watch_replay_num"`
+	OnlyWatchReplayTimeAverage uint `gorm:"column:only_watch_replay_time_average;" json:"only_watch_replay_time_average" form:"only_watch_replay_time_average"`
+	DownloadTimes              uint `gorm:"column:download_times;" json:"download_times" form:"download_times"`
+	DownloadNum                uint `gorm:"column:download_num;" json:"download_num" form:"download_num"`
+	ShareTimes                 uint `gorm:"column:share_times;" json:"share_times" form:"share_times"`
+	ShareTimesUnidentified     uint `gorm:"column:share_times_unidentified;" json:"share_times_unidentified" form:"share_times_unidentified"`
+	ShareTimesFans             uint `gorm:"column:share_times_fans;" json:"share_times_fans" form:"share_times_fans"`
+	ShareTimesMember           uint `gorm:"column:share_times_member;" json:"share_times_member" form:"share_times_member"`
+	ShareTimesEmployee         uint `gorm:"column:share_times_employee;" json:"share_times_employee" form:"share_times_employee"`
+
+	ShareNum             uint `gorm:"column:share_num;" json:"share_num" form:"share_num"`
+	ShareNumUnidentified uint `gorm:"column:share_num_unidentified;" json:"share_num_unidentified" form:"share_num_unidentified"`
+	ShareNumFans         uint `gorm:"column:share_num_fans;" json:"share_num_fans" form:"share_num_fans"`
+	ShareNumMember       uint `gorm:"column:share_num_member;" json:"share_num_member" form:"share_num_member"`
+	ShareNumEmployee     uint `gorm:"column:share_num_employee;" json:"share_num_employee" form:"share_num_employee"`
+
+	FavoriteTimes         uint `gorm:"column:favorite_times;" json:"favorite_times" form:"favorite_times"`
+	FavoriteTimesMember   uint `gorm:"column:favorite_times_member;" json:"favorite_times_member" form:"favorite_times_member"`
+	FavoriteTimesEmployee uint `gorm:"column:favorite_times_employee;" json:"favorite_times_employee" form:"favorite_times_employee"`
+
+	FavoriteNum         uint `gorm:"column:favorite_num;" json:"favorite_num" form:"favorite_num"`
+	FavoriteNumMember   uint `gorm:"column:favorite_num_member;" json:"favorite_num_member" form:"favorite_num_member"`
+	FavoriteNumEmployee uint `gorm:"column:favorite_num_employee;" json:"favorite_num_employee" form:"favorite_num_employee"`
+
+	ViewMaterialTimes uint `gorm:"column:view_material_times;" json:"view_material_times" form:"view_material_times"`
+	ViewMaterialNum   uint `gorm:"column:view_material_num;" json:"view_material_num" form:"view_material_num"`
+	NewFansNum        uint `gorm:"column:new_fans_num;" json:"new_fans_num" form:"new_fans_num"`
+	NewMemberNum      uint `gorm:"column:new_member_num;" json:"new_member_num" form:"new_member_num"`
+	SignNum           uint `gorm:"column:sign_num;" json:"sign_num" form:"sign_num"`
+	//JoinNum                               uint `gorm:"column:join_num;" json:"join_num" form:"join_num"`
+	JoinRate            uint `gorm:"column:join_rate;" json:"join_rate" form:"join_rate"`
+	TransferToLeadsNum  uint `gorm:"column:transfer_to_leads_num;" json:"transfer_to_leads_num" form:"transfer_to_leads_num"`
+	TransferToLeadsRate uint `gorm:"column:transfer_to_leads_rate;" json:"transfer_to_leads_rate" form:"transfer_to_leads_rate"`
+	AcceptAsLeadsNum    uint `gorm:"column:accept_as_leads_num;" json:"accept_as_leads_num" form:"accept_as_leads_num"`
+	AcceptAsLeadsRate   uint `gorm:"column:accept_as_leads_rate;" json:"accept_as_leads_rate" form:"accept_as_leads_rate"`
 }
 
 /*
