@@ -82,12 +82,11 @@ type ActionLiveData struct {
 	ReplayWatchTimes      int    `gorm:"column:replay_watch_times;" json:"replay_watch_times" form:"replay_watch_times"`
 	LastReplayWatchClient string `gorm:"column:last_replay_watch_client;" json:"last_replay_watch_client" form:"last_replay_watch_client"`
 	LastReplayLoginCity   string `gorm:"column:last_replay_login_city;" json:"last_replay_login_city" form:"last_replay_login_city"`
-	TotalWatchTime        int    `gorm:"column:total_watch_time;" json:"total_watch_time" form:"total_watch_time"`
 }
 
 //ActionLiveData 实体表需要返回的有限字段
 var ActionLiveDataColumn = "action_data_id,live_platform_type,is_watch_live,is_watch_replay,last_live_watch_client,last_live_leave_time,last_live_login_city,live_watch_time," +
-	"live_watch_times,first_live_enter_time,first_replay_enter_time,replay_watch_time,replay_watch_times,last_replay_watch_client,last_replay_login_city,total_watch_time"
+	"live_watch_times,first_live_enter_time,first_replay_enter_time,replay_watch_time,replay_watch_times,last_replay_watch_client,last_replay_login_city"
 
 /*
 var operatorTypeOneMap = []string{"=", ">", ">=", "<", "<=", "<>"}
@@ -572,12 +571,6 @@ func joinQueryGenerator(params ActionData, liveTableSegmentation string, c *ctxE
 		//fmt.Println("LastLiveLoginCity: ", LastLiveLoginCity)
 		tx = tx.Where(liveTableSegmentation+".last_replay_login_city LIKE ?", "%"+LastReplayLoginCity+"%")
 	}
-	/*
-		TotalWatchTimeOperator := c.Query("total_watch_time_operator")
-		if params.TotalWatchTime >= 0 && TotalWatchTimeOperator != "" && isPermittedExpression(TotalWatchTimeOperator, operatorTypeOneMap) {
-			tx = tx.Where(liveTableSegmentation+".total_watch_time "+TotalWatchTimeOperator+"  ?", params.TotalWatchTime)
-		}
-	*/
 	return tx
 }
 
@@ -656,13 +649,6 @@ func joinOperatorQueryGenerator(params ActionData, liveTableSegmentation string,
 		}
 	}
 
-	TotalWatchTimeOperator := c.Query("total_watch_time_operator")
-	if TotalWatchTimeOperator != "" {
-		tx, err = operatorQueryAbstract(tx, c, liveTableSegmentation+".total_watch_time", TotalWatchTimeOperator, params.TotalWatchTime)
-		if err != nil {
-			return tx, err
-		}
-	}
 	return tx, err
 }
 

@@ -160,27 +160,24 @@ func gstMapQueryGenerator(params GeneralStatData, mapQuery map[string]interface{
 	if params.ToolType > 0 {
 		mapQuery["tool_type"] = params.ToolType
 	}
-	//其他查询参数
-	if params.DateTime != "" {
-		mapQuery["date_time"] = params.DateTime
-	}
+	/*
+		if params.DateTime != "" {
+			mapQuery["date_time"] = params.DateTime
+		}
+	*/
 	return mapQuery
 }
 
 //gstOperatorQueryGenerator构造基于操作符的查询
 func gstOperatorQueryGenerator(params GeneralStatData, tx *gorm.DB, c *ctxExt.Context) (txNew *gorm.DB, err error) {
-	/*
-		var ViewMaterialTimes = 0
-		if params.ViewMaterialTimes != nil {
-			ViewMaterialTimes = *params.ViewMaterialTimes
+
+	DateTimeOperator := c.Query("date_time_operator")
+	if DateTimeOperator != "" {
+		tx, err = operatorQueryAbstract(tx, c, "date_time", DateTimeOperator, params.DateTime)
+		if err != nil {
+			return tx, err
 		}
-		ViewMaterialTimesOperator := c.Query("view_material_times_operator")
-		if ViewMaterialTimesOperator != "" {
-			tx, err = operatorQueryAbstract(tx, c, "view_material_times", ViewMaterialTimesOperator, ViewMaterialTimes)
-			if err != nil {
-				return tx, err
-			}
-		}
-	*/
+	}
+
 	return tx, err
 }
