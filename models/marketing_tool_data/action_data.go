@@ -32,24 +32,24 @@ type ActionData struct {
 	FirstVisitBrowser string `gorm:"column:first_visit_browser;" json:"first_visit_browser" form:"first_visit_browser"`
 	FirstVisitClient  int    `gorm:"column:first_visit_client;" json:"first_visit_client" form:"first_visit_client"`
 	//FirstVisitEquipment         string `gorm:"column:first_visit_equipment;" json:"first_visit_equipment" form:"first_visit_equipment"`
-	FirstVisitChannelId          int    `gorm:"column:first_visit_channel_id;" json:"first_visit_channel_id" form:"first_visit_channel_id"`
-	FollowChannelId              int    `gorm:"column:follow_channel_id;" json:"follow_channel_id" form:"follow_channel_id"`
-	EnrollChannelId              int    `gorm:"column:enroll_channel_id;" json:"enroll_channel_id" form:"enroll_channel_id"`
-	WxFollowInviterId            int    `gorm:"column:wx_follow_inviter_id;" json:"wx_follow_inviter_id" form:"wx_follow_inviter_id"`
-	MeetingEnrollInviterId       int    `gorm:"column:meeting_enroll_inviter_id;" json:"meeting_enroll_inviter_id" form:"meeting_enroll_inviter_id"`
-	IsEnroll                     *int   `gorm:"column:is_enroll;" json:"is_enroll" form:"is_enroll"`
-	EnrollType                   int    `gorm:"column:enroll_type;" json:"enroll_type" form:"enroll_type"`
-	EnrollWay                    int    `gorm:"column:enroll_way;" json:"enroll_way" form:"enroll_way"`
-	EnrollTime                   int    `gorm:"column:enroll_time;" json:"enroll_time" form:"enroll_time"`
-	EnrollMeetingStatus          int    `gorm:"column:enroll_meeting_status;" json:"enroll_meeting_status" form:"enroll_meeting_status"`
-	EnrollApproveStatus          int    `gorm:"column:enroll_approve_status;" json:"enroll_approve_status" form:"enroll_approve_status"`
-	IsSign                       *int   `gorm:"column:is_sign;" json:"is_sign" form:"is_sign"`
-	IsNewFans                    *int   `gorm:"column:is_new_fans;" json:"is_new_fans" form:"is_new_fans"`
-	IsNewMember                  *int   `gorm:"column:is_new_member;" json:"is_new_member" form:"is_new_member"`
-	PosterInviteFollowNum        *int   `gorm:"column:poster_invite_follow_num;" json:"poster_invite_follow_num" form:"poster_invite_follow_num"`
-	PayMoney                     *int   `gorm:"column:pay_money;" json:"pay_money" form:"pay_money"`
-	IsWatchLive                  *int   `gorm:"column:is_watch_live;" json:"is_watch_live" form:"is_watch_live"`
-	IsWatchReplay                *int   `gorm:"column:is_watch_replay;" json:"is_watch_replay" form:"is_watch_replay"`
+	FirstVisitChannelId    int  `gorm:"column:first_visit_channel_id;" json:"first_visit_channel_id" form:"first_visit_channel_id"`
+	FollowChannelId        int  `gorm:"column:follow_channel_id;" json:"follow_channel_id" form:"follow_channel_id"`
+	EnrollChannelId        int  `gorm:"column:enroll_channel_id;" json:"enroll_channel_id" form:"enroll_channel_id"`
+	WxFollowInviterId      int  `gorm:"column:wx_follow_inviter_id;" json:"wx_follow_inviter_id" form:"wx_follow_inviter_id"`
+	MeetingEnrollInviterId int  `gorm:"column:meeting_enroll_inviter_id;" json:"meeting_enroll_inviter_id" form:"meeting_enroll_inviter_id"`
+	IsEnroll               *int `gorm:"column:is_enroll;" json:"is_enroll" form:"is_enroll"`
+	EnrollType             int  `gorm:"column:enroll_type;" json:"enroll_type" form:"enroll_type"`
+	EnrollWay              int  `gorm:"column:enroll_way;" json:"enroll_way" form:"enroll_way"`
+	EnrollTime             int  `gorm:"column:enroll_time;" json:"enroll_time" form:"enroll_time"`
+	EnrollMeetingStatus    int  `gorm:"column:enroll_meeting_status;" json:"enroll_meeting_status" form:"enroll_meeting_status"`
+	EnrollApproveStatus    int  `gorm:"column:enroll_approve_status;" json:"enroll_approve_status" form:"enroll_approve_status"`
+	IsSign                 *int `gorm:"column:is_sign;" json:"is_sign" form:"is_sign"`
+	IsNewFans              *int `gorm:"column:is_new_fans;" json:"is_new_fans" form:"is_new_fans"`
+	IsNewMember            *int `gorm:"column:is_new_member;" json:"is_new_member" form:"is_new_member"`
+	PosterInviteFollowNum  *int `gorm:"column:poster_invite_follow_num;" json:"poster_invite_follow_num" form:"poster_invite_follow_num"`
+	PayMoney               *int `gorm:"column:pay_money;" json:"pay_money" form:"pay_money"`
+	//IsWatchLive                  *int   `gorm:"column:is_watch_live;" json:"is_watch_live" form:"is_watch_live"`
+	//IsWatchReplay                *int   `gorm:"column:is_watch_replay;" json:"is_watch_replay" form:"is_watch_replay"`
 	VisitTimes                   *int   `gorm:"column:visit_times;" json:"visit_times" form:"visit_times"`
 	DownloadTimes                *int   `gorm:"column:download_times;" json:"download_times" form:"download_times"`
 	ShareTimes                   *int   `gorm:"column:share_times;" json:"share_times" form:"share_times"`
@@ -69,6 +69,8 @@ type ActionData struct {
 type ActionLiveData struct {
 	ActionDataId          int    `gorm:"column:action_data_id;" json:"action_data_id" form:"action_data_id"`
 	LivePlatformType      int    `gorm:"column:live_platform_type;" json:"live_platform_type" form:"live_platform_type"`
+	IsWatchLive           int    `gorm:"column:is_watch_live;" json:"is_watch_live" form:"is_watch_live"`
+	IsWatchReplay         int    `gorm:"column:is_watch_replay;" json:"is_watch_replay" form:"is_watch_replay"`
 	LastLiveWatchClient   string `gorm:"column:last_live_watch_client;" json:"last_live_watch_client" form:"last_live_watch_client"`
 	LastLiveLeaveTime     int    `gorm:"column:last_live_leave_time;" json:"last_live_leave_time" form:"last_live_leave_time"`
 	LastLiveLoginCity     string `gorm:"column:last_live_login_city;" json:"last_live_login_city" form:"last_live_login_city"`
@@ -84,7 +86,7 @@ type ActionLiveData struct {
 }
 
 //ActionLiveData 实体表需要返回的有限字段
-var ActionLiveDataColumn = "action_data_id,live_platform_type,last_live_watch_client,last_live_leave_time,last_live_login_city,live_watch_time," +
+var ActionLiveDataColumn = "action_data_id,live_platform_type,is_watch_live,is_watch_replay,last_live_watch_client,last_live_leave_time,last_live_login_city,live_watch_time," +
 	"live_watch_times,first_live_enter_time,first_replay_enter_time,replay_watch_time,replay_watch_times,last_replay_watch_client,last_replay_login_city,total_watch_time"
 
 /*
@@ -202,7 +204,7 @@ func (ad *ActionData) QueryByParams(c *ctxExt.Context) (list []ActionData, suppl
 
 	//排序处理
 	orderBy = c.DefaultQuery("orderBy", orderBy)
-
+	fmt.Println("orderBy", orderBy)
 	//err = tx.Select("*").Scan(&list).Error
 	//err = tx.Select("*").Order(orderBy).Offset(offSet).Limit(pageSizeInt).Scan(&list).Error
 	err = tx.Select(tableSegmentation + ".*, " + ActionLiveDataColumn).Order(orderBy).Offset(offSet).Limit(pageSizeInt).Scan(&list).Error
@@ -309,16 +311,6 @@ func mapQueryGenerator(params ActionData, mapQuery map[string]interface{}, c *ct
 	IsNewMember := c.Query("is_new_member")
 	if params.IsNewMember != nil && *params.IsNewMember >= 0 && IsNewMember != "" {
 		mapQuery["is_new_member"] = *params.IsNewMember
-	}
-	//验证是否有参数is_watch_live请求进来
-	IsWatchLive := c.Query("is_watch_live")
-	if params.IsWatchLive != nil && *params.IsWatchLive >= 0 && IsWatchLive != "" {
-		mapQuery["is_watch_live"] = *params.IsWatchLive
-	}
-	//验证是否有参数is_watch_replay请求进来
-	IsWatchReplay := c.Query("is_watch_replay")
-	if params.IsWatchReplay != nil && *params.IsWatchReplay >= 0 && IsWatchReplay != "" {
-		mapQuery["is_watch_replay"] = *params.IsWatchReplay
 	}
 	if params.SeatNumber != "" {
 		mapQuery["seat_number"] = params.SeatNumber
@@ -515,6 +507,14 @@ func joinQueryGenerator(params ActionData, liveTableSegmentation string, c *ctxE
 	if LivePlatformType != "" {
 		tx = tx.Where(liveTableSegmentation+".live_platform_type = ?", LivePlatformType)
 	}
+	IsWatchLive := c.Query("is_watch_live")
+	if IsWatchLive != "" {
+		tx = tx.Where(liveTableSegmentation+".is_watch_live = ?", IsWatchLive)
+	}
+	IsWatchReplay := c.Query("is_watch_replay")
+	if IsWatchReplay != "" {
+		tx = tx.Where(liveTableSegmentation+".is_watch_replay = ?", IsWatchReplay)
+	}
 	LastLiveWatchClient := c.Query("last_live_watch_client")
 	if LastLiveWatchClient != "" {
 		//fmt.Println("LastLiveLoginCity: ", LastLiveLoginCity)
@@ -527,6 +527,10 @@ func joinQueryGenerator(params ActionData, liveTableSegmentation string, c *ctxE
 			tx = tx.Where(liveTableSegmentation+".last_live_leave_time "+LastLiveLeaveTimeOperator+"  ?", params.LastLiveLeaveTime)
 		}
 	*/
+	LastLiveLeaveTime := c.Query("last_live_leave_time")
+	if LastLiveLeaveTime != "" {
+		tx = tx.Where(liveTableSegmentation+".last_live_leave_time = ?", LastLiveLeaveTime)
+	}
 	LastLiveLoginCity := c.Query("last_live_login_city")
 	if LastLiveLoginCity != "" {
 		//fmt.Println("LastLiveLoginCity: ", LastLiveLoginCity)

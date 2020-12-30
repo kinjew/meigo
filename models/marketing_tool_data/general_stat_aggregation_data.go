@@ -48,12 +48,17 @@ type GeneralStatAggregationData struct {
 	EnrollApprovePassedNum    uint `gorm:"column:enroll_approve_passed_num;" json:"enroll_approve_passed_num" form:"enroll_approve_passed_num"`
 	EnrollApproveNotPassedNum uint `gorm:"column:enroll_approve_not_passed_num;" json:"enroll_approve_not_passed_num" form:"enroll_approve_not_passed_num"`
 
-	ClickEnterLiveTimes        uint `gorm:"column:click_enter_live_times;" json:"click_enter_live_times" form:"click_enter_live_times"`
-	ClickEnterLiveNum          uint `gorm:"column:click_enter_live_num;" json:"click_enter_live_num" form:"click_enter_live_num"`
-	ClickWatchReplayTimes      uint `gorm:"column:click_watch_replay_times;" json:"click_watch_replay_times" form:"click_watch_replay_times"`
-	ClickWatchReplayNum        uint `gorm:"column:click_watch_replay_num;" json:"click_watch_replay_num" form:"click_watch_replay_num"`
+	ClickEnterLiveTimes   uint `gorm:"column:click_enter_live_times;" json:"click_enter_live_times" form:"click_enter_live_times"`
+	ClickEnterLiveNum     uint `gorm:"column:click_enter_live_num;" json:"click_enter_live_num" form:"click_enter_live_num"`
+	ClickWatchReplayTimes uint `gorm:"column:click_watch_replay_times;" json:"click_watch_replay_times" form:"click_watch_replay_times"`
+	ClickWatchReplayNum   uint `gorm:"column:click_watch_replay_num;" json:"click_watch_replay_num" form:"click_watch_replay_num"`
+
+	WatchLiveTime              uint `gorm:"column:watch_live_time;" json:"watch_live_time" form:"watch_live_time"`
+	WatchLiveTimes             uint `gorm:"column:watch_live_times;" json:"watch_live_times" form:"watch_live_times"`
 	WatchLiveNum               uint `gorm:"column:watch_live_num;" json:"watch_live_num" form:"watch_live_num"`
 	WatchLiveTimeAverage       uint `gorm:"column:watch_live_time_average;" json:"watch_live_time_average" form:"watch_live_time_average"`
+	OnlyWatchReplayTime        uint `gorm:"column:only_watch_replay_time;" json:"only_watch_replay_time" form:"only_watch_replay_time"`
+	OnlyWatchReplayTimes       uint `gorm:"column:only_watch_replay_times;" json:"only_watch_replay_times" form:"only_watch_replay_times"`
 	OnlyWatchReplayNum         uint `gorm:"column:only_watch_replay_num;" json:"only_watch_replay_num" form:"only_watch_replay_num"`
 	OnlyWatchReplayTimeAverage uint `gorm:"column:only_watch_replay_time_average;" json:"only_watch_replay_time_average" form:"only_watch_replay_time_average"`
 	DownloadTimes              uint `gorm:"column:download_times;" json:"download_times" form:"download_times"`
@@ -80,7 +85,9 @@ type GeneralStatAggregationData struct {
 
 	ViewMaterialTimes uint `gorm:"column:view_material_times;" json:"view_material_times" form:"view_material_times"`
 	ViewMaterialNum   uint `gorm:"column:view_material_num;" json:"view_material_num" form:"view_material_num"`
+	OldFansNum        uint `gorm:"column:old_fans_num;" json:"old_fans_num" form:"old_fans_num"`
 	NewFansNum        uint `gorm:"column:new_fans_num;" json:"new_fans_num" form:"new_fans_num"`
+	OldMemberNum      uint `gorm:"column:old_member_num;" json:"old_member_num" form:"old_member_num"`
 	NewMemberNum      uint `gorm:"column:new_member_num;" json:"new_member_num" form:"new_member_num"`
 	SignNum           uint `gorm:"column:sign_num;" json:"sign_num" form:"sign_num"`
 	//JoinNum                               uint `gorm:"column:join_num;" json:"join_num" form:"join_num"`
