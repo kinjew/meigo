@@ -38,13 +38,16 @@ type GeneralStatAggregationData struct {
 	BMeetingOfflineEnrollApprovePassedNum uint `gorm:"column:b_meeting_offline_enroll_approve_passed_num;" json:"b_meeting_offline_enroll_approve_passed_num" form:"b_meeting_offline_enroll_approve_passed_num"`
 	AMeetingEnrollNum                     uint `gorm:"column:a_meeting_enroll_num;" json:"a_meeting_enroll_num" form:"a_meeting_enroll_num"`
 	AMeetingEnrollApprovePassedNum        uint `gorm:"column:a_meeting_enroll_approve_passed_num;" json:"a_meeting_enroll_approve_passed_num" form:"a_meeting_enroll_approve_passed_num"`
+	GenerateFissionNum                    uint `gorm:"column:generate_fission_num;" json:"generate_fission_num" form:"generate_fission_num"`
 	EnrollNum                             uint `gorm:"column:enroll_num;" json:"enroll_num" form:"enroll_num"`
 	EnrollNumUnidentified                 uint `gorm:"column:enroll_num_unidentified;" json:"enroll_num_unidentified" form:"enroll_num_unidentified"`
 	EnrollNumFans                         uint `gorm:"column:enroll_num_fans;" json:"enroll_num_fans" form:"enroll_num_fans"`
 	EnrollNumMember                       uint `gorm:"column:enroll_num_member;" json:"enroll_num_member" form:"enroll_num_member"`
 	EnrollNumEmployee                     uint `gorm:"column:enroll_num_employee;" json:"enroll_num_employee" form:"enroll_num_employee"`
 
-	EnrollApprovePassedNum     uint `gorm:"column:enroll_approve_passed_num;" json:"enroll_approve_passed_num" form:"enroll_approve_passed_num"`
+	EnrollApprovePassedNum    uint `gorm:"column:enroll_approve_passed_num;" json:"enroll_approve_passed_num" form:"enroll_approve_passed_num"`
+	EnrollApproveNotPassedNum uint `gorm:"column:enroll_approve_not_passed_num;" json:"enroll_approve_not_passed_num" form:"enroll_approve_not_passed_num"`
+
 	ClickEnterLiveTimes        uint `gorm:"column:click_enter_live_times;" json:"click_enter_live_times" form:"click_enter_live_times"`
 	ClickEnterLiveNum          uint `gorm:"column:click_enter_live_num;" json:"click_enter_live_num" form:"click_enter_live_num"`
 	ClickWatchReplayTimes      uint `gorm:"column:click_watch_replay_times;" json:"click_watch_replay_times" form:"click_watch_replay_times"`
