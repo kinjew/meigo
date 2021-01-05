@@ -90,6 +90,7 @@ type GeneralStatAggregationData struct {
 	OldMemberNum      uint `gorm:"column:old_member_num;" json:"old_member_num" form:"old_member_num"`
 	NewMemberNum      uint `gorm:"column:new_member_num;" json:"new_member_num" form:"new_member_num"`
 	SignNum           uint `gorm:"column:sign_num;" json:"sign_num" form:"sign_num"`
+	UnsignNum         uint `gorm:"column:unsign_num;" json:"unsign_num" form:"unsign_num"`
 	//JoinNum                               uint `gorm:"column:join_num;" json:"join_num" form:"join_num"`
 	JoinRate            uint `gorm:"column:join_rate;" json:"join_rate" form:"join_rate"`
 	TransferToLeadsNum  uint `gorm:"column:transfer_to_leads_num;" json:"transfer_to_leads_num" form:"transfer_to_leads_num"`

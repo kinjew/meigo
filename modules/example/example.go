@@ -121,12 +121,12 @@ func Redis(c *ctxExt.Context) {
 	})
 	var ctx = context.Background()
 
-	errList := rdb.LPush(ctx, "list-key", "{\"tool_id\":1,\"tool_type\":1,\"main_id\":5618,\"wx_system_user_id\":36,\"member_id\":20010187,\"wx_open_id\":\"ofK1R1gBLvNqt8Uyn7pp4VVghgC4\",\"client_ip\":\"119.57.93.91\",\"data_generation_at\":1607060185,\"user_identity_type\":1,\"type\":\"visit\",\"data\":{\"device_type\":\"mobile\",\"browser_type\":\"wechat\",\"channel_id\":0}}").Err()
+	errList := rdb.LPush(ctx, "data_collection_stat_queue", "{\"tool_id\":1,\"tool_type\":1,\"main_id\":5618,\"wx_system_user_id\":36,\"member_id\":20010187,\"wx_open_id\":\"ofK1R1gBLvNqt8Uyn7pp4VVghgC4\",\"client_ip\":\"119.57.93.91\",\"data_generation_at\":1607060185,\"user_identity_type\":1,\"type\":\"visit\",\"data\":{\"device_type\":\"mobile\",\"browser_type\":\"wechat\",\"channel_id\":0}}").Err()
 	if errList != nil {
 		panic(errList)
 	}
 
-	errList1 := rdb.LPush(ctx, "list-key", "{\"tool_id\":18053,\"tool_type\":1,\"main_id\":5371,\"wx_system_user_id\":36,\"member_id\":20010187,\"wx_open_id\":\"ofK1R1gBLvNqt8Uyn7pp4VVghgC4\",\"client_ip\":\"119.57.93.91\",\"data_generation_at\":1607060185,\"user_identity_type\":1,\"type\":\"visit\",\"data\":{\"device_type\":\"mobile\",\"browser_type\":\"wechat\",\"channel_id\":0}}").Err()
+	errList1 := rdb.LPush(ctx, "data_collection_stat_queue", "{\"tool_id\":18053,\"tool_type\":1,\"main_id\":5371,\"wx_system_user_id\":36,\"member_id\":20010187,\"wx_open_id\":\"ofK1R1gBLvNqt8Uyn7pp4VVghgC4\",\"client_ip\":\"119.57.93.91\",\"data_generation_at\":1607060185,\"user_identity_type\":1,\"type\":\"visit\",\"data\":{\"device_type\":\"mobile\",\"browser_type\":\"wechat\",\"channel_id\":0}}").Err()
 	if errList1 != nil {
 		panic(errList)
 	}

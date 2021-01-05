@@ -38,9 +38,9 @@ type GeneralStatData struct {
 	FavoriteNum           uint `gorm:"column:favorite_num;" json:"favorite_num" form:"favorite_num"`
 	ViewMaterialTimes     uint `gorm:"column:view_material_times;" json:"view_material_times" form:"view_material_times"`
 	ViewMaterialNum       uint `gorm:"column:view_material_num;" json:"view_material_num" form:"view_material_num"`
+	NewFansNum            uint `gorm:"column:new_fans_num;" json:"new_fans_num" form:"new_fans_num"`
+	NewMemberNum          uint `gorm:"column:new_member_num;" json:"new_member_num" form:"new_member_num"`
 	/*
-		NewFansNum             uint   `gorm:"column:new_fans_num;" json:"new_fans_num" form:"new_fans_num"`
-		NewMemberNum           uint   `gorm:"column:new_member_num;" json:"new_member_num" form:"new_member_num"`
 		SignNum                uint   `gorm:"column:sign_num;" json:"sign_num" form:"sign_num"`
 		JoinNum                uint   `gorm:"column:join_num;" json:"join_num" form:"join_num"`
 		JoinRate               uint   `gorm:"column:join_rate;" json:"join_rate" form:"join_rate"`

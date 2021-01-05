@@ -9,10 +9,16 @@ import (
 	"io/ioutil"
 	mgInit "meigo/library/init"
 	"meigo/library/log"
+	"meigo/library/rateLimit"
 	"net/http"
+	_ "net/http/pprof"
 	"os"
 	"path/filepath"
 	"time"
+
+	_ "github.com/mkevac/debugcharts"
+
+	"github.com/prometheus/client_golang/prometheus/promhttp"
 
 	"github.com/spf13/viper"
 
@@ -86,17 +92,37 @@ func main() {
 	// 配置读取加载
 	mgInit.ConfInit(ExeDir)
 
+	//限速设置
+	var lr rateLimit.LimitRate
+	lr.SetRate(viper.GetInt("const.rateLimiter"))
+
+	//监控
+	//https://www.cnblogs.com/52fhy/p/11828448.html
+	go func() {
+		//提供给负载均衡探活
+		http.HandleFunc("/", func(w http.ResponseWriter, r *http.Request) {
+			w.Write([]byte("ok"))
+
+		})
+
+		//prometheus
+		http.Handle("/metrics", promhttp.Handler())
+
+		//pprof, go tool pprof -http=:8081 http://$host:$port/debug/pprof/heap
+		http.ListenAndServe(":10109", nil)
+	}()
+
 	//初始化channel
-	ch0 = make(chan string)
-	ch1 = make(chan string)
-	ch2 = make(chan string)
-	ch3 = make(chan string)
-	ch4 = make(chan string)
-	ch5 = make(chan string)
-	ch6 = make(chan string)
-	ch7 = make(chan string)
-	ch8 = make(chan string)
-	ch9 = make(chan string)
+	ch0 = make(chan string, 5)
+	ch1 = make(chan string, 5)
+	ch2 = make(chan string, 5)
+	ch3 = make(chan string, 5)
+	ch4 = make(chan string, 5)
+	ch5 = make(chan string, 5)
+	ch6 = make(chan string, 5)
+	ch7 = make(chan string, 5)
+	ch8 = make(chan string, 5)
+	ch9 = make(chan string, 5)
 	//chN = make(chan string)
 	/*
 		ch0 = make(chan string, 5)
@@ -121,34 +147,36 @@ func main() {
 	})
 	var ctx = context.Background()
 
+	//l := rate.NewLimiter(10000, 30000)
+
 	//读取redis数据
-	go readRedis(ctx, rdb)
+	go readRedis(ctx, rdb, lr)
 
 	//阻塞读取channel数据
 	for {
 		select {
 		case val := <-ch0:
-			requestOuterApiOnce(val, ctx, rdb)
+			go requestOuterApiOnce(val, ctx, rdb)
 		case val := <-ch1:
 			//fmt.Println("get ch1: ", val)
-			requestOuterApiOnce(val, ctx, rdb)
+			go requestOuterApiOnce(val, ctx, rdb)
 		case val := <-ch2:
-			requestOuterApiOnce(val, ctx, rdb)
+			go requestOuterApiOnce(val, ctx, rdb)
 		case val := <-ch3:
-			requestOuterApiOnce(val, ctx, rdb)
+			go requestOuterApiOnce(val, ctx, rdb)
 		case val := <-ch4:
-			requestOuterApiOnce(val, ctx, rdb)
+			go requestOuterApiOnce(val, ctx, rdb)
 		case val := <-ch5:
-			requestOuterApiOnce(val, ctx, rdb)
+			go requestOuterApiOnce(val, ctx, rdb)
 		case val := <-ch6:
-			requestOuterApiOnce(val, ctx, rdb)
+			go requestOuterApiOnce(val, ctx, rdb)
 		case val := <-ch7:
-			requestOuterApiOnce(val, ctx, rdb)
+			go requestOuterApiOnce(val, ctx, rdb)
 		case val := <-ch8:
 			//fmt.Println("get ch8: ", val)
-			requestOuterApiOnce(val, ctx, rdb)
+			go requestOuterApiOnce(val, ctx, rdb)
 		case val := <-ch9:
-			requestOuterApiOnce(val, ctx, rdb)
+			go requestOuterApiOnce(val, ctx, rdb)
 			/*
 				case <-time.After(10 * time.Second):
 					fmt.Println("For test env, Time out: ", "100s")
@@ -177,16 +205,36 @@ func main() {
 			close(chN)
 		}()
 	*/
+
 }
 
 //readRedis 读取redis数据，存入channel
-func readRedis(ctx context.Context, rdb *redis.Client) {
-	for i := 1; i > 0; i++ {
-		fmt.Println("i: ", i)
-		log.Info("i:", i)
-		remainderInt, listValueStr := readRedisOnce(ctx, rdb)
+func readRedis(ctx context.Context, rdb *redis.Client, lr rateLimit.LimitRate) {
+	for {
+		var remainderInt = -1
+		var listValueStr = ""
+		/*
+			n := lr.Limit()
+			fmt.Println("nnnn----", n, "----nnnnn")
+		*/
+		/*
+			if l.AllowN(time.Now(), 20000) {
+				remainderInt, listValueStr = readRedisOnce(ctx, rdb)
+			} else {
+				fmt.Println("sleep: ", "500ms")
+				time.Sleep(2 * time.Millisecond)
+			}
+		*/
+		if lr.Limit() {
+			remainderInt, listValueStr = readRedisOnce(ctx, rdb)
+		} else {
+			fmt.Println("sleep: ", "50ms")
+			time.Sleep(50 * time.Millisecond)
+		}
+
 		fmt.Println("remainderInt: ", remainderInt)
 		log.Info("remainderInt:", remainderInt)
+
 		if remainderInt == 0 {
 			//fmt.Println("ch0: ", ch1)
 			ch0 <- listValueStr
@@ -200,11 +248,11 @@ func readRedis(ctx context.Context, rdb *redis.Client) {
 			ch2 <- listValueStr
 		}
 		if remainderInt == 3 {
-			fmt.Println("ch3: ", ch3)
+			//fmt.Println("ch3: ", ch3)
 			ch3 <- listValueStr
 		}
 		if remainderInt == 4 {
-			fmt.Println("ch4: ", ch4)
+			//fmt.Println("ch4: ", ch4)
 			ch4 <- listValueStr
 		}
 		if remainderInt == 5 {
@@ -241,18 +289,20 @@ func readRedis(ctx context.Context, rdb *redis.Client) {
 //go 发起http请求 https://www.cnblogs.com/tigerzhouv587/p/11458772.html
 //go 发起http请求 https://blog.csdn.net/zangdaiyang1991/article/details/107071529/
 func readRedisOnce(ctx context.Context, rdb *redis.Client) (remainder int, listValue string) {
-	listValue, err := rdb.RPop(ctx, "data_collection_stat_queue").Result()
-	fmt.Println("listValue: ", listValue)
-	log.Info("listValue:", listValue)
+	listValue, err := rdb.RPop(ctx, viper.GetString("redis.source_data_queue")).Result()
+	/*
+		fmt.Println("listValue: ", listValue)
+		log.Info("listValue:", listValue)
+	*/
 	if err != nil {
 		//rdb.RPush(ctx, "list-key", listValue)
 		fmt.Println("readRedis-error: ", err)
-		log.Info("readRedis-error:", err)
+		log.Error("readRedis-error:", err)
 		//panic(err)
 	}
 	if listValue == "" {
 		remainder = -1
-		time.Sleep(3 * time.Second)
+		//time.Sleep(1 * time.Second)
 		return
 	}
 	//json解析
@@ -265,14 +315,14 @@ func readRedisOnce(ctx context.Context, rdb *redis.Client) (remainder int, listV
 	//求余数
 	remainder = sourceDataObj.MainId % 10
 	fmt.Println("readRedisData: ", remainder, sourceDataObj)
-	log.Error("readRedisData: ", remainder, sourceDataObj)
+	//log.Info("readRedisData: ", remainder, sourceDataObj)
 	return
 }
 
 //requestOuterApiOnce  请求外部API
 func requestOuterApiOnce(sourceDataJson string, ctx context.Context, rdb *redis.Client) {
 	fmt.Println("requestOuterApiStart: ", "start")
-	log.Error("requestOuterApiStart: ", "start")
+	//log.Error("requestOuterApiStart: ", "start")
 	//获取配置数据
 	sourceDataProcessUrl := viper.GetString("const.sourceDataProcessUrl")
 	url := sourceDataProcessUrl + "?source_data=" + sourceDataJson
@@ -282,13 +332,30 @@ func requestOuterApiOnce(sourceDataJson string, ctx context.Context, rdb *redis.
 		fmt.Println("requestOuterApiUrl: ", url)
 
 	*/
-	//发起get请求
-	resp, err := http.Get(url)
-	//请求失败返回队列
-	if err != nil || resp.StatusCode != 200 {
-		fmt.Println("RPush list-key: ", sourceDataJson)
-		rdb.RPush(ctx, "list-key", sourceDataJson)
+	//定义resp
+	var resp *http.Response
+	var err error
+	for tryNum := 0; tryNum < 3; tryNum++ {
+		//发起get请求
+		client := &http.Client{Timeout: 3 * time.Second}
+		resp, err = client.Get(url)
+		//请求失败放回错误队列
+		fmt.Println("Response: ", resp.StatusCode, sourceDataJson, resp.Body)
+
+		if (err != nil || resp.StatusCode != 200) && tryNum < 2 {
+			continue
+		} else if (err != nil || resp.StatusCode != 200) && tryNum == 2 {
+			//如果不是重跑错误队列，则加入错入队列
+			if viper.GetString("redis.source_data_queue") != viper.GetString("redis.source_data_error_queue") {
+				fmt.Println("LPush list-key: ", sourceDataJson)
+				log.Info("LPush: "+viper.GetString("redis.source_data_error_queue"), sourceDataJson)
+				rdb.LPush(ctx, viper.GetString("redis.source_data_error_queue"), sourceDataJson)
+			}
+		} else {
+			break
+		}
 	}
+	//fmt.Println("Response22: ", resp.StatusCode, sourceDataJson, resp.Body)
 	//defer resp.Body.Close()
 	if resp != nil {
 		/*
@@ -296,7 +363,7 @@ func requestOuterApiOnce(sourceDataJson string, ctx context.Context, rdb *redis.
 			fmt.Println("responseBody: ", string(body))
 		*/
 		fmt.Println("requestOuterApiEnd: ", resp.StatusCode, sourceDataJson, resp.Body)
-		log.Error("requestOuterApiEnd: ", resp.StatusCode, sourceDataJson, resp.Body)
+		//log.Info("requestOuterApiEnd: ", resp.StatusCode, sourceDataJson, resp.Body)
 		resp.Body.Close()
 	} else {
 		return
