@@ -53,7 +53,7 @@ type ActionData struct {
 	VisitTimes                   *int   `gorm:"column:visit_times;" json:"visit_times" form:"visit_times"`
 	DownloadTimes                *int   `gorm:"column:download_times;" json:"download_times" form:"download_times"`
 	ShareTimes                   *int   `gorm:"column:share_times;" json:"share_times" form:"share_times"`
-	FavoriteTimes                *int   `gorm:"column:favorite_times;" json:"favorite_times" form:"favorite_times"`
+	IsFavorite                   *int   `gorm:"column:is_favorite;" json:"is_favorite" form:"is_favorite"`
 	ViewMaterialTimes            *int   `gorm:"column:view_material_times;" json:"view_material_times" form:"view_material_times"`
 	SeatNumber                   string `gorm:"column:seat_number;" json:"seat_number" form:"seat_number"`
 	IsClickEnrollButton          *int   `gorm:"column:is_click_enroll_button;" json:"is_click_enroll_button" form:"is_click_enroll_button"`
@@ -311,6 +311,12 @@ func mapQueryGenerator(params ActionData, mapQuery map[string]interface{}, c *ct
 	if params.IsNewMember != nil && *params.IsNewMember >= 0 && IsNewMember != "" {
 		mapQuery["is_new_member"] = *params.IsNewMember
 	}
+
+	IsFavorite := c.Query("is_favorite")
+	if params.IsFavorite != nil && *params.IsFavorite >= 0 && IsFavorite != "" {
+		mapQuery["is_favorite"] = *params.IsFavorite
+	}
+
 	if params.SeatNumber != "" {
 		mapQuery["seat_number"] = params.SeatNumber
 	}
@@ -466,18 +472,6 @@ func operatorQueryGenerator(params ActionData, tx *gorm.DB, c *ctxExt.Context) (
 	ShareTimesOperator := c.Query("share_times_operator")
 	if ShareTimesOperator != "" {
 		tx, err = operatorQueryAbstract(tx, c, "share_times", ShareTimesOperator, ShareTimes)
-		if err != nil {
-			return tx, err
-		}
-	}
-
-	var FavoriteTimes = 0
-	if params.FavoriteTimes != nil {
-		FavoriteTimes = *params.FavoriteTimes
-	}
-	FavoriteTimesOperator := c.Query("favorite_times_operator")
-	if FavoriteTimesOperator != "" {
-		tx, err = operatorQueryAbstract(tx, c, "favorite_times", FavoriteTimesOperator, FavoriteTimes)
 		if err != nil {
 			return tx, err
 		}

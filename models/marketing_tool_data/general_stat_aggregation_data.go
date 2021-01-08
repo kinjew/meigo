@@ -75,9 +75,9 @@ type GeneralStatAggregationData struct {
 	ShareNumMember       uint `gorm:"column:share_num_member;" json:"share_num_member" form:"share_num_member"`
 	ShareNumEmployee     uint `gorm:"column:share_num_employee;" json:"share_num_employee" form:"share_num_employee"`
 
-	FavoriteTimes         uint `gorm:"column:favorite_times;" json:"favorite_times" form:"favorite_times"`
-	FavoriteTimesMember   uint `gorm:"column:favorite_times_member;" json:"favorite_times_member" form:"favorite_times_member"`
-	FavoriteTimesEmployee uint `gorm:"column:favorite_times_employee;" json:"favorite_times_employee" form:"favorite_times_employee"`
+	//FavoriteTimes         uint `gorm:"column:favorite_times;" json:"favorite_times" form:"favorite_times"`
+	//FavoriteTimesMember   uint `gorm:"column:favorite_times_member;" json:"favorite_times_member" form:"favorite_times_member"`
+	//FavoriteTimesEmployee uint `gorm:"column:favorite_times_employee;" json:"favorite_times_employee" form:"favorite_times_employee"`
 
 	FavoriteNum         uint `gorm:"column:favorite_num;" json:"favorite_num" form:"favorite_num"`
 	FavoriteNumMember   uint `gorm:"column:favorite_num_member;" json:"favorite_num_member" form:"favorite_num_member"`

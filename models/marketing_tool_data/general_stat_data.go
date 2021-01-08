@@ -34,12 +34,12 @@ type GeneralStatData struct {
 	DownloadNum           uint `gorm:"column:download_num;" json:"download_num" form:"download_num"`
 	ShareTimes            uint `gorm:"column:share_times;" json:"share_times" form:"share_times"`
 	ShareNum              uint `gorm:"column:share_num;" json:"share_num" form:"share_num"`
-	FavoriteTimes         uint `gorm:"column:favorite_times;" json:"favorite_times" form:"favorite_times"`
-	FavoriteNum           uint `gorm:"column:favorite_num;" json:"favorite_num" form:"favorite_num"`
-	ViewMaterialTimes     uint `gorm:"column:view_material_times;" json:"view_material_times" form:"view_material_times"`
-	ViewMaterialNum       uint `gorm:"column:view_material_num;" json:"view_material_num" form:"view_material_num"`
-	NewFansNum            uint `gorm:"column:new_fans_num;" json:"new_fans_num" form:"new_fans_num"`
-	NewMemberNum          uint `gorm:"column:new_member_num;" json:"new_member_num" form:"new_member_num"`
+	//FavoriteTimes         uint `gorm:"column:favorite_times;" json:"favorite_times" form:"favorite_times"`
+	FavoriteNum       uint `gorm:"column:favorite_num;" json:"favorite_num" form:"favorite_num"`
+	ViewMaterialTimes uint `gorm:"column:view_material_times;" json:"view_material_times" form:"view_material_times"`
+	ViewMaterialNum   uint `gorm:"column:view_material_num;" json:"view_material_num" form:"view_material_num"`
+	NewFansNum        uint `gorm:"column:new_fans_num;" json:"new_fans_num" form:"new_fans_num"`
+	NewMemberNum      uint `gorm:"column:new_member_num;" json:"new_member_num" form:"new_member_num"`
 	/*
 		SignNum                uint   `gorm:"column:sign_num;" json:"sign_num" form:"sign_num"`
 		JoinNum                uint   `gorm:"column:join_num;" json:"join_num" form:"join_num"`
