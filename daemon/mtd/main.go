@@ -340,14 +340,14 @@ func requestOuterApiOnce(sourceDataJson string, ctx context.Context, rdb *redis.
 		client := &http.Client{Timeout: 3 * time.Second}
 		resp, err = client.Get(url)
 		//请求失败放回错误队列
-		fmt.Println("Response: ", resp.StatusCode, sourceDataJson, resp.Body)
-
+		//fmt.Println("Response: ", resp.StatusCode, sourceDataJson, resp.Body)
+		fmt.Println("tryNum:", tryNum)
 		if (err != nil || resp.StatusCode != 200) && tryNum < 2 {
 			continue
 		} else if (err != nil || resp.StatusCode != 200) && tryNum == 2 {
 			//如果不是重跑错误队列，则加入错入队列
 			if viper.GetString("redis.source_data_queue") != viper.GetString("redis.source_data_error_queue") {
-				fmt.Println("LPush list-key: ", sourceDataJson)
+				fmt.Println("LPush redis.source_data_error_queue: ", sourceDataJson)
 				log.Info("LPush: "+viper.GetString("redis.source_data_error_queue"), sourceDataJson)
 				rdb.LPush(ctx, viper.GetString("redis.source_data_error_queue"), sourceDataJson)
 			}

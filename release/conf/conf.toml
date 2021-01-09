@@ -78,5 +78,5 @@
     tracelog = "/data/logs/zap.log"
 
 [const]
-    sourceDataProcessUrl = "http://wwww.baidu.com"
+    sourceDataProcessUrl = "http://wwww.baidu222.com"
     rateLimiter = 600
