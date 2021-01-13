@@ -302,7 +302,7 @@ func readRedisOnce(ctx context.Context, rdb *redis.Client) (remainder int, listV
 	}
 	if listValue == "" {
 		remainder = -1
-		//time.Sleep(1 * time.Second)
+		time.Sleep(1 * time.Second)
 		return
 	}
 	//json解析
