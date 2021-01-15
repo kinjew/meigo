@@ -102,6 +102,10 @@ type GeneralStatAggregationData struct {
 	TransferToLeadsRate uint `gorm:"column:transfer_to_leads_rate;" json:"transfer_to_leads_rate" form:"transfer_to_leads_rate"`
 	AcceptAsLeadsNum    uint `gorm:"column:accept_as_leads_num;" json:"accept_as_leads_num" form:"accept_as_leads_num"`
 	AcceptAsLeadsRate   uint `gorm:"column:accept_as_leads_rate;" json:"accept_as_leads_rate" form:"accept_as_leads_rate"`
+
+	VisitAndEnrollNum               uint `gorm:"column:visit_and_enroll_num;" json:"visit_and_enroll_num" form:"visit_and_enroll_num"`
+	VisitAndEnrollApprovePassedNum  uint `gorm:"column:visit_and_enroll_approve_passed_num;" json:"visit_and_enroll_approve_passed_num" form:"visit_and_enroll_approve_passed_num"`
+	VisitAndWatchLiveOrReplayOrSign uint `gorm:"column:visit_and_watch_live_or_replay_or_sign;" json:"visit_and_watch_live_or_replay_or_sign" form:"visit_and_watch_live_or_replay_or_sign"`
 }
 
 /*
