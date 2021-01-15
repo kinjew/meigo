@@ -45,7 +45,12 @@ type GeneralStatAggregationData struct {
 	EnrollNumMember                       uint `gorm:"column:enroll_num_member;" json:"enroll_num_member" form:"enroll_num_member"`
 	EnrollNumEmployee                     uint `gorm:"column:enroll_num_employee;" json:"enroll_num_employee" form:"enroll_num_employee"`
 
-	EnrollApprovePassedNum    uint `gorm:"column:enroll_approve_passed_num;" json:"enroll_approve_passed_num" form:"enroll_approve_passed_num"`
+	EnrollApprovePassedNum          uint `gorm:"column:enroll_approve_passed_num;" json:"enroll_approve_passed_num" form:"enroll_approve_passed_num"`
+	EnrollApprovePassedUnidentified uint `gorm:"column:enroll_approve_passed_unidentified;" json:"enroll_approve_passed_unidentified" form:"enroll_approve_passed_unidentified"`
+	EnrollApprovePassedNumFans      uint `gorm:"column:enroll_approve_passed_num_fans;" json:"enroll_approve_passed_num_fans" form:"enroll_approve_passed_num_fans"`
+	EnrollApprovePassedNumMember    uint `gorm:"column:enroll_approve_passed_num_member;" json:"enroll_approve_passed_num_member" form:"enroll_approve_passed_num_member"`
+	EnrollApprovePassedNumEmployee  uint `gorm:"column:enroll_approve_passed_num_employee;" json:"enroll_approve_passed_num_employee" form:"enroll_approve_passed_num_employee"`
+
 	EnrollApproveNotPassedNum uint `gorm:"column:enroll_approve_not_passed_num;" json:"enroll_approve_not_passed_num" form:"enroll_approve_not_passed_num"`
 
 	ClickEnterLiveTimes   uint `gorm:"column:click_enter_live_times;" json:"click_enter_live_times" form:"click_enter_live_times"`
