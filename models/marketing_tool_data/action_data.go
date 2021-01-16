@@ -203,7 +203,7 @@ func (ad *ActionData) QueryByParams(c *ctxExt.Context) (list []ActionData, suppl
 
 	//排序处理
 	orderBy = c.DefaultQuery("orderBy", orderBy)
-	fmt.Println("orderBy", orderBy)
+	//fmt.Println("orderBy", orderBy)
 	//err = tx.Select("*").Scan(&list).Error
 	//err = tx.Select("*").Order(orderBy).Offset(offSet).Limit(pageSizeInt).Scan(&list).Error
 	err = tx.Select(tableSegmentation + ".*, " + ActionLiveDataColumn).Order(orderBy).Offset(offSet).Limit(pageSizeInt).Scan(&list).Error

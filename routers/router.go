@@ -20,7 +20,7 @@ func InitRouter() *gin.Engine {
 
 	//加载路由配置文件
 	commonRouter(g)
-	peopleRouter(g)
+	//peopleRouter(g)
 	exampleRouter(g)
 	mtdRouter(g)
 
