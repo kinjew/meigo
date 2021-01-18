@@ -161,6 +161,10 @@ func (ad *ActionData) QueryByParams(c *ctxExt.Context) (list []ActionData, suppl
 		err = tx.Select("*").Scan(&list).Error
 		return list, err
 	*/
+
+	//模糊查询
+	tx = likeQueryGenerator(c, tx)
+
 	//主表根据操作符查询
 	tx, err = operatorQueryGenerator(params, tx, c)
 	if err != nil {
@@ -243,17 +247,20 @@ func mapQueryGenerator(params ActionData, mapQuery map[string]interface{}, c *ct
 	if params.WxOpenId != "" {
 		mapQuery["wx_open_id"] = params.WxOpenId
 	}
-	if params.ClientIp != "" {
-		mapQuery["client_ip"] = params.ClientIp
-	}
 	/*
+		if params.ClientIp != "" {
+			mapQuery["client_ip"] = params.ClientIp
+		}
+
 		if params.UserIdentityType != "" {
 			mapQuery["user_identity_type"] = params.UserIdentityType
 		}
+
+		if params.FirstVisitBrowser != "" {
+			mapQuery["first_visit_browser"] = params.FirstVisitBrowser
+		}
+
 	*/
-	if params.FirstVisitBrowser != "" {
-		mapQuery["first_visit_browser"] = params.FirstVisitBrowser
-	}
 	if params.FirstVisitClient > 0 {
 		mapQuery["first_visit_client"] = params.FirstVisitClient
 	}
@@ -316,41 +323,55 @@ func mapQueryGenerator(params ActionData, mapQuery map[string]interface{}, c *ct
 	if params.IsFavorite != nil && *params.IsFavorite >= 0 && IsFavorite != "" {
 		mapQuery["is_favorite"] = *params.IsFavorite
 	}
-
-	if params.SeatNumber != "" {
-		mapQuery["seat_number"] = params.SeatNumber
-	}
-	//验证是否有参数is_click_enroll_button请求进来
+	/*
+		if params.SeatNumber != "" {
+			mapQuery["seat_number"] = params.SeatNumber
+		}
+	*/
 	IsClickEnrollButton := c.Query("is_click_enroll_button")
 	if params.IsClickEnrollButton != nil && *params.IsClickEnrollButton >= 0 && IsClickEnrollButton != "" {
 		mapQuery["is_click_enroll_button"] = *params.IsClickEnrollButton
 	}
-	//验证是否有参数is_click_enroll_button请求进来
 	IsClickPayButton := c.Query("is_click_pay_button")
 	if params.IsClickPayButton != nil && *params.IsClickPayButton >= 0 && IsClickPayButton != "" {
 		mapQuery["is_click_pay_button"] = *params.IsClickPayButton
 	}
-	//验证是否有参数is_click_enroll_button请求进来
 	IsClickGenerateFissionButton := c.Query("is_click_generate_fission_button")
 	if params.IsClickGenerateFissionButton != nil && *params.IsClickGenerateFissionButton >= 0 && IsClickGenerateFissionButton != "" {
 		mapQuery["is_click_generate_fission_button"] = *params.IsClickGenerateFissionButton
 	}
-	//验证是否有参数is_click_enroll_button请求进来
 	ClickEnterLiveTimes := c.Query("click_enter_live_times")
 	if params.ClickEnterLiveTimes != nil && *params.ClickEnterLiveTimes >= 0 && ClickEnterLiveTimes != "" {
 		mapQuery["click_enter_live_times"] = *params.ClickEnterLiveTimes
 	}
-	//验证是否有参数is_click_enroll_button请求进来
 	ClickWatchReplayTimes := c.Query("click_watch_replay_times")
 	if params.ClickWatchReplayTimes != nil && *params.ClickWatchReplayTimes >= 0 && ClickWatchReplayTimes != "" {
 		mapQuery["click_watch_replay_times"] = *params.ClickWatchReplayTimes
 	}
-	//验证是否有参数is_click_enroll_button请求进来
+	//验证是否有参数is_del请求进来
 	IsDel := c.Query("is_del")
 	if params.IsDel != nil && *params.IsDel >= 0 && IsDel != "" {
 		mapQuery["is_del"] = *params.IsDel
 	}
 	return mapQuery
+}
+
+//主表like查询
+func likeQueryGenerator(c *ctxExt.Context, tx *gorm.DB) *gorm.DB {
+
+	ClientIp := c.Query("client_ip")
+	if ClientIp != "" {
+		tx = tx.Where("client_ip LIKE ?", "%"+ClientIp+"%")
+	}
+	FirstVisitBrowser := c.Query("first_visit_browser")
+	if FirstVisitBrowser != "" {
+		tx = tx.Where("first_visit_browser LIKE ?", "%"+FirstVisitBrowser+"%")
+	}
+	SeatNumber := c.Query("seat_number")
+	if SeatNumber != "" {
+		tx = tx.Where("seat_number LIKE ?", "%"+SeatNumber+"%")
+	}
+	return tx
 }
 
 //operatorQueryGenerator构造基于操作符的查询
