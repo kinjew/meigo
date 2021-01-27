@@ -602,6 +602,17 @@ func inQueryGenerator(params ActionData, tx *gorm.DB, c *ctxExt.Context) *gorm.D
 		}
 	}
 
+	//wx_open_id_list为wx_open_id以逗号分割的字符串
+	WxOpenIdList := c.Query("wx_open_id_list")
+	if WxOpenIdList != "" {
+		WxOpenIdArr := strings.Split(WxOpenIdList, ",")
+		if len(WxOpenIdArr) != 0 {
+			fmt.Println("WxOpenIdArr: ", WxOpenIdArr)
+			//fmt.Println("wx_open_id_arr: ", []int{29, 30})
+			tx = tx.Where("wx_open_id IN (?) ", WxOpenIdArr)
+		}
+	}
+
 	return tx
 }
 

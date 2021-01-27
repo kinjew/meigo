@@ -16,10 +16,10 @@ type GeneralStatAggregationData struct {
 	//WxSystemUserId              int    `gorm:"column:wx_system_user_id;" json:"wx_system_user_id" form:"wx_system_user_id" binding:"required"`
 	//ToolId                      int    `gorm:"column:tool_id;" json:"tool_id" form:"tool_id" binding:"required"`
 	//ToolType                    int8   `gorm:"column:tool_type;" json:"tool_type" form:"tool_type" binding:"required"`
-	WxSystemUserId         uint `gorm:"column:wx_system_user_id;" json:"wx_system_user_id" form:"wx_system_user_id"`
-	ToolId                 uint `gorm:"column:tool_id;" json:"tool_id" form:"tool_id"`
-	ToolType               int8 `gorm:"column:tool_type;" json:"tool_type" form:"tool_type"`
-	MeetingEndTime         int8 `gorm:"column:meeting_end_time;" json:"meeting_end_time" form:"meeting_end_time"`
+	WxSystemUserId uint `gorm:"column:wx_system_user_id;" json:"wx_system_user_id" form:"wx_system_user_id"`
+	ToolId         uint `gorm:"column:tool_id;" json:"tool_id" form:"tool_id"`
+	ToolType       int8 `gorm:"column:tool_type;" json:"tool_type" form:"tool_type"`
+	//MeetingEndTime         int8 `gorm:"column:meeting_end_time;" json:"meeting_end_time" form:"meeting_end_time"`
 	VisitTimes             uint `gorm:"column:visit_times;" json:"visit_times" form:"visit_times"`
 	VisitTimesUnidentified uint `gorm:"column:visit_times_unidentified;" json:"visit_times_unidentified" form:"visit_times_unidentified"`
 	VisitTimesFans         uint `gorm:"column:visit_times_fans;" json:"visit_times_fans" form:"visit_times_fans"`
