@@ -172,7 +172,7 @@ func (ad *ActionData) QueryByParams(c *ctxExt.Context) (list []ActionData, suppl
 	}
 
 	//范围查询，该方法放置于join操作之前
-	tx = inQueryGenerator(params, tx, c)
+	tx = inQueryGenerator(params, tx, c, tableSegmentation)
 
 	//表left join操作
 	tx = tx.Joins("left join " + liveTableSegmentation + " on " + liveTableSegmentation + ".action_data_id = " + tableSegmentation + ".id")
@@ -225,6 +225,9 @@ func (ad *ActionData) QueryByParams(c *ctxExt.Context) (list []ActionData, suppl
 //mapQueryGenerator构造mapQuery对象
 func mapQueryGenerator(params ActionData, mapQuery map[string]interface{}, c *ctxExt.Context) map[string]interface{} {
 	//return mapQuery
+	if params.ID > 0 {
+		mapQuery["id"] = params.ID
+	}
 	if params.MainId > 0 {
 		mapQuery["main_id"] = params.MainId
 	}
@@ -590,7 +593,18 @@ func joinQueryGenerator(params ActionData, liveTableSegmentation string, c *ctxE
 }
 
 //inQueryGenerator 构造in查询
-func inQueryGenerator(params ActionData, tx *gorm.DB, c *ctxExt.Context) *gorm.DB {
+func inQueryGenerator(params ActionData, tx *gorm.DB, c *ctxExt.Context, tableSegmentation string) *gorm.DB {
+
+	//id_list为id以逗号分割的字符串,id存在在两个表中，以主表为准
+	IdList := c.Query("id_list")
+	if IdList != "" {
+		IdArr := strings.Split(IdList, ",")
+		if len(IdArr) != 0 {
+			fmt.Println("IdArr: ", IdArr)
+			tx = tx.Where(tableSegmentation+".id IN (?) ", IdArr)
+		}
+	}
+
 	//member_id_list为member_id以逗号分割的字符串
 	MemberIdList := c.Query("member_id_list")
 	if MemberIdList != "" {
@@ -610,6 +624,93 @@ func inQueryGenerator(params ActionData, tx *gorm.DB, c *ctxExt.Context) *gorm.D
 			fmt.Println("WxOpenIdArr: ", WxOpenIdArr)
 			//fmt.Println("wx_open_id_arr: ", []int{29, 30})
 			tx = tx.Where("wx_open_id IN (?) ", WxOpenIdArr)
+		}
+	}
+
+	//meeting_enroll_inviter_id_list为meeting_enroll_inviter_id以逗号分割的字符串
+	MeetingEnrollInviterIdList := c.Query("meeting_enroll_inviter_id_list")
+	if MeetingEnrollInviterIdList != "" {
+		MeetingEnrollInviterIdArr := strings.Split(MeetingEnrollInviterIdList, ",")
+		if len(MeetingEnrollInviterIdArr) != 0 {
+			fmt.Println("MeetingEnrollInviterIdArr: ", MeetingEnrollInviterIdArr)
+			tx = tx.Where("meeting_enroll_inviter_id IN (?) ", MeetingEnrollInviterIdArr)
+		}
+	}
+
+	//enroll_type_list为enroll_type以逗号分割的字符串
+	EnrollTypeList := c.Query("enroll_type_list")
+	if EnrollTypeList != "" {
+		EnrollTypeArr := strings.Split(EnrollTypeList, ",")
+		if len(EnrollTypeArr) != 0 {
+			fmt.Println("EnrollTypeArr: ", EnrollTypeArr)
+			tx = tx.Where("enroll_type IN (?) ", EnrollTypeArr)
+		}
+	}
+
+	//enroll_way_list为enroll_way以逗号分割的字符串
+	EnrollWayList := c.Query("enroll_way_list")
+	if EnrollWayList != "" {
+		EnrollWayArr := strings.Split(EnrollWayList, ",")
+		if len(EnrollWayArr) != 0 {
+			fmt.Println("EnrollWayArr: ", EnrollWayArr)
+			tx = tx.Where("enroll_way IN (?) ", EnrollWayArr)
+		}
+	}
+
+	//enroll_approve_status_list为enroll_approve_status以逗号分割的字符串
+	EnrollApproveStatusList := c.Query("enroll_approve_status_list")
+	if EnrollApproveStatusList != "" {
+		EnrollApproveStatusArr := strings.Split(EnrollApproveStatusList, ",")
+		if len(EnrollApproveStatusArr) != 0 {
+			fmt.Println("EnrollApproveStatusArr: ", EnrollApproveStatusArr)
+			tx = tx.Where("enroll_approve_status IN (?) ", EnrollApproveStatusArr)
+		}
+	}
+
+	//first_visit_browser_list为first_visit_browser以逗号分割的字符串
+	FirstVisitBrowserList := c.Query("first_visit_browser_list")
+	if FirstVisitBrowserList != "" {
+		FirstVisitBrowserArr := strings.Split(FirstVisitBrowserList, ",")
+		if len(FirstVisitBrowserArr) != 0 {
+			fmt.Println("FirstVisitBrowserListArr: ", FirstVisitBrowserArr)
+			tx = tx.Where("first_visit_browser IN (?) ", FirstVisitBrowserArr)
+		}
+	}
+
+	//first_visit_browser_list为first_visit_browser以逗号分割的字符串
+	FirstVisitClientList := c.Query("first_visit_client_list")
+	if FirstVisitClientList != "" {
+		FirstVisitClientArr := strings.Split(FirstVisitClientList, ",")
+		if len(FirstVisitClientArr) != 0 {
+			fmt.Println("FirstVisitClientArr: ", FirstVisitClientArr)
+			tx = tx.Where("first_visit_client IN (?) ", FirstVisitClientArr)
+		}
+	}
+
+	FirstVisitChannelIdList := c.Query("first_visit_channel_id_list")
+	if FirstVisitChannelIdList != "" {
+		FirstVisitChannelIdArr := strings.Split(FirstVisitChannelIdList, ",")
+		if len(FirstVisitChannelIdArr) != 0 {
+			fmt.Println("FirstVisitChannelIdArr: ", FirstVisitChannelIdArr)
+			tx = tx.Where("first_visit_channel_id IN (?) ", FirstVisitChannelIdArr)
+		}
+	}
+
+	FollowChannelIdList := c.Query("follow_channel_id_list")
+	if FollowChannelIdList != "" {
+		FollowChannelIdArr := strings.Split(FollowChannelIdList, ",")
+		if len(FollowChannelIdArr) != 0 {
+			fmt.Println("FollowChannelIdArr: ", FollowChannelIdArr)
+			tx = tx.Where("follow_channel_id IN (?) ", FollowChannelIdArr)
+		}
+	}
+
+	EnrollChannelIdList := c.Query("enroll_channel_id_list")
+	if EnrollChannelIdList != "" {
+		EnrollChannelIdArr := strings.Split(EnrollChannelIdList, ",")
+		if len(EnrollChannelIdArr) != 0 {
+			fmt.Println("EnrollChannelIdArr: ", EnrollChannelIdArr)
+			tx = tx.Where("enroll_channel_id IN (?) ", EnrollChannelIdArr)
 		}
 	}
 
