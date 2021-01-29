@@ -53,8 +53,16 @@ type GeneralStatAggregationData struct {
 
 	EnrollApproveNotPassedNum uint `gorm:"column:enroll_approve_not_passed_num;" json:"enroll_approve_not_passed_num" form:"enroll_approve_not_passed_num"`
 
-	ClickEnterLiveTimes   uint `gorm:"column:click_enter_live_times;" json:"click_enter_live_times" form:"click_enter_live_times"`
-	ClickEnterLiveNum     uint `gorm:"column:click_enter_live_num;" json:"click_enter_live_num" form:"click_enter_live_num"`
+	ClickEnterLiveTimes         uint `gorm:"column:click_enter_live_times;" json:"click_enter_live_times" form:"click_enter_live_times"`
+	ClickEnterLiveTimesFans     uint `gorm:"column:click_enter_live_times_fans;" json:"click_enter_live_times_fans" form:"click_enter_live_times_fans"`
+	ClickEnterLiveTimesMember   uint `gorm:"column:click_enter_live_times_member;" json:"click_enter_live_times_member" form:"click_enter_live_times_member"`
+	ClickEnterLiveTimesEmployee uint `gorm:"column:click_enter_live_times_employee;" json:"click_enter_live_times_employee" form:"click_enter_live_times_employee"`
+
+	ClickEnterLiveNum         uint `gorm:"column:click_enter_live_num;" json:"click_enter_live_num" form:"click_enter_live_num"`
+	ClickEnterLiveNumFans     uint `gorm:"column:click_enter_live_num_fans;" json:"click_enter_live_num_fans" form:"click_enter_live_num_fans"`
+	ClickEnterLiveNumMember   uint `gorm:"column:click_enter_live_num_member;" json:"click_enter_live_num_member" form:"click_enter_live_num_member"`
+	ClickEnterLiveNumEmployee uint `gorm:"column:click_enter_live_num_employee;" json:"click_enter_live_num_employee" form:"click_enter_live_num_employee"`
+
 	ClickWatchReplayTimes uint `gorm:"column:click_watch_replay_times;" json:"click_watch_replay_times" form:"click_watch_replay_times"`
 	ClickWatchReplayNum   uint `gorm:"column:click_watch_replay_num;" json:"click_watch_replay_num" form:"click_watch_replay_num"`
 
