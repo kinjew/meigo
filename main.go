@@ -6,14 +6,12 @@ import (
 	"meigo/library/log"
 	Server "meigo/library/server"
 	"meigo/routers"
-	"net/http"
 	"os"
 	"path/filepath"
 
 	_ "net/http/pprof"
 
 	_ "github.com/mkevac/debugcharts"
-	"github.com/prometheus/client_golang/prometheus/promhttp"
 )
 
 var ExeDir string
@@ -39,19 +37,21 @@ func main() {
 
 	//监控
 	//https://www.cnblogs.com/52fhy/p/11828448.html
-	go func() {
-		//提供给负载均衡探活
-		http.HandleFunc("/", func(w http.ResponseWriter, r *http.Request) {
-			w.Write([]byte("ok"))
+	/*
+		go func() {
+			//提供给负载均衡探活
+			http.HandleFunc("/", func(w http.ResponseWriter, r *http.Request) {
+				w.Write([]byte("ok"))
 
-		})
+			})
 
-		//prometheus
-		http.Handle("/metrics", promhttp.Handler())
+			//prometheus
+			http.Handle("/metrics", promhttp.Handler())
 
-		//pprof, go tool pprof -http=:8081 http://$host:$port/debug/pprof/heap
-		http.ListenAndServe(":10108", nil)
-	}()
+			//pprof, go tool pprof -http=:8081 http://$host:$port/debug/pprof/heap
+			http.ListenAndServe(":10108", nil)
+		}()
+	*/
 
 	// 启动服务
 	if err := router.Run(Server.ServerConf.Port); err != nil {
