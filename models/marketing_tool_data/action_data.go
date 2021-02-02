@@ -58,6 +58,8 @@ type ActionData struct {
 	SeatNumber                   string `gorm:"column:seat_number;" json:"seat_number" form:"seat_number"`
 	IsClickEnrollButton          *int   `gorm:"column:is_click_enroll_button;" json:"is_click_enroll_button" form:"is_click_enroll_button"`
 	IsClickPayButton             *int   `gorm:"column:is_click_pay_button;" json:"is_click_pay_button" form:"is_click_pay_button"`
+	IsClickRealPayButton         *int   `gorm:"column:is_click_real_pay_button;" json:"is_click_real_pay_button" form:"is_click_real_pay_button"`
+	IsClickInviteButton          *int   `gorm:"column:is_click_invite_button;" json:"is_click_invite_button" form:"is_click_invite_button"`
 	IsClickGenerateFissionButton *int   `gorm:"column:is_click_generate_fission_button;" json:"is_click_generate_fission_button" form:"is_click_generate_fission_button"`
 	ClickEnterLiveTimes          *int   `gorm:"column:click_enter_live_times;" json:"click_enter_live_times" form:"click_enter_live_times"`
 	ClickWatchReplayTimes        *int   `gorm:"column:click_watch_replay_times;" json:"click_watch_replay_times" form:"click_watch_replay_times"`
@@ -339,18 +341,28 @@ func mapQueryGenerator(params ActionData, mapQuery map[string]interface{}, c *ct
 	if params.IsClickPayButton != nil && *params.IsClickPayButton >= 0 && IsClickPayButton != "" {
 		mapQuery["is_click_pay_button"] = *params.IsClickPayButton
 	}
+	IsClickRealPayButton := c.Query("is_click_real_pay_button")
+	if params.IsClickRealPayButton != nil && *params.IsClickRealPayButton >= 0 && IsClickRealPayButton != "" {
+		mapQuery["is_click_real_pay_button"] = *params.IsClickRealPayButton
+	}
+	IsClickInviteButton := c.Query("is_click_invite_button")
+	if params.IsClickInviteButton != nil && *params.IsClickInviteButton >= 0 && IsClickInviteButton != "" {
+		mapQuery["is_click_invite_button"] = *params.IsClickInviteButton
+	}
 	IsClickGenerateFissionButton := c.Query("is_click_generate_fission_button")
 	if params.IsClickGenerateFissionButton != nil && *params.IsClickGenerateFissionButton >= 0 && IsClickGenerateFissionButton != "" {
 		mapQuery["is_click_generate_fission_button"] = *params.IsClickGenerateFissionButton
 	}
-	ClickEnterLiveTimes := c.Query("click_enter_live_times")
-	if params.ClickEnterLiveTimes != nil && *params.ClickEnterLiveTimes >= 0 && ClickEnterLiveTimes != "" {
-		mapQuery["click_enter_live_times"] = *params.ClickEnterLiveTimes
-	}
-	ClickWatchReplayTimes := c.Query("click_watch_replay_times")
-	if params.ClickWatchReplayTimes != nil && *params.ClickWatchReplayTimes >= 0 && ClickWatchReplayTimes != "" {
-		mapQuery["click_watch_replay_times"] = *params.ClickWatchReplayTimes
-	}
+	/*
+		ClickEnterLiveTimes := c.Query("click_enter_live_times")
+		if params.ClickEnterLiveTimes != nil && *params.ClickEnterLiveTimes >= 0 && ClickEnterLiveTimes != "" {
+			mapQuery["click_enter_live_times"] = *params.ClickEnterLiveTimes
+		}
+		ClickWatchReplayTimes := c.Query("click_watch_replay_times")
+		if params.ClickWatchReplayTimes != nil && *params.ClickWatchReplayTimes >= 0 && ClickWatchReplayTimes != "" {
+			mapQuery["click_watch_replay_times"] = *params.ClickWatchReplayTimes
+		}
+	*/
 	//验证是否有参数is_del请求进来
 	IsDel := c.Query("is_del")
 	if params.IsDel != nil && *params.IsDel >= 0 && IsDel != "" {
@@ -508,6 +520,30 @@ func operatorQueryGenerator(params ActionData, tx *gorm.DB, c *ctxExt.Context) (
 	ViewMaterialTimesOperator := c.Query("view_material_times_operator")
 	if ViewMaterialTimesOperator != "" {
 		tx, err = operatorQueryAbstract(tx, c, "view_material_times", ViewMaterialTimesOperator, ViewMaterialTimes)
+		if err != nil {
+			return tx, err
+		}
+	}
+
+	var ClickEnterLiveTimes = 0
+	if params.ClickEnterLiveTimes != nil {
+		ClickEnterLiveTimes = *params.ClickEnterLiveTimes
+	}
+	ClickEnterLiveTimesOperator := c.Query("click_enter_live_times_operator")
+	if ClickEnterLiveTimesOperator != "" {
+		tx, err = operatorQueryAbstract(tx, c, "click_enter_live_times", ClickEnterLiveTimesOperator, ClickEnterLiveTimes)
+		if err != nil {
+			return tx, err
+		}
+	}
+
+	var ClickWatchReplayTimes = 0
+	if params.ClickWatchReplayTimes != nil {
+		ClickWatchReplayTimes = *params.ClickWatchReplayTimes
+	}
+	ClickWatchReplayTimesOperator := c.Query("click_watch_replay_times_operator")
+	if ClickWatchReplayTimesOperator != "" {
+		tx, err = operatorQueryAbstract(tx, c, "click_watch_replay_times", ClickWatchReplayTimesOperator, ClickWatchReplayTimes)
 		if err != nil {
 			return tx, err
 		}
