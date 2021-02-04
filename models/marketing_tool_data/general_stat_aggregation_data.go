@@ -1,9 +1,11 @@
 package marketing_tool_data
 
 import (
+	"fmt"
 	"meigo/library/db/common"
 	"meigo/library/log"
 	"strconv"
+	"strings"
 
 	"github.com/jinzhu/gorm"
 	ctxExt "github.com/kinjew/gin-context-ext"
@@ -74,13 +76,19 @@ type GeneralStatAggregationData struct {
 	OnlyWatchReplayTimes       uint `gorm:"column:only_watch_replay_times;" json:"only_watch_replay_times" form:"only_watch_replay_times"`
 	OnlyWatchReplayNum         uint `gorm:"column:only_watch_replay_num;" json:"only_watch_replay_num" form:"only_watch_replay_num"`
 	OnlyWatchReplayTimeAverage uint `gorm:"column:only_watch_replay_time_average;" json:"only_watch_replay_time_average" form:"only_watch_replay_time_average"`
-	DownloadTimes              uint `gorm:"column:download_times;" json:"download_times" form:"download_times"`
-	DownloadNum                uint `gorm:"column:download_num;" json:"download_num" form:"download_num"`
-	ShareTimes                 uint `gorm:"column:share_times;" json:"share_times" form:"share_times"`
-	ShareTimesUnidentified     uint `gorm:"column:share_times_unidentified;" json:"share_times_unidentified" form:"share_times_unidentified"`
-	ShareTimesFans             uint `gorm:"column:share_times_fans;" json:"share_times_fans" form:"share_times_fans"`
-	ShareTimesMember           uint `gorm:"column:share_times_member;" json:"share_times_member" form:"share_times_member"`
-	ShareTimesEmployee         uint `gorm:"column:share_times_employee;" json:"share_times_employee" form:"share_times_employee"`
+
+	WatchReplayTime        uint `gorm:"column:watch_replay_time;" json:"watch_replay_time" form:"watch_replay_time"`
+	WatchReplayTimes       uint `gorm:"column:watch_replay_times;" json:"watch_replay_times" form:"watch_replay_times"`
+	WatchReplayNum         uint `gorm:"column:watch_replay_num;" json:"watch_replay_num" form:"watch_replay_num"`
+	WatchReplayTimeAverage uint `gorm:"column:watch_replay_time_average;" json:"watch_replay_time_average" form:"watch_replay_time_average"`
+
+	DownloadTimes          uint `gorm:"column:download_times;" json:"download_times" form:"download_times"`
+	DownloadNum            uint `gorm:"column:download_num;" json:"download_num" form:"download_num"`
+	ShareTimes             uint `gorm:"column:share_times;" json:"share_times" form:"share_times"`
+	ShareTimesUnidentified uint `gorm:"column:share_times_unidentified;" json:"share_times_unidentified" form:"share_times_unidentified"`
+	ShareTimesFans         uint `gorm:"column:share_times_fans;" json:"share_times_fans" form:"share_times_fans"`
+	ShareTimesMember       uint `gorm:"column:share_times_member;" json:"share_times_member" form:"share_times_member"`
+	ShareTimesEmployee     uint `gorm:"column:share_times_employee;" json:"share_times_employee" form:"share_times_employee"`
 
 	ShareNum             uint `gorm:"column:share_num;" json:"share_num" form:"share_num"`
 	ShareNumUnidentified uint `gorm:"column:share_num_unidentified;" json:"share_num_unidentified" form:"share_num_unidentified"`
@@ -185,6 +193,9 @@ func (gsat *GeneralStatAggregationData) GsatQueryByParams(c *ctxExt.Context) (li
 		return
 	}
 
+	//gsat范围查询
+	tx = inQueryGeneratorGsat(tx, c)
+
 	//执行查询操作
 	page = c.DefaultQuery("page", page)
 	pageSize = c.DefaultQuery("pageSize", pageSize)
@@ -250,4 +261,20 @@ func gsatOperatorQueryGenerator(params GeneralStatAggregationData, tx *gorm.DB, 
 		}
 	*/
 	return tx, err
+}
+
+//inQueryGeneratorGsat 构造in查询
+func inQueryGeneratorGsat(tx *gorm.DB, c *ctxExt.Context) *gorm.DB {
+
+	//tool_id_list为tool_id以逗号分割的字符串
+	ToolIdList := c.Query("tool_id_list")
+	if ToolIdList != "" {
+		ToolIdArr := strings.Split(ToolIdList, ",")
+		if len(ToolIdArr) != 0 {
+			fmt.Println("ToolIdArr: ", ToolIdArr)
+			tx = tx.Where("tool_id IN (?) ", ToolIdArr)
+		}
+	}
+
+	return tx
 }
