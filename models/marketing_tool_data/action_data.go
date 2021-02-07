@@ -249,11 +249,9 @@ func mapQueryGenerator(params ActionData, mapQuery map[string]interface{}, c *ct
 	if params.MemberId > 0 {
 		mapQuery["member_id"] = params.MemberId
 	}
-	/*
-		if params.WxOpenId != "" {
-			mapQuery["wx_open_id"] = params.WxOpenId
-		}
-	*/
+	if params.WxOpenId != "" {
+		mapQuery["wx_open_id"] = params.WxOpenId
+	}
 	/*
 		if params.ClientIp != "" {
 			mapQuery["client_ip"] = params.ClientIp
@@ -388,10 +386,12 @@ func likeQueryGenerator(c *ctxExt.Context, tx *gorm.DB) *gorm.DB {
 	if SeatNumber != "" {
 		tx = tx.Where("seat_number LIKE ?", "%"+SeatNumber+"%")
 	}
-	WxOpenId := c.Query("wx_open_id")
-	if WxOpenId != "" {
-		tx = tx.Where("wx_open_id LIKE ?", "%"+WxOpenId+"%")
-	}
+	/*
+		WxOpenId := c.Query("wx_open_id")
+		if WxOpenId != "" {
+			tx = tx.Where("wx_open_id LIKE ?", "%"+WxOpenId+"%")
+		}
+	*/
 	return tx
 }
 
