@@ -246,7 +246,8 @@ func mapQueryGenerator(params ActionData, mapQuery map[string]interface{}, c *ct
 		mapQuery["user_identity_type"] = params.UserIdentityType
 	}
 	//其他查询参数
-	if params.MemberId > 0 {
+	MemberId := c.Query("member_id")
+	if params.MemberId >= 0 && MemberId != "" {
 		mapQuery["member_id"] = params.MemberId
 	}
 	if params.WxOpenId != "" {
@@ -274,19 +275,24 @@ func mapQueryGenerator(params ActionData, mapQuery map[string]interface{}, c *ct
 			mapQuery["first_visit_equipment"] = params.FirstVisitEquipment
 		}
 	*/
-	if params.FirstVisitChannelId > 0 {
+	FirstVisitChannelId := c.Query("first_visit_channel_id")
+	if params.FirstVisitChannelId >= 0 && FirstVisitChannelId != "" {
 		mapQuery["first_visit_channel_id"] = params.FirstVisitChannelId
 	}
-	if params.FollowChannelId > 0 {
+	FollowChannelId := c.Query("follow_channel_id")
+	if params.FollowChannelId >= 0 && FollowChannelId != "" {
 		mapQuery["follow_channel_id"] = params.FollowChannelId
 	}
-	if params.EnrollChannelId > 0 {
+	EnrollChannelId := c.Query("enroll_channel_id")
+	if params.EnrollChannelId >= 0 && EnrollChannelId != "" {
 		mapQuery["enroll_channel_id"] = params.EnrollChannelId
 	}
-	if params.WxFollowInviterId > 0 {
+	WxFollowInviterId := c.Query("wx_follow_inviter_id")
+	if params.WxFollowInviterId >= 0 && WxFollowInviterId != "" {
 		mapQuery["wx_follow_inviter_id"] = params.WxFollowInviterId
 	}
-	if params.MeetingEnrollInviterId > 0 {
+	MeetingEnrollInviterId := c.Query("meeting_enroll_inviter_id")
+	if params.MeetingEnrollInviterId >= 0 && MeetingEnrollInviterId != "" {
 		mapQuery["meeting_enroll_inviter_id"] = params.MeetingEnrollInviterId
 	}
 	//验证是否有参数is_enroll请求进来
