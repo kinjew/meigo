@@ -27,17 +27,17 @@ import (
 
 // SourceData 实体
 type SourceData struct {
-	MainId           int             `gorm:"column:main_id;" json:"main_id" form:"main_id"`
-	WxSystemUserId   int             `gorm:"column:wx_system_user_id;" json:"wx_system_user_id" form:"wx_system_user_id" `
-	ToolId           int             `gorm:"column:tool_id;" json:"tool_id" form:"tool_id"`
-	ToolType         int8            `gorm:"column:tool_type;" json:"tool_type" form:"tool_type"`
-	MemberId         int             `gorm:"column:member_id;" json:"member_id" form:"member_id"`
-	WxOpenId         string          `gorm:"column:wx_open_id;" json:"wx_open_id" form:"wx_open_id"`
-	ClientIp         string          `gorm:"column:client_ip;" json:"client_ip" form:"client_ip"`
-	DataGenerationAt int             `gorm:"column:data_generation_at;" json:"data_generation_at" form:"data_generation_at"`
-	UserIdentityType int             `gorm:"column:user_identity_type;" json:"user_identity_type" form:"user_identity_type"`
-	Type             string          `gorm:"column:type;" json:"type" form:"type"`
-	Data             OtherSourceData `gorm:"column:data;" json:"data" form:"data"`
+	MainId           int    `gorm:"column:main_id;" json:"main_id" form:"main_id"`
+	WxSystemUserId   int    `gorm:"column:wx_system_user_id;" json:"wx_system_user_id" form:"wx_system_user_id" `
+	ToolId           int    `gorm:"column:tool_id;" json:"tool_id" form:"tool_id"`
+	ToolType         int8   `gorm:"column:tool_type;" json:"tool_type" form:"tool_type"`
+	MemberId         int    `gorm:"column:member_id;" json:"member_id" form:"member_id"`
+	WxOpenId         string `gorm:"column:wx_open_id;" json:"wx_open_id" form:"wx_open_id"`
+	ClientIp         string `gorm:"column:client_ip;" json:"client_ip" form:"client_ip"`
+	DataGenerationAt int    `gorm:"column:data_generation_at;" json:"data_generation_at" form:"data_generation_at"`
+	UserIdentityType int    `gorm:"column:user_identity_type;" json:"user_identity_type" form:"user_identity_type"`
+	Type             string `gorm:"column:type;" json:"type" form:"type"`
+	//Data             OtherSourceData `gorm:"column:data;" json:"data" form:"data"`
 }
 
 // OtherSourceData 实体
@@ -167,36 +167,36 @@ func main() {
 		select {
 		case val := <-ch0:
 			//延迟10ms，防止调用接口太频繁
-			time.Sleep(20 * time.Millisecond)
+			time.Sleep(50 * time.Millisecond)
 			go requestOuterApiOnce(val, ctx, rdb)
 		case val := <-ch1:
 			//fmt.Println("get ch1: ", val)
-			time.Sleep(20 * time.Millisecond)
+			time.Sleep(50 * time.Millisecond)
 			go requestOuterApiOnce(val, ctx, rdb)
 		case val := <-ch2:
-			time.Sleep(20 * time.Millisecond)
+			time.Sleep(50 * time.Millisecond)
 			go requestOuterApiOnce(val, ctx, rdb)
 		case val := <-ch3:
-			time.Sleep(20 * time.Millisecond)
+			time.Sleep(50 * time.Millisecond)
 			go requestOuterApiOnce(val, ctx, rdb)
 		case val := <-ch4:
-			time.Sleep(20 * time.Millisecond)
+			time.Sleep(50 * time.Millisecond)
 			go requestOuterApiOnce(val, ctx, rdb)
 		case val := <-ch5:
-			time.Sleep(20 * time.Millisecond)
+			time.Sleep(50 * time.Millisecond)
 			go requestOuterApiOnce(val, ctx, rdb)
 		case val := <-ch6:
-			time.Sleep(20 * time.Millisecond)
+			time.Sleep(50 * time.Millisecond)
 			go requestOuterApiOnce(val, ctx, rdb)
 		case val := <-ch7:
-			time.Sleep(20 * time.Millisecond)
+			time.Sleep(50 * time.Millisecond)
 			go requestOuterApiOnce(val, ctx, rdb)
 		case val := <-ch8:
 			//fmt.Println("get ch8: ", val)
-			time.Sleep(20 * time.Millisecond)
+			time.Sleep(50 * time.Millisecond)
 			go requestOuterApiOnce(val, ctx, rdb)
 		case val := <-ch9:
-			time.Sleep(20 * time.Millisecond)
+			time.Sleep(50 * time.Millisecond)
 			go requestOuterApiOnce(val, ctx, rdb)
 			/*
 				case <-time.After(10 * time.Second):
@@ -205,34 +205,34 @@ func main() {
 
 			*/
 		case val := <-ch10:
-			time.Sleep(20 * time.Millisecond)
+			time.Sleep(50 * time.Millisecond)
 			go requestOuterApiOnce(val, ctx, rdb)
 		case val := <-ch11:
-			time.Sleep(20 * time.Millisecond)
+			time.Sleep(50 * time.Millisecond)
 			go requestOuterApiOnce(val, ctx, rdb)
 		case val := <-ch12:
-			time.Sleep(20 * time.Millisecond)
+			time.Sleep(50 * time.Millisecond)
 			go requestOuterApiOnce(val, ctx, rdb)
 		case val := <-ch13:
-			time.Sleep(20 * time.Millisecond)
+			time.Sleep(50 * time.Millisecond)
 			go requestOuterApiOnce(val, ctx, rdb)
 		case val := <-ch14:
-			time.Sleep(20 * time.Millisecond)
+			time.Sleep(50 * time.Millisecond)
 			go requestOuterApiOnce(val, ctx, rdb)
 		case val := <-ch15:
-			time.Sleep(20 * time.Millisecond)
+			time.Sleep(50 * time.Millisecond)
 			go requestOuterApiOnce(val, ctx, rdb)
 		case val := <-ch16:
-			time.Sleep(20 * time.Millisecond)
+			time.Sleep(50 * time.Millisecond)
 			go requestOuterApiOnce(val, ctx, rdb)
 		case val := <-ch17:
-			time.Sleep(20 * time.Millisecond)
+			time.Sleep(50 * time.Millisecond)
 			go requestOuterApiOnce(val, ctx, rdb)
 		case val := <-ch18:
-			time.Sleep(20 * time.Millisecond)
+			time.Sleep(50 * time.Millisecond)
 			go requestOuterApiOnce(val, ctx, rdb)
 		case val := <-ch19:
-			time.Sleep(20 * time.Millisecond)
+			time.Sleep(50 * time.Millisecond)
 			go requestOuterApiOnce(val, ctx, rdb)
 		}
 	}
