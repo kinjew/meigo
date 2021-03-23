@@ -78,5 +78,5 @@
     tracelog = "/data/logs/zap.log"
 
 [const]
-    sourceDataProcessUrl = "http://wwww.baidu.com"
+    sourceDataProcessUrl = "http://dataplatform.system6.dev.scrmtech.com/datacollection/api/add-source-data"
     rateLimiter = 600

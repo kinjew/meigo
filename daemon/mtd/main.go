@@ -47,7 +47,7 @@ type OtherSourceData struct {
 	ChannelId   int    `gorm:"column:channel_id;" json:"channel_id" form:"channel_id"`
 }
 
-var ch0, ch1, ch2, ch3, ch4, ch5, ch6, ch7, ch8, ch9 chan string
+var ch0, ch1, ch2, ch3, ch4, ch5, ch6, ch7, ch8, ch9, ch10, ch11, ch12, ch13, ch14, ch15, ch16, ch17, ch18, ch19 chan string
 
 //var strList = []string{"ch1", "ch2", "ch3", "ch4", "ch5", "ch6", "ch7", "ch8", "ch9"}
 var ExeDir string
@@ -123,6 +123,16 @@ func main() {
 	ch7 = make(chan string, 5)
 	ch8 = make(chan string, 5)
 	ch9 = make(chan string, 5)
+	ch10 = make(chan string, 5)
+	ch11 = make(chan string, 5)
+	ch12 = make(chan string, 5)
+	ch13 = make(chan string, 5)
+	ch14 = make(chan string, 5)
+	ch15 = make(chan string, 5)
+	ch16 = make(chan string, 5)
+	ch17 = make(chan string, 5)
+	ch18 = make(chan string, 5)
+	ch19 = make(chan string, 5)
 	//chN = make(chan string)
 	/*
 		ch0 = make(chan string, 5)
@@ -156,26 +166,37 @@ func main() {
 	for {
 		select {
 		case val := <-ch0:
+			//延迟10ms，防止调用接口太频繁
+			time.Sleep(20 * time.Millisecond)
 			go requestOuterApiOnce(val, ctx, rdb)
 		case val := <-ch1:
 			//fmt.Println("get ch1: ", val)
+			time.Sleep(20 * time.Millisecond)
 			go requestOuterApiOnce(val, ctx, rdb)
 		case val := <-ch2:
+			time.Sleep(20 * time.Millisecond)
 			go requestOuterApiOnce(val, ctx, rdb)
 		case val := <-ch3:
+			time.Sleep(20 * time.Millisecond)
 			go requestOuterApiOnce(val, ctx, rdb)
 		case val := <-ch4:
+			time.Sleep(20 * time.Millisecond)
 			go requestOuterApiOnce(val, ctx, rdb)
 		case val := <-ch5:
+			time.Sleep(20 * time.Millisecond)
 			go requestOuterApiOnce(val, ctx, rdb)
 		case val := <-ch6:
+			time.Sleep(20 * time.Millisecond)
 			go requestOuterApiOnce(val, ctx, rdb)
 		case val := <-ch7:
+			time.Sleep(20 * time.Millisecond)
 			go requestOuterApiOnce(val, ctx, rdb)
 		case val := <-ch8:
 			//fmt.Println("get ch8: ", val)
+			time.Sleep(20 * time.Millisecond)
 			go requestOuterApiOnce(val, ctx, rdb)
 		case val := <-ch9:
+			time.Sleep(20 * time.Millisecond)
 			go requestOuterApiOnce(val, ctx, rdb)
 			/*
 				case <-time.After(10 * time.Second):
@@ -183,6 +204,36 @@ func main() {
 					return
 
 			*/
+		case val := <-ch10:
+			time.Sleep(20 * time.Millisecond)
+			go requestOuterApiOnce(val, ctx, rdb)
+		case val := <-ch11:
+			time.Sleep(20 * time.Millisecond)
+			go requestOuterApiOnce(val, ctx, rdb)
+		case val := <-ch12:
+			time.Sleep(20 * time.Millisecond)
+			go requestOuterApiOnce(val, ctx, rdb)
+		case val := <-ch13:
+			time.Sleep(20 * time.Millisecond)
+			go requestOuterApiOnce(val, ctx, rdb)
+		case val := <-ch14:
+			time.Sleep(20 * time.Millisecond)
+			go requestOuterApiOnce(val, ctx, rdb)
+		case val := <-ch15:
+			time.Sleep(20 * time.Millisecond)
+			go requestOuterApiOnce(val, ctx, rdb)
+		case val := <-ch16:
+			time.Sleep(20 * time.Millisecond)
+			go requestOuterApiOnce(val, ctx, rdb)
+		case val := <-ch17:
+			time.Sleep(20 * time.Millisecond)
+			go requestOuterApiOnce(val, ctx, rdb)
+		case val := <-ch18:
+			time.Sleep(20 * time.Millisecond)
+			go requestOuterApiOnce(val, ctx, rdb)
+		case val := <-ch19:
+			time.Sleep(20 * time.Millisecond)
+			go requestOuterApiOnce(val, ctx, rdb)
 		}
 	}
 
@@ -275,6 +326,46 @@ func readRedis(ctx context.Context, rdb *redis.Client, lr rateLimit.LimitRate) {
 			//fmt.Println("ch9: ", ch9)
 			ch9 <- listValueStr
 		}
+		if remainderInt == 10 {
+			//fmt.Println("ch0: ", ch1)
+			ch10 <- listValueStr
+		}
+		if remainderInt == 11 {
+			//fmt.Println("ch1: ", ch1)
+			ch11 <- listValueStr
+		}
+		if remainderInt == 12 {
+			//fmt.Println("ch2: ", ch2)
+			ch12 <- listValueStr
+		}
+		if remainderInt == 13 {
+			//fmt.Println("ch3: ", ch3)
+			ch13 <- listValueStr
+		}
+		if remainderInt == 14 {
+			//fmt.Println("ch4: ", ch4)
+			ch14 <- listValueStr
+		}
+		if remainderInt == 15 {
+			//fmt.Println("ch5: ", ch5)
+			ch15 <- listValueStr
+		}
+		if remainderInt == 16 {
+			//fmt.Println("ch6: ", ch6)
+			ch16 <- listValueStr
+		}
+		if remainderInt == 17 {
+			//fmt.Println("ch7: ", ch7)
+			ch17 <- listValueStr
+		}
+		if remainderInt == 18 {
+			//fmt.Println("ch8: ", ch8)
+			ch18 <- listValueStr
+		}
+		if remainderInt == 19 {
+			//fmt.Println("ch9: ", ch9)
+			ch19 <- listValueStr
+		}
 		/*
 			if remainderInt == -1 {
 				chN <- listValueStr
@@ -313,7 +404,7 @@ func readRedisOnce(ctx context.Context, rdb *redis.Client) (remainder int, listV
 		log.Error("unmarshal err: ", err)
 	}
 	//求余数
-	remainder = sourceDataObj.MainId % 10
+	remainder = sourceDataObj.MainId % 20
 	fmt.Println("readRedisData: ", remainder, sourceDataObj)
 	//log.Info("readRedisData: ", remainder, sourceDataObj)
 	return
@@ -337,14 +428,22 @@ func requestOuterApiOnce(sourceDataJson string, ctx context.Context, rdb *redis.
 	var err error
 	for tryNum := 0; tryNum < 3; tryNum++ {
 		//发起get请求
-		client := &http.Client{Timeout: 3 * time.Second}
+		client := &http.Client{Timeout: 5 * time.Second}
 		resp, err = client.Get(url)
 		//请求失败放回错误队列
 		//fmt.Println("Response: ", resp.StatusCode, sourceDataJson, resp.Body)
 		fmt.Println("tryNum:", tryNum)
-		if (err != nil || resp.StatusCode != 200) && tryNum < 2 {
+		//获取http请求值
+		apiRetObj := Transformation(resp)
+		//获取返回的code
+		retCode, _ := apiRetObj["code"]
+		//fmt.Println("apiRetObj: ", apiRetObj)
+		//fmt.Println("retCode: ", retCode.(float64))
+		//		if (err != nil || resp.StatusCode != 200 || retCode != 0) && tryNum < 2 {
+		if (retCode.(float64) != 0 || err != nil || resp.StatusCode != 200) && tryNum < 2 {
+			fmt.Println("casetryNum: ", tryNum, err, resp.StatusCode, retCode)
 			continue
-		} else if (err != nil || resp.StatusCode != 200) && tryNum == 2 {
+		} else if (retCode.(float64) != 0 || err != nil || resp.StatusCode != 200) && tryNum == 2 {
 			//如果不是重跑错误队列，则加入错入队列
 			if viper.GetString("redis.source_data_queue") != viper.GetString("redis.source_data_error_queue") {
 				fmt.Println("LPush redis.source_data_error_queue: ", sourceDataJson)
@@ -423,4 +522,13 @@ func Post(url string, data interface{}, contentType string) string {
 
 	result, _ := ioutil.ReadAll(resp.Body)
 	return string(result)
+}
+
+func Transformation(response *http.Response) map[string]interface{} {
+	var result map[string]interface{}
+	body, err := ioutil.ReadAll(response.Body)
+	if err == nil {
+		json.Unmarshal([]byte(string(body)), &result)
+	}
+	return result
 }
