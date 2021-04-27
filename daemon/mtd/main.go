@@ -434,16 +434,19 @@ func requestOuterApiOnce(sourceDataJson string, ctx context.Context, rdb *redis.
 		//fmt.Println("Response: ", resp.StatusCode, sourceDataJson, resp.Body)
 		fmt.Println("tryNum:", tryNum)
 		//获取http请求值
-		apiRetObj := Transformation(resp)
+		var apiRetObj map[string]interface{}
+		if resp != nil {
+			apiRetObj = Transformation(resp)
+		}
 		//获取返回的code
 		retCode, _ := apiRetObj["code"]
 		//fmt.Println("apiRetObj: ", apiRetObj)
 		//fmt.Println("retCode: ", retCode.(float64))
 		//		if (err != nil || resp.StatusCode != 200 || retCode != 0) && tryNum < 2 {
-		if (retCode.(float64) != 0 || err != nil || resp.StatusCode != 200) && tryNum < 2 {
+		if (retCode.(float64) != 0 || resp == nil || err != nil || resp.StatusCode != 200) && tryNum < 2 {
 			fmt.Println("casetryNum: ", tryNum, err, resp.StatusCode, retCode)
 			continue
-		} else if (retCode.(float64) != 0 || err != nil || resp.StatusCode != 200) && tryNum == 2 {
+		} else if (retCode.(float64) != 0 || resp == nil || err != nil || resp.StatusCode != 200) && tryNum == 2 {
 			//如果不是重跑错误队列，则加入错入队列
 			if viper.GetString("redis.source_data_queue") != viper.GetString("redis.source_data_error_queue") {
 				fmt.Println("LPush redis.source_data_error_queue: ", sourceDataJson)
