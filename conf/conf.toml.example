@@ -33,6 +33,8 @@
 	DB = 0
 	# MaxRetries: Maximum number of retries before giving up.
 	maxRetries = 3
+	source_data_queue = "data_collection_stat_queue"
+	source_data_error_queue = "source_data_error_queue"
 
 [zap]
 	# Filename is the file to write logs to.  Backup log files will be retained
@@ -76,3 +78,4 @@
 
 [const]
     sourceDataProcessUrl = "http://wwww.baidu.com"
+    rateLimiter = 600
