@@ -4,16 +4,17 @@ import (
 	"bytes"
 	"context"
 	"encoding/json"
+	"flag"
 	"fmt"
 	"io"
 	"io/ioutil"
 	mgInit "meigo/library/init"
 	"meigo/library/log"
-	"meigo/library/rateLimit"
 	"net/http"
 	_ "net/http/pprof"
 	"os"
 	"path/filepath"
+	"sort"
 	"time"
 
 	"github.com/prometheus/client_golang/prometheus/promhttp"
@@ -25,63 +26,47 @@ import (
 	"github.com/go-redis/redis/v8"
 )
 
-// SourceData 实体
-type SourceData struct {
-	MainId           int    `gorm:"column:main_id;" json:"main_id" form:"main_id"`
-	WxSystemUserId   int    `gorm:"column:wx_system_user_id;" json:"wx_system_user_id" form:"wx_system_user_id" `
-	ToolId           int    `gorm:"column:tool_id;" json:"tool_id" form:"tool_id"`
-	ToolType         int8   `gorm:"column:tool_type;" json:"tool_type" form:"tool_type"`
-	MemberId         int    `gorm:"column:member_id;" json:"member_id" form:"member_id"`
-	WxOpenId         string `gorm:"column:wx_open_id;" json:"wx_open_id" form:"wx_open_id"`
-	ClientIp         string `gorm:"column:client_ip;" json:"client_ip" form:"client_ip"`
-	DataGenerationAt int    `gorm:"column:data_generation_at;" json:"data_generation_at" form:"data_generation_at"`
-	UserIdentityType int    `gorm:"column:user_identity_type;" json:"user_identity_type" form:"user_identity_type"`
-	Type             string `gorm:"column:type;" json:"type" form:"type"`
-	//Data             OtherSourceData `gorm:"column:data;" json:"data" form:"data"`
+// NodeInfo 实体
+type NodeInfo struct {
+	NodeId        int    `gorm:"column:node_id;" json:"node_id" form:"node_id"`
+	ParentNodeIds string `gorm:"column:parent_node_ids;" json:"parent_node_ids" form:"parent_node_ids" `
+	NodeName      string `gorm:"column:node_name;" json:"node_name" form:"node_name"`
+	NodeType      string `gorm:"column:node_type;" json:"node_type" form:"node_type"`
+	IsFirstNode   int    `gorm:"column:is_first_node;" json:"is_first_node" form:"is_first_node"`
+	ConditionInfo ConditionInfo
+	DelayInfo     DelayInfo
+	ExecutorInfo  ExecutorInfo
 }
 
-// OtherSourceData 实体
-type OtherSourceData struct {
-	DeviceType  string `gorm:"column:device_type;" json:"device_type" form:"device_type"`
-	BrowserType string `gorm:"column:browser_type;" json:"browser_type" form:"browser_type"`
-	ChannelId   int    `gorm:"column:channel_id;" json:"channel_id" form:"channel_id"`
+// DelayInfo 实体
+type ConditionInfo struct {
+	//单位是秒
+	Duar   int `gorm:"column:duar;" json:"duar" form:"duar"`
+	TimeAt int `gorm:"column:time_at;" json:"time_at" form:"time_at"`
 }
 
-var ch0, ch1, ch2, ch3, ch4, ch5, ch6, ch7, ch8, ch9, ch10, ch11, ch12, ch13, ch14, ch15, ch16, ch17, ch18, ch19 chan string
+// DelayInfo 实体
+type DelayInfo struct {
+	//单位是秒
+	Duar   int `gorm:"column:duar;" json:"duar" form:"duar"`
+	TimeAt int `gorm:"column:time_at;" json:"time_at" form:"time_at"`
+}
 
-//var strList = []string{"ch1", "ch2", "ch3", "ch4", "ch5", "ch6", "ch7", "ch8", "ch9"}
+// DelayInfo 实体
+type ExecutorInfo struct {
+	//单位是秒
+	Duar   int `gorm:"column:duar;" json:"duar" form:"duar"`
+	TimeAt int `gorm:"column:time_at;" json:"time_at" form:"time_at"`
+}
+
 var ExeDir string
 
+/*
+./bin/mtd -wfUuid='wew'  -nodeId='234' -message='{"title":"json在线解析（简 版） -JSON在线解析","json.url":"https://www.sojson.com/simple_json.html","keywords":"json在线解析","功能":["JSON美化","JSON数据类型显示","JSON数组显示角标","高亮显示","错误提示",{"备注":["www.sojson.com","json.la"]}],"加入我们":{"qq群":"259217951"}}'
+*/
+
 func main() {
-
-	/*
-		timer2 := time.NewTimer(time.Second)
-		go func() {
-			<-timer2.C
-			fmt.Println("Timer 2 expired")
-		}()
-		stop2 := timer2.Stop()
-		if stop2 {
-			fmt.Println("Timer 2 stopped")
-		}
-
-		/*
-			ticker := time.NewTicker(time.Millisecond * 500)
-			go func() {
-				for t := range ticker.C {
-					fmt.Println("Tick at", t)
-				}
-			}()
-			time.Sleep(time.Second)
-
-	*/
-	/*
-		for key, _ := range chanList {
-			temKey := key
-			chanList[temKey] = make(chan string, 5)
-			fmt.Println("chanList[temKey]: ", chanList[temKey])
-		}
-	*/
+	//获取执行目录
 	path, err := os.Executable()
 	if err != nil {
 		fmt.Println(err)
@@ -92,9 +77,53 @@ func main() {
 	// 配置读取加载
 	mgInit.ConfInit(ExeDir)
 
-	//限速设置
-	var lr rateLimit.LimitRate
-	lr.SetRate(viper.GetInt("const.rateLimiter"))
+	//读取命令参数
+	var message, wfUuid, messagekey string
+	var nodeId uint
+	//flag.StringVar(&wfId, "wfId", "", "workflow's id")
+	flag.StringVar(&message, "message", "", "workflow's input message")
+	//传递messageKey，从redis获取值
+	flag.StringVar(&messagekey, "messagekey", "", "workflow's input messagekey")
+	flag.StringVar(&wfUuid, "wfUuid", "", "workflow's single exect id")
+	flag.UintVar(&nodeId, "nodeId", 0, "workflow's nodeId")
+	flag.Parse()
+	fmt.Println(wfUuid, nodeId, message)
+
+	//fmt.Println("redisAddr: ", viper.GetString("redis.addr"))
+	//连接redis
+	rdb := redis.NewClient(&redis.Options{
+		Addr:       viper.GetString("redis.addr"),
+		Password:   viper.GetString("redis.password"), // no password set
+		DB:         viper.GetInt("redis.DB"),          // use default DB
+		MaxRetries: viper.GetInt("redis.maxRetries"),
+	})
+	var ctx = context.Background()
+
+	var messageObj = make(map[string]string)
+
+	if message != "" {
+		//json解析
+		jsonStr := []byte(message)
+		if err := json.Unmarshal(jsonStr, &messageObj); err != nil {
+			fmt.Println("unmarshal err: ", err)
+			log.Error("unmarshal err: ", err)
+		}
+	} else if messagekey != "" {
+		//从redis中获取消息内容
+		message, err = rdb.Get(ctx, "wf_node_"+messagekey).Result()
+		if err != nil {
+			fmt.Println("readRedis-error: ", err)
+			log.Error("readRedis-error:", err)
+			//panic(err)
+		}
+		//json解析
+		jsonStr := []byte(message)
+		if err := json.Unmarshal(jsonStr, &messageObj); err != nil {
+			fmt.Println("unmarshal err: ", err)
+			log.Error("unmarshal err: ", err)
+		}
+	}
+	fmt.Println(messageObj)
 
 	//监控
 	//https://www.cnblogs.com/52fhy/p/11828448.html
@@ -112,302 +141,104 @@ func main() {
 		http.ListenAndServe(":10109", nil)
 	}()
 
-	//初始化channel
-	ch0 = make(chan string)
-	ch1 = make(chan string)
-	ch2 = make(chan string)
-	ch3 = make(chan string)
-	ch4 = make(chan string)
-	ch5 = make(chan string)
-	ch6 = make(chan string)
-	ch7 = make(chan string)
-	ch8 = make(chan string)
-	ch9 = make(chan string)
-	ch10 = make(chan string)
-	ch11 = make(chan string)
-	ch12 = make(chan string)
-	ch13 = make(chan string)
-	ch14 = make(chan string)
-	ch15 = make(chan string)
-	ch16 = make(chan string)
-	ch17 = make(chan string)
-	ch18 = make(chan string)
-	ch19 = make(chan string)
-	//chN = make(chan string)
-	/*
-		ch0 = make(chan string, 5)
-		ch1 = make(chan string, 5)
-		ch2 = make(chan string, 5)
-		ch3 = make(chan string, 5)
-		ch4 = make(chan string, 5)
-		ch5 = make(chan string, 5)
-		ch6 = make(chan string, 5)
-		ch7 = make(chan string, 5)
-		ch8 = make(chan string, 5)
-		ch9 = make(chan string, 5)
-		chN = make(chan string, 5)
-	*/
-	//fmt.Println("redisAddr: ", viper.GetString("redis.addr"))
-	//连接redis
-	rdb := redis.NewClient(&redis.Options{
-		Addr:       viper.GetString("redis.addr"),
-		Password:   viper.GetString("redis.password"), // no password set
-		DB:         viper.GetInt("redis.DB"),          // use default DB
-		MaxRetries: viper.GetInt("redis.maxRetries"),
-	})
-	var ctx = context.Background()
-
-	//l := rate.NewLimiter(10000, 30000)
-
-	//读取redis数据
-	go readRedis(ctx, rdb, lr)
-
-	//阻塞读取channel数据
-	for {
-		select {
-		case val := <-ch0:
-			//延迟10ms，防止调用接口太频繁
-			time.Sleep(50 * time.Millisecond)
-			go requestOuterApiOnce(val, ctx, rdb)
-		case val := <-ch1:
-			//fmt.Println("get ch1: ", val)
-			time.Sleep(50 * time.Millisecond)
-			go requestOuterApiOnce(val, ctx, rdb)
-		case val := <-ch2:
-			time.Sleep(50 * time.Millisecond)
-			go requestOuterApiOnce(val, ctx, rdb)
-		case val := <-ch3:
-			time.Sleep(50 * time.Millisecond)
-			go requestOuterApiOnce(val, ctx, rdb)
-		case val := <-ch4:
-			time.Sleep(50 * time.Millisecond)
-			go requestOuterApiOnce(val, ctx, rdb)
-		case val := <-ch5:
-			time.Sleep(50 * time.Millisecond)
-			go requestOuterApiOnce(val, ctx, rdb)
-		case val := <-ch6:
-			time.Sleep(50 * time.Millisecond)
-			go requestOuterApiOnce(val, ctx, rdb)
-		case val := <-ch7:
-			time.Sleep(50 * time.Millisecond)
-			go requestOuterApiOnce(val, ctx, rdb)
-		case val := <-ch8:
-			//fmt.Println("get ch8: ", val)
-			time.Sleep(50 * time.Millisecond)
-			go requestOuterApiOnce(val, ctx, rdb)
-		case val := <-ch9:
-			time.Sleep(50 * time.Millisecond)
-			go requestOuterApiOnce(val, ctx, rdb)
-			/*
-				case <-time.After(10 * time.Second):
-					fmt.Println("For test env, Time out: ", "100s")
-					return
-
-			*/
-		case val := <-ch10:
-			time.Sleep(50 * time.Millisecond)
-			go requestOuterApiOnce(val, ctx, rdb)
-		case val := <-ch11:
-			time.Sleep(50 * time.Millisecond)
-			go requestOuterApiOnce(val, ctx, rdb)
-		case val := <-ch12:
-			time.Sleep(50 * time.Millisecond)
-			go requestOuterApiOnce(val, ctx, rdb)
-		case val := <-ch13:
-			time.Sleep(50 * time.Millisecond)
-			go requestOuterApiOnce(val, ctx, rdb)
-		case val := <-ch14:
-			time.Sleep(50 * time.Millisecond)
-			go requestOuterApiOnce(val, ctx, rdb)
-		case val := <-ch15:
-			time.Sleep(50 * time.Millisecond)
-			go requestOuterApiOnce(val, ctx, rdb)
-		case val := <-ch16:
-			time.Sleep(50 * time.Millisecond)
-			go requestOuterApiOnce(val, ctx, rdb)
-		case val := <-ch17:
-			time.Sleep(50 * time.Millisecond)
-			go requestOuterApiOnce(val, ctx, rdb)
-		case val := <-ch18:
-			time.Sleep(50 * time.Millisecond)
-			go requestOuterApiOnce(val, ctx, rdb)
-		case val := <-ch19:
-			time.Sleep(50 * time.Millisecond)
-			go requestOuterApiOnce(val, ctx, rdb)
-		}
-	}
+	//执行核心程序
+	ret := run(ctx, rdb, wfUuid, nodeId, messageObj)
 
 	//主协程休眠1s，保证调度成功
 	//time.Sleep(time.Second)
 
-	fmt.Println("runing: ", "end")
-	/*
-		defer func() {
-			close(ch0)
-			close(ch1)
-			close(ch2)
-			close(ch3)
-			close(ch4)
-			close(ch5)
-			close(ch6)
-			close(ch7)
-			close(ch8)
-			close(ch9)
-			close(chN)
-		}()
-	*/
-
-}
-
-//readRedis 读取redis数据，存入channel
-func readRedis(ctx context.Context, rdb *redis.Client, lr rateLimit.LimitRate) {
-	for {
-		var remainderInt = -1
-		var listValueStr = ""
-		/*
-			n := lr.Limit()
-			fmt.Println("nnnn----", n, "----nnnnn")
-		*/
-		/*
-			if l.AllowN(time.Now(), 20000) {
-				remainderInt, listValueStr = readRedisOnce(ctx, rdb)
-			} else {
-				fmt.Println("sleep: ", "500ms")
-				time.Sleep(2 * time.Millisecond)
-			}
-		*/
-		if lr.Limit() {
-			remainderInt, listValueStr = readRedisOnce(ctx, rdb)
-		} else {
-			fmt.Println("sleep: ", "50ms")
-			time.Sleep(50 * time.Millisecond)
-		}
-
-		fmt.Println("remainderInt: ", remainderInt)
-		log.Info("remainderInt:", remainderInt)
-
-		if remainderInt == 0 {
-			//fmt.Println("ch0: ", ch1)
-			ch0 <- listValueStr
-		}
-		if remainderInt == 1 {
-			//fmt.Println("ch1: ", ch1)
-			ch1 <- listValueStr
-		}
-		if remainderInt == 2 {
-			//fmt.Println("ch2: ", ch2)
-			ch2 <- listValueStr
-		}
-		if remainderInt == 3 {
-			//fmt.Println("ch3: ", ch3)
-			ch3 <- listValueStr
-		}
-		if remainderInt == 4 {
-			//fmt.Println("ch4: ", ch4)
-			ch4 <- listValueStr
-		}
-		if remainderInt == 5 {
-			//fmt.Println("ch5: ", ch5)
-			ch5 <- listValueStr
-		}
-		if remainderInt == 6 {
-			//fmt.Println("ch6: ", ch6)
-			ch6 <- listValueStr
-		}
-		if remainderInt == 7 {
-			//fmt.Println("ch7: ", ch7)
-			ch7 <- listValueStr
-		}
-		if remainderInt == 8 {
-			//fmt.Println("ch8: ", ch8)
-			ch8 <- listValueStr
-		}
-		if remainderInt == 9 {
-			//fmt.Println("ch9: ", ch9)
-			ch9 <- listValueStr
-		}
-		if remainderInt == 10 {
-			//fmt.Println("ch0: ", ch1)
-			ch10 <- listValueStr
-		}
-		if remainderInt == 11 {
-			//fmt.Println("ch1: ", ch1)
-			ch11 <- listValueStr
-		}
-		if remainderInt == 12 {
-			//fmt.Println("ch2: ", ch2)
-			ch12 <- listValueStr
-		}
-		if remainderInt == 13 {
-			//fmt.Println("ch3: ", ch3)
-			ch13 <- listValueStr
-		}
-		if remainderInt == 14 {
-			//fmt.Println("ch4: ", ch4)
-			ch14 <- listValueStr
-		}
-		if remainderInt == 15 {
-			//fmt.Println("ch5: ", ch5)
-			ch15 <- listValueStr
-		}
-		if remainderInt == 16 {
-			//fmt.Println("ch6: ", ch6)
-			ch16 <- listValueStr
-		}
-		if remainderInt == 17 {
-			//fmt.Println("ch7: ", ch7)
-			ch17 <- listValueStr
-		}
-		if remainderInt == 18 {
-			//fmt.Println("ch8: ", ch8)
-			ch18 <- listValueStr
-		}
-		if remainderInt == 19 {
-			//fmt.Println("ch9: ", ch9)
-			ch19 <- listValueStr
-		}
-		/*
-			if remainderInt == -1 {
-				chN <- listValueStr
-				fmt.Println("chN: ", chN)
-			}
-
-		*/
+	if ret == true {
+		os.Exit(0)
+	} else {
+		os.Exit(1)
 	}
+
+	//fmt.Println("runing: ", "end")
 }
 
-//readRedisOnce 读取redis数据
-//go 发起http请求 https://www.cnblogs.com/tigerzhouv587/p/11458772.html
-//go 发起http请求 https://blog.csdn.net/zangdaiyang1991/article/details/107071529/
-func readRedisOnce(ctx context.Context, rdb *redis.Client) (remainder int, listValue string) {
-	listValue, err := rdb.RPop(ctx, viper.GetString("redis.source_data_queue")).Result()
+//run 读取redis数据,执行节点操作
+func run(ctx context.Context, rdb *redis.Client, wfUuid string, nodeId uint, messageObj map[string]string) bool {
+	var inputDataSourceInfo map[string]string
+	//获取当前节点信息
+	stringValue, err := rdb.Get(ctx, "wf_node_"+string(nodeId)).Result()
 	/*
 		fmt.Println("listValue: ", listValue)
 		log.Info("listValue:", listValue)
 	*/
 	if err != nil {
-		//rdb.RPush(ctx, "list-key", listValue)
 		fmt.Println("readRedis-error: ", err)
 		log.Error("readRedis-error:", err)
 		//panic(err)
 	}
-	if listValue == "" {
-		remainder = -1
-		time.Sleep(1 * time.Second)
-		return
-	}
 	//json解析
-	jsonStr := []byte(listValue)
-	sourceDataObj := SourceData{}
-	if err := json.Unmarshal(jsonStr, &sourceDataObj); err != nil {
+	jsonStr := []byte(stringValue)
+	nodeInfoObj := NodeInfo{}
+	if err := json.Unmarshal(jsonStr, &nodeInfoObj); err != nil {
 		fmt.Println("unmarshal err: ", err)
 		log.Error("unmarshal err: ", err)
 	}
-	//求余数
-	remainder = sourceDataObj.MainId % 20
-	fmt.Println("readRedisData: ", remainder, sourceDataObj)
-	//log.Info("readRedisData: ", remainder, sourceDataObj)
-	return
+	//处理输入数据源信息
+	if nodeInfoObj.IsFirstNode > 0 {
+		//输入信息写入redis hash key
+		_, err = rdb.HSet(ctx, "wf_node_"+wfUuid, messageObj).Result()
+		inputDataSourceInfo = messageObj
+	} else {
+		//获取数据源信息
+		inputDataSourceInfo, err = rdb.HGetAll(ctx, "wf_node_"+wfUuid).Result()
+		if err != nil {
+			fmt.Println("readRedis-error: ", err)
+			log.Error("readRedis-error:", err)
+			//panic(err)
+		}
+	}
+	//解析依赖节点信息
+	//if isStringInSlice(nodeInfoObj.nodeType, []string{"condition", "executor"}) {
+	if nodeInfoObj.NodeType == "condition" {
+		ruleEnginRet := callRuleEngin(nodeInfoObj.ConditionInfo, inputDataSourceInfo)
+		//存储数据源信息?,不改变数据源数据
+		return ruleEnginRet
+
+	} else if nodeInfoObj.NodeType == "executor" {
+		//调用执行服务获取结果，消息中间件
+		executorRet := callExecutor(nodeInfoObj.ExecutorInfo, inputDataSourceInfo)
+		//存储数据源信息?,不改变数据源数据
+		return executorRet
+
+	} else if nodeInfoObj.NodeType == "delay" {
+		//延迟返回结果
+		if nodeInfoObj.DelayInfo.Duar != 0 {
+			time.Sleep(time.Duration(nodeInfoObj.DelayInfo.Duar) * time.Second)
+		} else {
+			for int64(nodeInfoObj.DelayInfo.TimeAt) < time.Now().Unix() {
+				time.Sleep(1 * time.Second)
+			}
+		}
+		//不更新数据源
+		return true
+	}
+	return true
+}
+
+//调用规则引擎
+func callRuleEngin(ConditionInfo ConditionInfo, inputDataSourceInfo map[string]string) bool {
+
+	return true
+}
+
+//调用执行器
+func callExecutor(ExecutorInfo ExecutorInfo, inputDataSourceInfo map[string]string) bool {
+
+	return true
+}
+
+//判断操作符是否在切片中
+func isStringInSlice(target string, str_array []string) bool {
+	sort.Strings(str_array)
+	index := sort.SearchStrings(str_array, target)
+	if index < len(str_array) && str_array[index] == target {
+		return true
+	}
+	return false
 }
 
 //requestOuterApiOnce  请求外部API
