@@ -3,6 +3,7 @@ package init
 import (
 	esModel "meigo/library/es"
 	marketingToolDataModel "meigo/models/marketing_tool_data"
+	wfModel "meigo/models/wf"
 	//peopleModel "meigo/models/people"
 )
 
@@ -13,6 +14,9 @@ func DBInit() {
 
 	// 业务逻辑，初始化 MarketingToolData 的数据库连接
 	marketingToolDataModel.InitMarketingToolDataDB()
+
+	// 业务逻辑，初始化 wf 的数据库连接
+	wfModel.InitWfDB()
 
 	esModel.ESInit()
 

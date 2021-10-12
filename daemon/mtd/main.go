@@ -60,6 +60,7 @@ type ExecutorInfo struct {
 }
 
 var ExeDir string
+var wf_prefix string
 
 /*
 ./bin/mtd -wfUuid='wew'  -nodeId='234' -message='{"title":"json在线解析（简 版） -JSON在线解析","json.url":"https://www.sojson.com/simple_json.html","keywords":"json在线解析","功能":["JSON美化","JSON数据类型显示","JSON数组显示角标","高亮显示","错误提示",{"备注":["www.sojson.com","json.la"]}],"加入我们":{"qq群":"259217951"}}'
@@ -89,6 +90,9 @@ func main() {
 	flag.Parse()
 	fmt.Println(wfUuid, nodeId, message)
 
+	//work flow redis prefix
+	wf_prefix = viper.GetString("redis.wf_prefix")
+
 	//fmt.Println("redisAddr: ", viper.GetString("redis.addr"))
 	//连接redis
 	rdb := redis.NewClient(&redis.Options{
@@ -110,7 +114,7 @@ func main() {
 		}
 	} else if messagekey != "" {
 		//从redis中获取消息内容
-		message, err = rdb.Get(ctx, "wf_node_"+messagekey).Result()
+		message, err = rdb.Get(ctx, messagekey).Result()
 		if err != nil {
 			fmt.Println("readRedis-error: ", err)
 			log.Error("readRedis-error:", err)
@@ -160,7 +164,7 @@ func main() {
 func run(ctx context.Context, rdb *redis.Client, wfUuid string, nodeId uint, messageObj map[string]string) bool {
 	var inputDataSourceInfo map[string]string
 	//获取当前节点信息
-	stringValue, err := rdb.Get(ctx, "wf_node_"+string(nodeId)).Result()
+	stringValue, err := rdb.Get(ctx, wf_prefix+string(nodeId)).Result()
 	/*
 		fmt.Println("listValue: ", listValue)
 		log.Info("listValue:", listValue)
@@ -180,11 +184,11 @@ func run(ctx context.Context, rdb *redis.Client, wfUuid string, nodeId uint, mes
 	//处理输入数据源信息
 	if nodeInfoObj.IsFirstNode > 0 {
 		//输入信息写入redis hash key
-		_, err = rdb.HSet(ctx, "wf_node_"+wfUuid, messageObj).Result()
+		_, err = rdb.HSet(ctx, wf_prefix+wfUuid, messageObj).Result()
 		inputDataSourceInfo = messageObj
 	} else {
 		//获取数据源信息
-		inputDataSourceInfo, err = rdb.HGetAll(ctx, "wf_node_"+wfUuid).Result()
+		inputDataSourceInfo, err = rdb.HGetAll(ctx, wf_prefix+wfUuid).Result()
 		if err != nil {
 			fmt.Println("readRedis-error: ", err)
 			log.Error("readRedis-error:", err)

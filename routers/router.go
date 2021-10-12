@@ -23,6 +23,7 @@ func InitRouter() *gin.Engine {
 	//peopleRouter(g)
 	exampleRouter(g)
 	mtdRouter(g)
+	wfRouter(g)
 
 	return g
 }
