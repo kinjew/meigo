@@ -6,7 +6,6 @@ import (
 	"fmt"
 	"meigo/library/db/common"
 	"meigo/library/log"
-	"os"
 	"strconv"
 	"strings"
 	"time"
@@ -41,7 +40,15 @@ type Flow struct {
 	Content      string `gorm:"column:content;" json:"content" form:"content"`
 	Creator      string `gorm:"column:creator;" json:"creator" form:"creator"`
 	Modifier     string `gorm:"column:modifier;" json:"modifier" form:"modifier"`
-	IsDel        int8   `gorm:"column:is_del;" json:"is_del" form:"is_del"`
+	IsDel        int    `gorm:"column:is_del;" json:"is_del" form:"is_del"`
+}
+
+// FlowYaml 实体
+type FlowYaml struct {
+	common.BaseModelV1
+	FlowId      int    `gorm:"column:flow_id;" json:"flow_id" form:"flow_id" `
+	YamlContent string `gorm:"column:yaml_content;" json:"yaml_content" form:"yaml_content"`
+	IsDel       int    `gorm:"column:is_del;" json:"is_del" form:"is_del"`
 }
 
 //ActionLiveData 实体表需要返回的有限字段
@@ -56,6 +63,8 @@ func (n *Node) ArgoYaml(c *ctxExt.Context) (flag bool, err error) {
 
 	//work flow redis prefix
 	wf_prefix := viper.GetString("redis.wf_prefix")
+	//fmt.Println("wf_prefix: ", viper.GetString("redis.wf_prefix"))
+
 	//连接redis
 	rdb := redis.NewClient(&redis.Options{
 		Addr:       viper.GetString("redis.addr"),
@@ -104,7 +113,9 @@ func (n *Node) ArgoYaml(c *ctxExt.Context) (flag bool, err error) {
 		nodeInfoMap[v.ID] = v
 		//获取当前节点信息
 		json_str, _ := json.Marshal(v)
-		_ = rdb.Set(ctx, wf_prefix+string(nodeId), json_str, time.Duration(3600)*time.Second).Err()
+		//println(strconv.Itoa(v.ID))
+		//println(v.ID, wf_prefix+strconv.Itoa(v.ID), json_str)
+		_ = rdb.Set(ctx, wf_prefix+strconv.Itoa(v.ID), json_str, time.Duration(86400)*time.Second).Err()
 	}
 	//根据依赖关系定义dag
 	/*
@@ -316,8 +327,27 @@ spec:
 	wfDagTemplate := strings.Join(strDagTemplate, "")
 	var wfYamlTmp = []string{wfhead, wfTemplate, wfDagTemplate}
 	wfYaml := strings.Join(wfYamlTmp, "")
+	//存储工作流模版
+	var flowYaml FlowYaml
+	flowYamlTemp := FlowYaml{FlowId: flow_id, YamlContent: wfYaml}
+	err = sqlDB.Table("flow_yaml").Where("flow_id = ?", flow_id).Select("* ").First(&flowYaml).Error //Map查询
+	if err == nil && flowYaml.ID > 0 {
+		//更新流程内容
+		flowYamlTemp.UpdatedAt = int(time.Now().Unix())
+		err = sqlDB.Table("flow_yaml").Updates(flowYamlTemp).Where("id = ?", flowYaml.ID).Error
+		if err != nil {
+			return false, err
+		}
+	} else {
+		//新建流程内容
+		flowYamlTemp.CreatedAt = int(time.Now().Unix())
+		err = sqlDB.Table("flow_yaml").Create(&flowYamlTemp).Error
+		if err != nil {
+			return false, err
+		}
+	}
 	//println(wfYaml)
-	fmt.Fprintf(os.Stdout, wfYaml)
+	//fmt.Fprintf(os.Stdout, wfYaml)
 	return true, err
 }
 

@@ -8,6 +8,7 @@ import (
 	"fmt"
 	"io"
 	"io/ioutil"
+	"meigo/library/db/common"
 	mgInit "meigo/library/init"
 	"meigo/library/log"
 	"net/http"
@@ -15,6 +16,8 @@ import (
 	"os"
 	"path/filepath"
 	"sort"
+	"strconv"
+	"syscall"
 	"time"
 
 	"github.com/prometheus/client_golang/prometheus/promhttp"
@@ -26,19 +29,21 @@ import (
 	"github.com/go-redis/redis/v8"
 )
 
-// NodeInfo 实体
-type NodeInfo struct {
-	NodeId        int    `gorm:"column:node_id;" json:"node_id" form:"node_id"`
-	ParentNodeIds string `gorm:"column:parent_node_ids;" json:"parent_node_ids" form:"parent_node_ids" `
-	NodeName      string `gorm:"column:node_name;" json:"node_name" form:"node_name"`
-	NodeType      string `gorm:"column:node_type;" json:"node_type" form:"node_type"`
-	IsFirstNode   int    `gorm:"column:is_first_node;" json:"is_first_node" form:"is_first_node"`
-	ConditionInfo ConditionInfo
-	DelayInfo     DelayInfo
-	ExecutorInfo  ExecutorInfo
+// Node 实体
+type Node struct {
+	common.BaseModelV1
+	ParentId     string `gorm:"column:parent_id;" json:"parent_id" form:"parent_id" binding:"required"`
+	FlowId       int    `gorm:"column:flow_id;" json:"flow_id" form:"flow_id" `
+	NodeName     string `gorm:"column:node_name;" json:"node_name" form:"node_name"`
+	NodeType     string `gorm:"column:node_type;" json:"node_type" form:"node_type"`
+	NodeClassify int    `gorm:"column:node_classify;" json:"node_classify" form:"node_classify"`
+	Rules        string `gorm:"column:rules;" json:"rules" form:"rules"`
+	Creator      string `gorm:"column:creator;" json:"creator" form:"creator"`
+	Modifier     string `gorm:"column:modifier;" json:"modifier" form:"modifier"`
+	IsDel        int    `gorm:"column:is_del;" json:"is_del" form:"is_del"`
 }
 
-// DelayInfo 实体
+// ConditionInfo 实体
 type ConditionInfo struct {
 	//单位是秒
 	Duar   int `gorm:"column:duar;" json:"duar" form:"duar"`
@@ -48,11 +53,11 @@ type ConditionInfo struct {
 // DelayInfo 实体
 type DelayInfo struct {
 	//单位是秒
-	Duar   int `gorm:"column:duar;" json:"duar" form:"duar"`
-	TimeAt int `gorm:"column:time_at;" json:"time_at" form:"time_at"`
+	TimerType  string `gorm:"column:timer_type;" json:"timer_type" form:"timer_type"`
+	TimerValue int    `gorm:"column:timer_value;" json:"timer_value" form:"timer_value"`
 }
 
-// DelayInfo 实体
+// ExecutorInfo 实体
 type ExecutorInfo struct {
 	//单位是秒
 	Duar   int `gorm:"column:duar;" json:"duar" form:"duar"`
@@ -80,13 +85,13 @@ func main() {
 
 	//读取命令参数
 	var message, wfUuid, messagekey string
-	var nodeId uint
+	var nodeId int
 	//flag.StringVar(&wfId, "wfId", "", "workflow's id")
 	flag.StringVar(&message, "message", "", "workflow's input message")
 	//传递messageKey，从redis获取值
 	flag.StringVar(&messagekey, "messagekey", "", "workflow's input messagekey")
 	flag.StringVar(&wfUuid, "wfUuid", "", "workflow's single exect id")
-	flag.UintVar(&nodeId, "nodeId", 0, "workflow's nodeId")
+	flag.IntVar(&nodeId, "nodeId", 0, "workflow's nodeId")
 	flag.Parse()
 	fmt.Println(wfUuid, nodeId, message)
 
@@ -127,7 +132,7 @@ func main() {
 			log.Error("unmarshal err: ", err)
 		}
 	}
-	fmt.Println(messageObj)
+	//fmt.Println(messageObj)
 
 	//监控
 	//https://www.cnblogs.com/52fhy/p/11828448.html
@@ -152,19 +157,20 @@ func main() {
 	//time.Sleep(time.Second)
 
 	if ret == true {
-		os.Exit(0)
+		syscall.Exit(0)
 	} else {
-		os.Exit(1)
+		syscall.Exit(200)
 	}
 
 	//fmt.Println("runing: ", "end")
 }
 
 //run 读取redis数据,执行节点操作
-func run(ctx context.Context, rdb *redis.Client, wfUuid string, nodeId uint, messageObj map[string]string) bool {
+func run(ctx context.Context, rdb *redis.Client, wfUuid string, nodeId int, messageObj map[string]string) bool {
 	var inputDataSourceInfo map[string]string
 	//获取当前节点信息
-	stringValue, err := rdb.Get(ctx, wf_prefix+string(nodeId)).Result()
+	stringValue, err := rdb.Get(ctx, wf_prefix+strconv.Itoa(nodeId)).Result()
+	println(stringValue)
 	/*
 		fmt.Println("listValue: ", listValue)
 		log.Info("listValue:", listValue)
@@ -176,13 +182,14 @@ func run(ctx context.Context, rdb *redis.Client, wfUuid string, nodeId uint, mes
 	}
 	//json解析
 	jsonStr := []byte(stringValue)
-	nodeInfoObj := NodeInfo{}
+	nodeInfoObj := Node{}
 	if err := json.Unmarshal(jsonStr, &nodeInfoObj); err != nil {
 		fmt.Println("unmarshal err: ", err)
 		log.Error("unmarshal err: ", err)
 	}
+	fmt.Println(nodeInfoObj)
 	//处理输入数据源信息
-	if nodeInfoObj.IsFirstNode > 0 {
+	if nodeInfoObj.ParentId == "" {
 		//输入信息写入redis hash key
 		_, err = rdb.HSet(ctx, wf_prefix+wfUuid, messageObj).Result()
 		inputDataSourceInfo = messageObj
@@ -197,23 +204,41 @@ func run(ctx context.Context, rdb *redis.Client, wfUuid string, nodeId uint, mes
 	}
 	//解析依赖节点信息
 	//if isStringInSlice(nodeInfoObj.nodeType, []string{"condition", "executor"}) {
-	if nodeInfoObj.NodeType == "condition" {
-		ruleEnginRet := callRuleEngin(nodeInfoObj.ConditionInfo, inputDataSourceInfo)
+	if nodeInfoObj.NodeType == "condition" || nodeInfoObj.NodeType == "condition_exclusion" {
+		ruleEnginRet := callRuleEngin(nodeInfoObj.Rules, inputDataSourceInfo)
 		//存储数据源信息?,不改变数据源数据
 		return ruleEnginRet
 
 	} else if nodeInfoObj.NodeType == "executor" {
 		//调用执行服务获取结果，消息中间件
-		executorRet := callExecutor(nodeInfoObj.ExecutorInfo, inputDataSourceInfo)
+		executorRet := callExecutor(nodeInfoObj.Rules, inputDataSourceInfo)
 		//存储数据源信息?,不改变数据源数据
 		return executorRet
 
 	} else if nodeInfoObj.NodeType == "delay" {
+		fmt.Println(6666)
+		fmt.Println(nodeInfoObj.Rules)
 		//延迟返回结果
-		if nodeInfoObj.DelayInfo.Duar != 0 {
-			time.Sleep(time.Duration(nodeInfoObj.DelayInfo.Duar) * time.Second)
-		} else {
-			for int64(nodeInfoObj.DelayInfo.TimeAt) < time.Now().Unix() {
+		type Delay struct {
+			Constraints DelayInfo ` json:"constraints"`
+		}
+		var delayObj Delay
+		//var delayObj map[string]map[string]string
+		//json解码
+		err := json.Unmarshal([]byte(nodeInfoObj.Rules), &delayObj)
+		if err != nil {
+			log.Error("json.Unmarshal-error:", err)
+			return false
+		}
+		fmt.Println(7777, delayObj.Constraints.TimerType, delayObj.Constraints.TimerValue)
+		fmt.Println(delayObj)
+		//timerValueInt, _ := strconv.Atoi(delayObj.Constraints.TimerValue)
+		//延迟处理
+		if delayObj.Constraints.TimerType == "duration" {
+			time.Sleep(time.Duration(delayObj.Constraints.TimerValue) * time.Second)
+		} else if delayObj.Constraints.TimerType == "fixed_time" {
+			//fmt.Println(int64(delayObj.Constraints.TimerValue), time.Now().Unix())
+			for int64(delayObj.Constraints.TimerValue) > time.Now().Unix() {
 				time.Sleep(1 * time.Second)
 			}
 		}
@@ -224,15 +249,15 @@ func run(ctx context.Context, rdb *redis.Client, wfUuid string, nodeId uint, mes
 }
 
 //调用规则引擎
-func callRuleEngin(ConditionInfo ConditionInfo, inputDataSourceInfo map[string]string) bool {
+func callRuleEngin(Rules string, inputDataSourceInfo map[string]string) bool {
 
 	return true
 }
 
 //调用执行器
-func callExecutor(ExecutorInfo ExecutorInfo, inputDataSourceInfo map[string]string) bool {
+func callExecutor(Rules string, inputDataSourceInfo map[string]string) bool {
 
-	return true
+	return false
 }
 
 //判断操作符是否在切片中

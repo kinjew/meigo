@@ -49,7 +49,7 @@ func LoadConfigFile(MainDir string) {
 	confDir := MainDir + "/conf/"
 	//mac本地调试使用
 	if runtime.GOOS == "darwin" {
-		confDir = "/Users/danderui/test/meigo/conf/"
+		confDir = "/Users/danderui/kinjew/meigo/conf/"
 	}
 	viper.AddConfigPath(confDir)
 	viper.SetConfigName("conf")
