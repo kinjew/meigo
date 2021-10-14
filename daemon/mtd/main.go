@@ -84,12 +84,12 @@ func main() {
 	mgInit.ConfInit(ExeDir)
 
 	//读取命令参数
-	var message, wfUuid, messagekey string
+	var message, wfUuid string
 	var nodeId int
 	//flag.StringVar(&wfId, "wfId", "", "workflow's id")
 	flag.StringVar(&message, "message", "", "workflow's input message")
 	//传递messageKey，从redis获取值
-	flag.StringVar(&messagekey, "messagekey", "", "workflow's input messagekey")
+	//flag.StringVar(&messagekey, "messagekey", "", "workflow's input messagekey")
 	flag.StringVar(&wfUuid, "wfUuid", "", "workflow's single exect id")
 	flag.IntVar(&nodeId, "nodeId", 0, "workflow's nodeId")
 	flag.Parse()
@@ -109,27 +109,30 @@ func main() {
 	var ctx = context.Background()
 
 	var messageObj = make(map[string]string)
+	if message == "" {
+		//除第一个节点外，其他节点的message参数可以为空
+		fmt.Println("message is null")
+	} else {
+		//json解析
+		jsonStr := []byte(message)
+		if err := json.Unmarshal(jsonStr, &messageObj); err != nil {
+			fmt.Println("unmarshal err: ", err)
+			log.Error("unmarshal err: ", err)
 
-	if message != "" {
-		//json解析
-		jsonStr := []byte(message)
-		if err := json.Unmarshal(jsonStr, &messageObj); err != nil {
-			fmt.Println("unmarshal err: ", err)
-			log.Error("unmarshal err: ", err)
-		}
-	} else if messagekey != "" {
-		//从redis中获取消息内容
-		message, err = rdb.Get(ctx, messagekey).Result()
-		if err != nil {
-			fmt.Println("readRedis-error: ", err)
-			log.Error("readRedis-error:", err)
-			//panic(err)
-		}
-		//json解析
-		jsonStr := []byte(message)
-		if err := json.Unmarshal(jsonStr, &messageObj); err != nil {
-			fmt.Println("unmarshal err: ", err)
-			log.Error("unmarshal err: ", err)
+			//从redis中获取消息内容
+			messageResult, err := rdb.Get(ctx, message).Result()
+			if err != nil {
+				fmt.Println("readRedis-error: ", err)
+				log.Error("readRedis-error:", err)
+				syscall.Exit(400)
+			}
+			//json解析
+			jsonStr := []byte(messageResult)
+			if err := json.Unmarshal(jsonStr, &messageObj); err != nil {
+				fmt.Println("unmarshal err: ", err)
+				log.Error("unmarshal err: ", err)
+				syscall.Exit(400)
+			}
 		}
 	}
 	//fmt.Println(messageObj)
@@ -216,7 +219,6 @@ func run(ctx context.Context, rdb *redis.Client, wfUuid string, nodeId int, mess
 		return executorRet
 
 	} else if nodeInfoObj.NodeType == "delay" {
-		fmt.Println(6666)
 		fmt.Println(nodeInfoObj.Rules)
 		//延迟返回结果
 		type Delay struct {
@@ -230,8 +232,8 @@ func run(ctx context.Context, rdb *redis.Client, wfUuid string, nodeId int, mess
 			log.Error("json.Unmarshal-error:", err)
 			return false
 		}
-		fmt.Println(7777, delayObj.Constraints.TimerType, delayObj.Constraints.TimerValue)
-		fmt.Println(delayObj)
+		fmt.Println(delayObj.Constraints.TimerType, delayObj.Constraints.TimerValue)
+		//fmt.Println(delayObj)
 		//timerValueInt, _ := strconv.Atoi(delayObj.Constraints.TimerValue)
 		//延迟处理
 		if delayObj.Constraints.TimerType == "duration" {

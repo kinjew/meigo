@@ -51,10 +51,6 @@ type FlowYaml struct {
 	IsDel       int    `gorm:"column:is_del;" json:"is_del" form:"is_del"`
 }
 
-//ActionLiveData 实体表需要返回的有限字段
-var ActionLiveDataColumn = "action_data_id,live_platform_type,is_watch_live,is_watch_replay,last_live_watch_client,last_live_leave_time,last_live_login_city,live_watch_time," +
-	"live_watch_times,first_live_enter_time,first_replay_enter_time,replay_watch_time,replay_watch_times,last_replay_watch_client,last_replay_login_city"
-
 /*
 ArgoYaml 生产yaml文件
 */
@@ -142,8 +138,7 @@ spec:
   arguments:
     parameters:
     - name: message
-      value: hello world
-
+      value: '{"test":"hello word"}'
   templates:
 `
 	/*
@@ -163,49 +158,68 @@ spec:
 `
 	//nodeOne是第一个节点，输入依赖于参数传递（取传递进入的参数）
 
-	var artifactItemTemplate = `      - name: %s
-        path: /tmp/%s
-`
-	var parametersItemTemplate = `      - name: %s
-        valueFrom:
-          path: /tmp/%s
-`
+	/*
+			var artifactItemTemplate = `      - name: %s
+				        path: /tmp/%s
+				`
+
+			var parametersItemTemplate = `      - name: %s
+		        valueFrom:
+		          path: /tmp/%s
+		`
+	*/
 	//dag相关
-	var artifactArgumentsTemplate = `          - name: %s
-            from: "{{tasks.%s.outputs.artifacts.%s}}"
-`
-	var parametersArgumentsTemplate = `          - name: %s
-            value: "{{tasks.%s.outputs.parameters.%s}}"
-`
+	/*
+					var artifactArgumentsTemplate = `          - name: %s
+				            from: "{{tasks.%s.outputs.artifacts.%s}}"
+				`
+					var parametersArgumentsTemplate = `          - name: %s
+				            value: "{{tasks.%s.outputs.parameters.%s}}"
+				`
+			var templateBodyFirst = `
+		    inputs:
+		      parameters:
+		      - name: message       # parameter declaration
+		    container:
+		      image: wf:1.0
+		      command: ["/app/wf-server/bin/wf"]
+		      args: ["-wfUuid={{workflow.name}}","-nodeId=%s","{{inputs.parameters.message}}"]
+		    outputs:
+		      artifacts:
+		%s
+		      parameters:
+		%s
+		`
+			var templateBodyMiddle = `
+		    inputs:
+		      artifacts:
+		%s
+		    container:
+		      image: wf:1.0
+		      command: ["/app/wf-server/bin/wf"]
+		      args: ["-wfUuid={{workflow.name}}","-nodeId=%s"]
+		    outputs:
+		      artifacts:
+		%s
+		      parameters:
+		%s
+		`
+	*/
 
 	var templateBodyFirst = `
     inputs:
       parameters:
       - name: message       # parameter declaration
     container:
-      image: docker/whalesay:latest
-      command: [sh, -c]
-      args: ["cowsay %s {{workflow.name}} {{inputs.parameters.message}} | tee /tmp/%s"]
-    outputs:
-      artifacts:
-%s
-      parameters:
-%s
+      image: wf:1.0
+      command: ["/app/wf-server/bin/wf"]
+      args: ["-wfUuid={{workflow.name}}","-nodeId=%s","-message={{inputs.parameters.message}}"]
 `
-
 	var templateBodyMiddle = `
-    inputs:
-      artifacts:
-%s
     container:
-      image: docker/whalesay:latest
-      command: [sh, -c]
-      args: ["cowsay %s {{workflow.name}} | tee /tmp/%s"]
-    outputs:
-      artifacts:
-%s
-      parameters:
-%s
+      image: wf:1.0
+      command: ["/app/wf-server/bin/wf"]
+      args: ["-wfUuid={{workflow.name}}","-nodeId=%s"]
 `
 	var dagTemplateBodyFirst = `
         arguments:
@@ -213,15 +227,19 @@ spec:
 %s
           parameters: [{name: message, value: "{{workflow.parameters.message}}"}]
 `
-	var dagTemplateBodyMiddle = `
-        arguments:
-          artifacts:
-%s
-          parameters:
-%s
-`
+	/*
+			var dagTemplateBodyMiddle = `
+		        arguments:
+		          artifacts:
+		%s
+		          parameters:
+		%s
+		`
+	*/
 	//变量预定义
-	var dagTemplateOneHeader, dependencyInput, dagDependencyInputArtifacts, dagDependencyInputParams, currentTemplate, currentOutputArtifacts, currentOutputParams string
+	//var dagTemplateOneHeader, dependencyInput, dagDependencyInputArtifacts, dagDependencyInputParams, currentTemplate, currentOutputArtifacts, currentOutputParams string
+	var dagTemplateOneHeader string
+
 	var strTemplate, strDagTemplate []string
 	strTemplate = append(strTemplate, WfSpecHeader)
 	strDagTemplate = append(strDagTemplate, dagheader)
@@ -232,17 +250,19 @@ spec:
 		//节点名称
 		//templateName := v.NodeName + strconv.Itoa(int(v.ID))
 		templateName := "template" + strconv.Itoa(int(v.ID))
-		currentTemplate = templateName
+		//currentTemplate = templateName
 		//根节点处理
 		if v.ParentId == "" {
 			//生成模版体
 			//templateOne不依赖任何节点
 			var templateOneHeader = "  - name: " + templateName
-			//生成制品
-			currentOutputArtifacts = fmt.Sprintf(artifactItemTemplate, templateName, templateName)
-			//生成输出参数
-			currentOutputParams = fmt.Sprintf(parametersItemTemplate, templateName, templateName)
-			templateOneBody := fmt.Sprintf(templateBodyFirst, currentTemplate, currentTemplate, currentOutputArtifacts, currentOutputParams)
+			/*
+				//生成制品
+				currentOutputArtifacts = fmt.Sprintf(artifactItemTemplate, templateName, templateName)
+				//生成输出参数
+				currentOutputParams = fmt.Sprintf(parametersItemTemplate, templateName, templateName)
+			*/
+			templateOneBody := fmt.Sprintf(templateBodyFirst, strconv.Itoa(int(v.ID)))
 			//生成dag模版
 			dagTemplateOneHeader = fmt.Sprintf(dagTemplateHeader, templateName, templateName)
 			dagTemplateOneBody := fmt.Sprintf(dagTemplateBodyFirst, "")
@@ -258,23 +278,27 @@ spec:
 				templateDependency := "template" + strconv.Itoa(nodeInfoMap[ParentIdInt].ID)
 				//构造dag模版
 				dagTemplateHeader := fmt.Sprintf(dagDependencyTemplateHeader, templateName, templateName, templateDependency)
-				dagDependencyInputArtifacts = fmt.Sprintf(artifactArgumentsTemplate, templateDependency, templateDependency, templateDependency)
-				dagDependencyInputParams = fmt.Sprintf(parametersArgumentsTemplate, templateDependency, templateDependency, templateDependency)
-				dagTemplateBody := fmt.Sprintf(dagTemplateBodyMiddle, dagDependencyInputArtifacts, dagDependencyInputParams)
+				/*
+					dagDependencyInputArtifacts = fmt.Sprintf(artifactArgumentsTemplate, templateDependency, templateDependency, templateDependency)
+					dagDependencyInputParams = fmt.Sprintf(parametersArgumentsTemplate, templateDependency, templateDependency, templateDependency)
+					dagTemplateBody := fmt.Sprintf(dagTemplateBodyMiddle, dagDependencyInputArtifacts, dagDependencyInputParams)
+				*/
 
 				//构造模版头
 				var templateHeader = "  - name: " + templateName
-				dependencyInput = fmt.Sprintf(artifactItemTemplate, templateDependency, templateDependency)
-				//生成制品
-				currentOutputArtifacts = fmt.Sprintf(artifactItemTemplate, templateName, templateName)
-				//生成输出参数
-				currentOutputParams = fmt.Sprintf(parametersItemTemplate, templateName, templateName)
+				/*
+					dependencyInput = fmt.Sprintf(artifactItemTemplate, templateDependency, templateDependency)
+					//生成制品
+					currentOutputArtifacts = fmt.Sprintf(artifactItemTemplate, templateName, templateName)
+					//生成输出参数
+					currentOutputParams = fmt.Sprintf(parametersItemTemplate, templateName, templateName)
+				*/
 				//生成模版体
-				templateBody := fmt.Sprintf(templateBodyMiddle, dependencyInput, currentTemplate, currentTemplate, currentOutputArtifacts, currentOutputParams)
+				templateBody := fmt.Sprintf(templateBodyMiddle, strconv.Itoa(int(v.ID)))
 				//压入切片
 				strTemplate = append(strTemplate, templateHeader, templateBody)
-				strDagTemplate = append(strDagTemplate, dagTemplateHeader, dagTemplateBody)
-
+				//strDagTemplate = append(strDagTemplate, dagTemplateHeader, dagTemplateBody)
+				strDagTemplate = append(strDagTemplate, dagTemplateHeader)
 			} else {
 				//存在多个父节点
 				var tmpStrSlice []string
@@ -287,36 +311,41 @@ spec:
 				var templateHeader = "  - name: " + templateName
 				//templateFour依赖于templateTwo和templateThree的输入
 				//构造依赖项
-				var strSlice = []string{}
-				var strSliceDagArtifacts = []string{}
-				var strSliceDagParams = []string{}
-				for _, tempItem := range tmpStrSlice {
-					dependencyInputTemp := fmt.Sprintf(artifactItemTemplate, tempItem, tempItem)
-					strSlice = append(strSlice, dependencyInputTemp)
+				/*
+					var strSlice = []string{}
+					var strSliceDagArtifacts = []string{}
+					var strSliceDagParams = []string{}
 
-					dagDependencyInputArtifactsTemp := fmt.Sprintf(artifactArgumentsTemplate, tempItem, tempItem, tempItem)
-					strSliceDagArtifacts = append(strSliceDagArtifacts, dagDependencyInputArtifactsTemp)
+						for _, tempItem := range tmpStrSlice {
+							dependencyInputTemp := fmt.Sprintf(artifactItemTemplate, tempItem, tempItem)
+							strSlice = append(strSlice, dependencyInputTemp)
 
-					dagDependencyInputParamsTemp := fmt.Sprintf(parametersArgumentsTemplate, tempItem, tempItem, tempItem)
-					strSliceDagParams = append(strSliceDagParams, dagDependencyInputParamsTemp)
+							dagDependencyInputArtifactsTemp := fmt.Sprintf(artifactArgumentsTemplate, tempItem, tempItem, tempItem)
+							strSliceDagArtifacts = append(strSliceDagArtifacts, dagDependencyInputArtifactsTemp)
 
-				}
-				dependencyInput = strings.Join(strSlice, "")
-				//生成制品
-				currentOutputArtifacts = fmt.Sprintf(artifactItemTemplate, templateName, templateName)
-				//生成输出参数
-				currentOutputParams = fmt.Sprintf(parametersItemTemplate, templateName, templateName)
+							dagDependencyInputParamsTemp := fmt.Sprintf(parametersArgumentsTemplate, tempItem, tempItem, tempItem)
+							strSliceDagParams = append(strSliceDagParams, dagDependencyInputParamsTemp)
+
+						}
+					dependencyInput = strings.Join(strSlice, "")
+						//生成制品
+						currentOutputArtifacts = fmt.Sprintf(artifactItemTemplate, templateName, templateName)
+						//生成输出参数
+						currentOutputParams = fmt.Sprintf(parametersItemTemplate, templateName, templateName)
+				*/
 				//生成模版体
-				templateBody := fmt.Sprintf(templateBodyMiddle, dependencyInput, currentTemplate, currentTemplate, currentOutputArtifacts, currentOutputParams)
-				//构造制品
-				dagDependencyInputArtifacts = strings.Join(strSliceDagArtifacts, "")
-				//构造输入参数
-				dagDependencyInputParams = strings.Join(strSliceDagParams, "")
-				//生成dag模版体
-				dagTemplateBody := fmt.Sprintf(dagTemplateBodyMiddle, dagDependencyInputArtifacts, dagDependencyInputParams)
+				templateBody := fmt.Sprintf(templateBodyMiddle, strconv.Itoa(int(v.ID)))
+				/*
+					//构造制品
+					dagDependencyInputArtifacts = strings.Join(strSliceDagArtifacts, "")
+					//构造输入参数
+					dagDependencyInputParams = strings.Join(strSliceDagParams, "")
+					//生成dag模版体
+					dagTemplateBody := fmt.Sprintf(dagTemplateBodyMiddle, dagDependencyInputArtifacts, dagDependencyInputParams)
+				*/
 				//压入切片
 				strTemplate = append(strTemplate, templateHeader, templateBody)
-				strDagTemplate = append(strDagTemplate, dagTemplateHeader, dagTemplateBody)
+				strDagTemplate = append(strDagTemplate, dagTemplateHeader)
 			}
 		}
 	}
@@ -420,6 +449,5 @@ func Strval(value interface{}) string {
 		newValue, _ := json.Marshal(value)
 		key = string(newValue)
 	}
-
 	return key
 }

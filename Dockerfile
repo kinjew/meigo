@@ -14,7 +14,7 @@ RUN go mod download
 COPY . .
 
 # Build the Go app
-RUN go build -o ./bin/mtd daemon/mtd/main.go
+RUN go build -o ./bin/wf daemon/mtd/main.go
 
 
 RUN git clone https://xiezhiqiang%40scrmtech.com:Waj33040!@e.coding.net/zqbc-scrm-new/scrm/go_conf.git ./go_conf
