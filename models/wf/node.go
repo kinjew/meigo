@@ -359,18 +359,18 @@ spec:
 	//存储工作流模版
 	var flowYaml FlowYaml
 	flowYamlTemp := FlowYaml{FlowId: flow_id, YamlContent: wfYaml}
-	err = sqlDB.Table("flow_yaml").Where("flow_id = ?", flow_id).Select("* ").First(&flowYaml).Error //Map查询
+	err = sqlDB.Table("flow_yamls").Where("flow_id = ?", flow_id).Select("* ").First(&flowYaml).Error //Map查询
 	if err == nil && flowYaml.ID > 0 {
 		//更新流程内容
 		flowYamlTemp.UpdatedAt = int(time.Now().Unix())
-		err = sqlDB.Table("flow_yaml").Updates(flowYamlTemp).Where("id = ?", flowYaml.ID).Error
+		err = sqlDB.Table("flow_yamls").Updates(flowYamlTemp).Where("id = ?", flowYaml.ID).Error
 		if err != nil {
 			return false, err
 		}
 	} else {
 		//新建流程内容
 		flowYamlTemp.CreatedAt = int(time.Now().Unix())
-		err = sqlDB.Table("flow_yaml").Create(&flowYamlTemp).Error
+		err = sqlDB.Table("flow_yamls").Create(&flowYamlTemp).Error
 		if err != nil {
 			return false, err
 		}

@@ -22,7 +22,7 @@ var ExeDir string
 
 func main() {
 
-	go strCancat()
+	//go strCancat()
 
 	path, err := os.Executable()
 	if err != nil {

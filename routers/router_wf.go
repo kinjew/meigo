@@ -12,5 +12,6 @@ func wfRouter(giNew *gin.Engine) {
 	mtd := giNew.Group("/wf")
 	{
 		mtd.GET("/node_change", ctxExt.Handle(wfModule.QueryByParams))
+		mtd.GET("/trigger", ctxExt.Handle(wfModule.TriggerProcess))
 	}
 }
