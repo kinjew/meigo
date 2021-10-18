@@ -9,8 +9,10 @@ import (
 	"math/rand"
 	"meigo/library/log"
 	"net/http"
+	"os"
 	"os/exec"
 	"strconv"
+	"strings"
 	"time"
 
 	"github.com/spf13/viper"
@@ -44,6 +46,8 @@ func TrigerProcess(c *ctxExt.Context) (flag bool, err error) {
 		log.Error("flow_id or message is not allowed null: ", err)
 		return false, fmt.Errorf("flow_id or message is null")
 	}
+	//flow_id为以逗号分隔的字符串，验证和处理
+	FlowIdSlice := strings.Split(FlowId, ",")
 	//验证message的数据格式
 	var messageObj = make(map[string]string)
 	if Message == "" {
@@ -72,15 +76,43 @@ func TrigerProcess(c *ctxExt.Context) (flag bool, err error) {
 		}
 	}
 	//获取节点的yaml内容
-	var flowYaml FlowYaml
-	err = sqlDB.Table("flow_yamls").Where("flow_id = ?", FlowId).Select("* ").Scan(&flowYaml).Error
+	var flowYamls []FlowYaml
+	err = sqlDB.Table("flow_yamls").Where("flow_id in (?)", FlowIdSlice).Select("* ").Scan(&flowYamls).Error
 	if err != nil {
 		return false, err
 	}
+	//构造flow_id的map
+	/*
+		var flowYamlsMap map[int]FlowYaml
+		for _, v := range flowYamls {
+			flowYamlsMap[v.ID] = v
+		}
+	*/
+	//工作流执行
+	for _, item := range flowYamls {
+		flag, err := generateYaml(strconv.Itoa(item.FlowId), item, Message)
+		if flag == false {
+			return false, err
+		}
+	}
+	/*
+		argoServerUrl := viper.GetString("const.argoServerUrl")
+		fmt.Println("argoServerUrl: ", viper.GetString("const.argoServerUrl"))
+		err, ret := Post(argoServerUrl, flowYaml.YamlContent, "application/json")
+		if err != nil {
+			return false, err
+		}
+		fmt.Println(ret)
+	*/
+	// 返回结果
+	return true, err
+}
+
+func generateYaml(FlowId string, flowYaml FlowYaml, Message string) (flag bool, err error) {
 	//构造yaml文件
 	//操作文件4种方法，https://studygolang.com/articles/2073
 	var randInt = rand.Intn(1000) //生成0-1000之间的随机数
-	var fileName = FlowId + strconv.Itoa(randInt)
+	var fileName = FlowId + "_" + strconv.Itoa(randInt)
 	fileName = fileName + ".yaml"
 	err = ioutil.WriteFile(fileName, []byte(flowYaml.YamlContent), 0666) //写入文件(字节数组)
 	if err != nil {
@@ -97,16 +129,8 @@ func TrigerProcess(c *ctxExt.Context) (flag bool, err error) {
 	if err != nil {
 		return false, err
 	}
-	/*
-		argoServerUrl := viper.GetString("const.argoServerUrl")
-		fmt.Println("argoServerUrl: ", viper.GetString("const.argoServerUrl"))
-		err, ret := Post(argoServerUrl, flowYaml.YamlContent, "application/json")
-		if err != nil {
-			return false, err
-		}
-		fmt.Println(ret)
-	*/
-	// 返回结果
+	//删除临时文件
+	_ = os.Remove(fileName)
 	return true, err
 }
 
