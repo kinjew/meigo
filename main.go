@@ -377,4 +377,36 @@ func maxResult(arr []int) int {
 	return max
 }
 
+
+输入
+[1,3,5,7,9,10]
+[2,3,4,5,8]
+输出
+[1,2,4,7,8,9,10]
+*/
+
+/*
+func arrCombile(arr1, arr2 []int) (arr3 []int) {
+
+    len1 := len(arr1)
+    len2 := len(arr2)
+    for i := 0; i < len1; i++ {
+
+        for j := 0; j < len2; j++ {
+            if arr1[i] < arr2[j] {
+                arr3 = append(arr3, arr1[i])
+                i = i + 1
+            } else if arr1[i] == arr2[j] {
+                //arr1和arr2移除该元素
+
+            } else {
+                arr3 = append(arr3, arr1[j])
+                j = j + 1
+            }
+        }
+
+    }
+    return arr3
+
+}
 */

@@ -25,6 +25,7 @@ type Node struct {
 	NodeType     string `gorm:"column:node_type;" json:"node_type" form:"node_type"`
 	NodeClassify int    `gorm:"column:node_classify;" json:"node_classify" form:"node_classify"`
 	Rules        string `gorm:"column:rules;" json:"rules" form:"rules"`
+	Styles       string `gorm:"column:styles;" json:"styles" form:"styles"`
 	Creator      string `gorm:"column:creator;" json:"creator" form:"creator"`
 	Modifier     string `gorm:"column:modifier;" json:"modifier" form:"modifier"`
 	IsDel        int    `gorm:"column:is_del;" json:"is_del" form:"is_del"`
@@ -36,6 +37,8 @@ type Flow struct {
 	OrgId        string `gorm:"column:org_id;" json:"org_id" form:"org_id"`
 	FlowName     string `gorm:"column:flow_name;" json:"flow_name" form:"flow_name"`
 	FlowStatus   int    `gorm:"column:flow_status;" json:"flow_status" form:"flow_status"`
+	BeginTime    int    `gorm:"column:begin_time;" json:"begin_time" form:"begin_time"`
+	EndTime      int    `gorm:"column:end_time;" json:"end_time" form:"end_time"`
 	TriggerCount int    `gorm:"column:trigger_count;" json:"trigger_count" form:"trigger_count"`
 	Content      string `gorm:"column:content;" json:"content" form:"content"`
 	Creator      string `gorm:"column:creator;" json:"creator" form:"creator"`

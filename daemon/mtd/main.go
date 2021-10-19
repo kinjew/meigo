@@ -8,6 +8,7 @@ import (
 	"fmt"
 	"io"
 	"io/ioutil"
+	"meigo/library/db"
 	"meigo/library/db/common"
 	mgInit "meigo/library/init"
 	"meigo/library/log"
@@ -27,6 +28,8 @@ import (
 	"github.com/spf13/viper"
 
 	"github.com/go-redis/redis/v8"
+
+	"github.com/jinzhu/gorm"
 )
 
 // Node 实体
@@ -38,9 +41,21 @@ type Node struct {
 	NodeType     string `gorm:"column:node_type;" json:"node_type" form:"node_type"`
 	NodeClassify int    `gorm:"column:node_classify;" json:"node_classify" form:"node_classify"`
 	Rules        string `gorm:"column:rules;" json:"rules" form:"rules"`
+	Styles       string `gorm:"column:styles;" json:"styles" form:"styles"`
 	Creator      string `gorm:"column:creator;" json:"creator" form:"creator"`
 	Modifier     string `gorm:"column:modifier;" json:"modifier" form:"modifier"`
 	IsDel        int    `gorm:"column:is_del;" json:"is_del" form:"is_del"`
+}
+
+// FlowExecStates 实体
+type FlowExecState struct {
+	ID        int    `gorm:"column:id;primary_key;auto_increment;" json:"id" form:"id"` // 主键
+	WfUuid    string `gorm:"column:wf_uuid;" json:"wf_uuid" form:"wf_uuid" `
+	FlowId    int    `gorm:"column:flow_id;" json:"flow_id" form:"flow_id" `
+	NodeId    int    `gorm:"column:node_id;" json:"node_id" form:"node_id" `
+	Status    int    `gorm:"column:status;" json:"status" form:"status" `
+	Message   string `gorm:"column:message;" json:"message" form:"message" `
+	CreatedAt int    `gorm:"column:created_at;" json:"created_at" form:"created_at"` // 创建时间
 }
 
 // ConditionInfo 实体
@@ -82,6 +97,13 @@ func main() {
 	//fmt.Println(dir)  // for example /home/user
 	// 配置读取加载
 	mgInit.ConfInit(ExeDir)
+
+	// 初始化数据库连接
+	// sqlDB 是 *gorm.DB
+	var sqlDB *gorm.DB
+	if sqlDB, err = db.ConnDB("test"); err != nil {
+		panic(err)
+	}
 
 	//读取命令参数
 	var message, wfUuid string
@@ -154,7 +176,7 @@ func main() {
 	}()
 
 	//执行核心程序
-	ret := run(ctx, rdb, wfUuid, nodeId, messageObj)
+	ret := run(ctx, rdb, sqlDB, wfUuid, nodeId, messageObj)
 
 	//主协程休眠1s，保证调度成功
 	//time.Sleep(time.Second)
@@ -169,7 +191,7 @@ func main() {
 }
 
 //run 读取redis数据,执行节点操作
-func run(ctx context.Context, rdb *redis.Client, wfUuid string, nodeId int, messageObj map[string]string) bool {
+func run(ctx context.Context, rdb *redis.Client, sqlDB *gorm.DB, wfUuid string, nodeId int, messageObj map[string]string) bool {
 	var inputDataSourceInfo map[string]string
 	//获取当前节点信息
 	stringValue, err := rdb.Get(ctx, wf_prefix+strconv.Itoa(nodeId)).Result()
@@ -182,6 +204,8 @@ func run(ctx context.Context, rdb *redis.Client, wfUuid string, nodeId int, mess
 		fmt.Println("readRedis-error: ", err)
 		log.Error("readRedis-error:", err)
 		//panic(err)
+		//从数据库获取节点信息，todo
+
 	}
 	//json解析
 	jsonStr := []byte(stringValue)
@@ -192,32 +216,58 @@ func run(ctx context.Context, rdb *redis.Client, wfUuid string, nodeId int, mess
 	}
 	fmt.Println(nodeInfoObj)
 	//处理输入数据源信息
-	if nodeInfoObj.ParentId == "" {
-		//输入信息写入redis hash key
-		_, err = rdb.HSet(ctx, wf_prefix+wfUuid, messageObj).Result()
-		inputDataSourceInfo = messageObj
-	} else {
-		//获取数据源信息
-		inputDataSourceInfo, err = rdb.HGetAll(ctx, wf_prefix+wfUuid).Result()
-		if err != nil {
-			fmt.Println("readRedis-error: ", err)
-			log.Error("readRedis-error:", err)
-			//panic(err)
+	if len(messageObj) == 0 || nodeInfoObj.ParentId == "" {
+		if nodeInfoObj.ParentId == "" {
+			//输入信息写入redis hash key
+			_, err = rdb.HSet(ctx, wf_prefix+wfUuid, messageObj).Result()
+			inputDataSourceInfo = messageObj
+		} else {
+			//获取数据源信息
+			inputDataSourceInfo, err = rdb.HGetAll(ctx, wf_prefix+wfUuid).Result()
+			if err != nil {
+				fmt.Println("readRedis-error: ", err)
+				log.Error("readRedis-error:", err)
+				//panic(err)
+			}
 		}
+
+	} else {
+		inputDataSourceInfo = messageObj
 	}
+	//数据源信息json化
+	inputDataSourceInfoStr, _ := json.Marshal(inputDataSourceInfo)
 	//解析依赖节点信息
 	//if isStringInSlice(nodeInfoObj.nodeType, []string{"condition", "executor"}) {
 	if nodeInfoObj.NodeType == "condition" || nodeInfoObj.NodeType == "condition_exclusion" {
 		ruleEnginRet := callRuleEngin(nodeInfoObj.Rules, inputDataSourceInfo)
-		//存储数据源信息?,不改变数据源数据
+		var status = 0
+		if ruleEnginRet == false {
+			status = 1
+		}
+		//更新节点执行状态
+		flowYamlTemp := FlowExecState{WfUuid: wfUuid, FlowId: nodeInfoObj.FlowId, NodeId: nodeId, Status: status, Message: string(inputDataSourceInfoStr), CreatedAt: int(time.Now().Unix())}
+		err = sqlDB.Table("flow_exec_states").Create(&flowYamlTemp).Error
+		if err != nil {
+			return false
+		}
 		return ruleEnginRet
-
 	} else if nodeInfoObj.NodeType == "executor" {
 		//调用执行服务获取结果，消息中间件
 		executorRet := callExecutor(nodeInfoObj.Rules, inputDataSourceInfo)
 		//存储数据源信息?,不改变数据源数据
+		//如果是同步执行需要更新状态，如果是异步执行，等待状态回调，todo
+		//更新执行状态
+		var status = 0
+		if executorRet == false {
+			status = 1
+		}
+		//更新节点执行状态
+		flowYamlTemp := FlowExecState{WfUuid: wfUuid, FlowId: nodeInfoObj.FlowId, NodeId: nodeId, Status: status, Message: string(inputDataSourceInfoStr), CreatedAt: int(time.Now().Unix())}
+		err = sqlDB.Table("flow_exec_states").Create(&flowYamlTemp).Error
+		if err != nil {
+			return false
+		}
 		return executorRet
-
 	} else if nodeInfoObj.NodeType == "delay" {
 		fmt.Println(nodeInfoObj.Rules)
 		//延迟返回结果
@@ -244,6 +294,12 @@ func run(ctx context.Context, rdb *redis.Client, wfUuid string, nodeId int, mess
 				time.Sleep(1 * time.Second)
 			}
 		}
+		//更新节点执行状态
+		flowYamlTemp := FlowExecState{WfUuid: wfUuid, FlowId: nodeInfoObj.FlowId, NodeId: nodeId, Status: 0, Message: string(inputDataSourceInfoStr), CreatedAt: int(time.Now().Unix())}
+		err = sqlDB.Table("flow_exec_states").Create(&flowYamlTemp).Error
+		if err != nil {
+			return false
+		}
 		//不更新数据源
 		return true
 	}
@@ -258,6 +314,9 @@ func callRuleEngin(Rules string, inputDataSourceInfo map[string]string) bool {
 
 //调用执行器
 func callExecutor(Rules string, inputDataSourceInfo map[string]string) bool {
+	//同步提供返回
+
+	//异步提供回调，更新节点执行状态
 
 	return false
 }
