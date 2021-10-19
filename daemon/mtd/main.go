@@ -8,6 +8,7 @@ import (
 	"fmt"
 	"io"
 	"io/ioutil"
+	"math/rand"
 	"meigo/library/db"
 	"meigo/library/db/common"
 	mgInit "meigo/library/init"
@@ -15,6 +16,7 @@ import (
 	"net/http"
 	_ "net/http/pprof"
 	"os"
+	"os/exec"
 	"path/filepath"
 	"sort"
 	"strconv"
@@ -42,6 +44,8 @@ type Node struct {
 	NodeClassify int    `gorm:"column:node_classify;" json:"node_classify" form:"node_classify"`
 	Rules        string `gorm:"column:rules;" json:"rules" form:"rules"`
 	Styles       string `gorm:"column:styles;" json:"styles" form:"styles"`
+	IsRepeat     int    `gorm:"column:is_repeat;" json:"is_repeat" form:"is_repeat"`
+	RepeatFreq   string `gorm:"column:repeat_freq;" json:"repeat_freq" form:"repeat_freq"`
 	Creator      string `gorm:"column:creator;" json:"creator" form:"creator"`
 	Modifier     string `gorm:"column:modifier;" json:"modifier" form:"modifier"`
 	IsDel        int    `gorm:"column:is_del;" json:"is_del" form:"is_del"`
@@ -56,6 +60,15 @@ type FlowExecState struct {
 	Status    int    `gorm:"column:status;" json:"status" form:"status" `
 	Message   string `gorm:"column:message;" json:"message" form:"message" `
 	CreatedAt int    `gorm:"column:created_at;" json:"created_at" form:"created_at"` // 创建时间
+}
+
+// FlowYaml 实体
+type FlowYaml struct {
+	common.BaseModelV1
+	FlowId      int    `gorm:"column:flow_id;" json:"flow_id" form:"flow_id" `
+	NodeId      int    `gorm:"column:node_id;" json:"node_id" form:"node_id" `
+	YamlContent string `gorm:"column:yaml_content;" json:"yaml_content" form:"yaml_content"`
+	IsDel       int    `gorm:"column:is_del;" json:"is_del" form:"is_del"`
 }
 
 // ConditionInfo 实体
@@ -176,7 +189,7 @@ func main() {
 	}()
 
 	//执行核心程序
-	ret := run(ctx, rdb, sqlDB, wfUuid, nodeId, messageObj)
+	ret := run(ctx, rdb, sqlDB, wfUuid, message, nodeId, messageObj)
 
 	//主协程休眠1s，保证调度成功
 	//time.Sleep(time.Second)
@@ -191,11 +204,11 @@ func main() {
 }
 
 //run 读取redis数据,执行节点操作
-func run(ctx context.Context, rdb *redis.Client, sqlDB *gorm.DB, wfUuid string, nodeId int, messageObj map[string]string) bool {
+func run(ctx context.Context, rdb *redis.Client, sqlDB *gorm.DB, wfUuid, message string, nodeId int, messageObj map[string]string) bool {
 	var inputDataSourceInfo map[string]string
 	//获取当前节点信息
 	stringValue, err := rdb.Get(ctx, wf_prefix+strconv.Itoa(nodeId)).Result()
-	println(stringValue)
+	println(wf_prefix+strconv.Itoa(nodeId), stringValue)
 	/*
 		fmt.Println("listValue: ", listValue)
 		log.Info("listValue:", listValue)
@@ -245,8 +258,8 @@ func run(ctx context.Context, rdb *redis.Client, sqlDB *gorm.DB, wfUuid string, 
 			status = 1
 		}
 		//更新节点执行状态
-		flowYamlTemp := FlowExecState{WfUuid: wfUuid, FlowId: nodeInfoObj.FlowId, NodeId: nodeId, Status: status, Message: string(inputDataSourceInfoStr), CreatedAt: int(time.Now().Unix())}
-		err = sqlDB.Table("flow_exec_states").Create(&flowYamlTemp).Error
+		flowExecStateTemp := FlowExecState{WfUuid: wfUuid, FlowId: nodeInfoObj.FlowId, NodeId: nodeId, Status: status, Message: string(inputDataSourceInfoStr), CreatedAt: int(time.Now().Unix())}
+		err = sqlDB.Table("flow_exec_states").Create(&flowExecStateTemp).Error
 		if err != nil {
 			return false
 		}
@@ -262,11 +275,24 @@ func run(ctx context.Context, rdb *redis.Client, sqlDB *gorm.DB, wfUuid string, 
 			status = 1
 		}
 		//更新节点执行状态
-		flowYamlTemp := FlowExecState{WfUuid: wfUuid, FlowId: nodeInfoObj.FlowId, NodeId: nodeId, Status: status, Message: string(inputDataSourceInfoStr), CreatedAt: int(time.Now().Unix())}
-		err = sqlDB.Table("flow_exec_states").Create(&flowYamlTemp).Error
+		flowExecStateTemp := FlowExecState{WfUuid: wfUuid, FlowId: nodeInfoObj.FlowId, NodeId: nodeId, Status: status, Message: string(inputDataSourceInfoStr), CreatedAt: int(time.Now().Unix())}
+		err = sqlDB.Table("flow_exec_states").Create(&flowExecStateTemp).Error
 		if err != nil {
 			return false
 		}
+		fmt.Println(9999, nodeInfoObj.IsRepeat, nodeInfoObj.RepeatFreq)
+		//重复执行的执行器需要提交到argo cron
+		if nodeInfoObj.IsRepeat == 1 {
+			flag, cronYaml := generateCronYaml(nodeInfoObj, sqlDB)
+			if flag == false {
+				return false
+			}
+			//执行cron工作流
+			if ret, _ := doCron(strconv.Itoa(nodeInfoObj.FlowId), cronYaml, message); ret == false {
+				return false
+			}
+		}
+		//统一返回
 		return executorRet
 	} else if nodeInfoObj.NodeType == "delay" {
 		fmt.Println(nodeInfoObj.Rules)
@@ -295,8 +321,8 @@ func run(ctx context.Context, rdb *redis.Client, sqlDB *gorm.DB, wfUuid string, 
 			}
 		}
 		//更新节点执行状态
-		flowYamlTemp := FlowExecState{WfUuid: wfUuid, FlowId: nodeInfoObj.FlowId, NodeId: nodeId, Status: 0, Message: string(inputDataSourceInfoStr), CreatedAt: int(time.Now().Unix())}
-		err = sqlDB.Table("flow_exec_states").Create(&flowYamlTemp).Error
+		flowExecStateTemp := FlowExecState{WfUuid: wfUuid, FlowId: nodeInfoObj.FlowId, NodeId: nodeId, Status: 0, Message: string(inputDataSourceInfoStr), CreatedAt: int(time.Now().Unix())}
+		err = sqlDB.Table("flow_exec_states").Create(&flowExecStateTemp).Error
 		if err != nil {
 			return false
 		}
@@ -304,6 +330,80 @@ func run(ctx context.Context, rdb *redis.Client, sqlDB *gorm.DB, wfUuid string, 
 		return true
 	}
 	return true
+}
+func generateCronYaml(nodeInfoObj Node, sqlDB *gorm.DB) (bool, string) {
+	var err error
+	//重复执行的执行器需要提交到argo cron
+	var cronTemplate = `
+apiVersion: argoproj.io/v1alpha1
+kind: CronWorkflow
+metadata:
+  name: %s
+spec:
+  schedule: "%s"
+  concurrencyPolicy: "Replace"
+  startingDeadlineSeconds: 0
+  workflowSpec:
+    entrypoint: wfServer
+    templates:
+    - name: wfServer
+      container:
+        image: wf:1.0
+        command: ["/app/wf-server/bin/wf"]
+        args: ["-wfUuid={{workflow.name}}","-nodeId=%s"]
+`
+	var cronName = "cron-wf-" + strconv.Itoa(nodeInfoObj.FlowId) + "-" + strconv.Itoa(nodeInfoObj.ID)
+	//生成cron yaml文件
+	cronYaml := fmt.Sprintf(cronTemplate, cronName, nodeInfoObj.RepeatFreq, strconv.Itoa(nodeInfoObj.ID))
+	//cronYaml信息存入数据库
+
+	//存储cron工作流模版
+	var flowYaml FlowYaml
+	flowYamlTemp := FlowYaml{FlowId: nodeInfoObj.FlowId, NodeId: nodeInfoObj.ID, YamlContent: cronYaml}
+	err = sqlDB.Table("flow_yamls").Where("flow_id = ?", nodeInfoObj.FlowId).Where("node_id = ?", nodeInfoObj.ID).Select("* ").Order("id desc").First(&flowYaml).Error //Map查询
+	if err == nil && flowYaml.ID > 0 {
+		//更新流程内容
+		flowYamlTemp.UpdatedAt = int(time.Now().Unix())
+		fmt.Println(flowYaml.ID, nodeInfoObj.ID)
+		err = sqlDB.Table("flow_yamls").Where("id = ?", flowYaml.ID).Updates(flowYamlTemp).Error
+		if err != nil {
+			return false, cronYaml
+		}
+	} else {
+		//新建流程内容
+		flowYamlTemp.CreatedAt = int(time.Now().Unix())
+		err = sqlDB.Table("flow_yamls").Create(&flowYamlTemp).Error
+		if err != nil {
+			return false, cronYaml
+		}
+	}
+	return true, cronYaml
+}
+
+func doCron(FlowId string, cronYaml string, Message string) (flag bool, err error) {
+	//构造yaml文件
+	//操作文件4种方法，https://studygolang.com/articles/2073
+	var randInt = rand.Intn(1000) //生成0-1000之间的随机数
+	var fileName = FlowId + "_" + strconv.Itoa(randInt)
+	fileName = fileName + ".yaml"
+	err = ioutil.WriteFile(fileName, []byte(cronYaml), 0666) //写入文件(字节数组)
+	if err != nil {
+		return false, err
+	}
+	//提交执行工作流
+	//	cmd := exec.Command("/usr/local/bin/argo submit", fileName, "-n argo", "-p message="+Message)
+	cmd := exec.Command("argo", "cron", "create", fileName, "-n", "argo", "-p", "message="+Message)
+	_, err = cmd.Output()
+	/*
+		data, err := cmd.Output()
+		fmt.Println(string(data))
+	*/
+	if err != nil {
+		return false, err
+	}
+	//删除临时文件
+	_ = os.Remove(fileName)
+	return true, err
 }
 
 //调用规则引擎

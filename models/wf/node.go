@@ -26,6 +26,8 @@ type Node struct {
 	NodeClassify int    `gorm:"column:node_classify;" json:"node_classify" form:"node_classify"`
 	Rules        string `gorm:"column:rules;" json:"rules" form:"rules"`
 	Styles       string `gorm:"column:styles;" json:"styles" form:"styles"`
+	IsRepeat     int    `gorm:"column:is_repeat;" json:"is_repeat" form:"is_repeat"`
+	RepeatFreq   string `gorm:"column:repeat_freq;" json:"repeat_freq" form:"repeat_freq"`
 	Creator      string `gorm:"column:creator;" json:"creator" form:"creator"`
 	Modifier     string `gorm:"column:modifier;" json:"modifier" form:"modifier"`
 	IsDel        int    `gorm:"column:is_del;" json:"is_del" form:"is_del"`
@@ -50,6 +52,7 @@ type Flow struct {
 type FlowYaml struct {
 	common.BaseModelV1
 	FlowId      int    `gorm:"column:flow_id;" json:"flow_id" form:"flow_id" `
+	NodeId      int    `gorm:"column:node_id;" json:"node_id" form:"node_id" `
 	YamlContent string `gorm:"column:yaml_content;" json:"yaml_content" form:"yaml_content"`
 	IsDel       int    `gorm:"column:is_del;" json:"is_del" form:"is_del"`
 }
@@ -113,8 +116,8 @@ func (n *Node) ArgoYaml(c *ctxExt.Context) (flag bool, err error) {
 		//获取当前节点信息
 		json_str, _ := json.Marshal(v)
 		//println(strconv.Itoa(v.ID))
-		//println(v.ID, wf_prefix+strconv.Itoa(v.ID), json_str)
-		_ = rdb.Set(ctx, wf_prefix+strconv.Itoa(v.ID), json_str, time.Duration(86400)*time.Second).Err()
+		println(v.ID, wf_prefix+strconv.Itoa(v.ID), string(json_str))
+		_ = rdb.Set(ctx, wf_prefix+strconv.Itoa(v.ID), string(json_str), time.Duration(86400)*time.Second).Err()
 	}
 	//根据依赖关系定义dag
 	/*
@@ -362,11 +365,11 @@ spec:
 	//存储工作流模版
 	var flowYaml FlowYaml
 	flowYamlTemp := FlowYaml{FlowId: flow_id, YamlContent: wfYaml}
-	err = sqlDB.Table("flow_yamls").Where("flow_id = ?", flow_id).Select("* ").First(&flowYaml).Error //Map查询
+	err = sqlDB.Table("flow_yamls").Where("flow_id = ?", flow_id).Where("node_id = ?", 0).Select("* ").First(&flowYaml).Error //Map查询
 	if err == nil && flowYaml.ID > 0 {
 		//更新流程内容
 		flowYamlTemp.UpdatedAt = int(time.Now().Unix())
-		err = sqlDB.Table("flow_yamls").Updates(flowYamlTemp).Where("id = ?", flowYaml.ID).Error
+		err = sqlDB.Table("flow_yamls").Where("id = ?", flowYaml.ID).Updates(flowYamlTemp).Error
 		if err != nil {
 			return false, err
 		}
