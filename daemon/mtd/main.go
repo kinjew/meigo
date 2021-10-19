@@ -384,7 +384,7 @@ func doCron(FlowId string, cronYaml string, Message string) (flag bool, err erro
 	//构造yaml文件
 	//操作文件4种方法，https://studygolang.com/articles/2073
 	var randInt = rand.Intn(1000) //生成0-1000之间的随机数
-	var fileName = FlowId + "_" + strconv.Itoa(randInt)
+	var fileName = FlowId + "_cron_" + strconv.Itoa(randInt)
 	fileName = fileName + ".yaml"
 	err = ioutil.WriteFile(fileName, []byte(cronYaml), 0666) //写入文件(字节数组)
 	if err != nil {
