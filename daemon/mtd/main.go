@@ -345,12 +345,16 @@ spec:
   startingDeadlineSeconds: 0
   workflowSpec:
     entrypoint: wfServer
+    arguments:
+      parameters:
+        - name: message
+          value: '{"test":"hello word"}'
     templates:
     - name: wfServer
       container:
         image: wf:1.0
         command: ["/app/wf-server/bin/wf"]
-        args: ["-wfUuid={{workflow.name}}","-nodeId=%s"]
+        args: ["-wfUuid={{workflow.name}}","-nodeId=%s","-message={{workflow.parameters.message}}"]
 `
 	var cronName = "cron-wf-" + strconv.Itoa(nodeInfoObj.FlowId) + "-" + strconv.Itoa(nodeInfoObj.ID)
 	//生成cron yaml文件

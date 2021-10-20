@@ -77,7 +77,7 @@ func TrigerProcess(c *ctxExt.Context) (flag bool, err error) {
 	}
 	//获取节点的yaml内容
 	var flowYamls []FlowYaml
-	err = sqlDB.Table("flow_yamls").Where("flow_id in (?)", FlowIdSlice).Select("* ").Scan(&flowYamls).Error
+	err = sqlDB.Table("flow_yamls").Where("flow_id in (?)", FlowIdSlice).Where("node_id = ?", 0).Select("* ").Scan(&flowYamls).Error
 	if err != nil {
 		return false, err
 	}
