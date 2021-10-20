@@ -116,7 +116,7 @@ func (n *Node) ArgoYaml(c *ctxExt.Context) (flag bool, err error) {
 		//获取当前节点信息
 		json_str, _ := json.Marshal(v)
 		//println(strconv.Itoa(v.ID))
-		println(v.ID, wf_prefix+strconv.Itoa(v.ID), string(json_str))
+		//println(v.ID, wf_prefix+strconv.Itoa(v.ID), string(json_str))
 		_ = rdb.Set(ctx, wf_prefix+strconv.Itoa(v.ID), string(json_str), time.Duration(86400)*time.Second).Err()
 	}
 	//根据依赖关系定义dag

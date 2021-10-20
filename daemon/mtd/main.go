@@ -269,6 +269,7 @@ func run(ctx context.Context, rdb *redis.Client, sqlDB *gorm.DB, wfUuid, message
 		executorRet := callExecutor(nodeInfoObj.Rules, inputDataSourceInfo)
 		//存储数据源信息?,不改变数据源数据
 		//如果是同步执行需要更新状态，如果是异步执行，等待状态回调，todo
+		//WfUuid中包含cron字符串的则为定时任务，定时任务不记录执行日志？
 		//更新执行状态
 		var status = 0
 		if executorRet == false {
