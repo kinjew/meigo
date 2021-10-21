@@ -213,19 +213,23 @@ func run(ctx context.Context, rdb *redis.Client, sqlDB *gorm.DB, wfUuid, message
 		fmt.Println("listValue: ", listValue)
 		log.Info("listValue:", listValue)
 	*/
+	nodeInfoObj := Node{}
 	if err != nil {
 		fmt.Println("readRedis-error: ", err)
 		log.Error("readRedis-error:", err)
 		//panic(err)
 		//从数据库获取节点信息，todo
-
-	}
-	//json解析
-	jsonStr := []byte(stringValue)
-	nodeInfoObj := Node{}
-	if err := json.Unmarshal(jsonStr, &nodeInfoObj); err != nil {
-		fmt.Println("unmarshal err: ", err)
-		log.Error("unmarshal err: ", err)
+		err = sqlDB.Table("flow_nodes").Where("id = ?", nodeId).Select("* ").First(&nodeInfoObj).Error //Map查询
+		if err != nil {
+			return false
+		}
+	} else {
+		//json解析
+		jsonStr := []byte(stringValue)
+		if err := json.Unmarshal(jsonStr, &nodeInfoObj); err != nil {
+			fmt.Println("unmarshal err: ", err)
+			log.Error("unmarshal err: ", err)
+		}
 	}
 	fmt.Println(nodeInfoObj)
 	//处理输入数据源信息

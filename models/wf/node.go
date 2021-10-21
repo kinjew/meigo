@@ -117,7 +117,7 @@ func (n *Node) ArgoYaml(c *ctxExt.Context) (flag bool, err error) {
 		json_str, _ := json.Marshal(v)
 		//println(strconv.Itoa(v.ID))
 		//println(v.ID, wf_prefix+strconv.Itoa(v.ID), string(json_str))
-		_ = rdb.Set(ctx, wf_prefix+strconv.Itoa(v.ID), string(json_str), time.Duration(86400)*time.Second).Err()
+		_ = rdb.Set(ctx, wf_prefix+strconv.Itoa(v.ID), string(json_str), time.Duration(86400*30)*time.Second).Err()
 	}
 	//根据依赖关系定义dag
 	/*
@@ -137,6 +137,7 @@ metadata:
 	var WfSpecHeader string = `
 spec:
   entrypoint: diamond
+  onExit: exit-handler                  # invoke exit-handler template at end of the workflow
   templateDefaults:
     #timeout: 30s   # timeout value will be applied to all templates
     #retryStrategy: # retryStrategy value will be applied to all templates
@@ -233,6 +234,39 @@ spec:
 %s
           parameters: [{name: message, value: "{{workflow.parameters.message}}"}]
 `
+	//https://github.com/argoproj/argo-workflows/tree/master/examples#exit-handlers
+	var exitHandlerTemplate = `
+  # Exit handler templates
+  # After the completion of the entrypoint template, the status of the
+  # workflow is made available in the global variable {{workflow.status}}.
+  # {{workflow.status}} will be one of: Succeeded, Failed, Error
+  - name: exit-handler
+    steps:
+    - - name: notify
+        template: send-email
+      - name: celebrate
+        template: celebrate
+        when: "{{workflow.status}} == Succeeded"
+      - name: cry
+        template: cry
+        when: "{{workflow.status}} != Succeeded"
+  - name: send-email
+    container:
+      image: alpine:latest
+      command: [sh, -c]
+      args: ["echo send e-mail: {{workflow.name}} {{workflow.status}} {{workflow.duration}}"]
+  - name: celebrate
+    container:
+      image: alpine:latest
+      command: [sh, -c]
+      args: ["echo hooray!"]
+  - name: cry
+    container:
+      image: alpine:latest
+      command: [sh, -c]
+      args: ["echo boohoo!"]
+`
+
 	/*
 			var dagTemplateBodyMiddle = `
 		        arguments:
@@ -362,6 +396,8 @@ spec:
 	wfDagTemplate := strings.Join(strDagTemplate, "")
 	var wfYamlTmp = []string{wfhead, wfTemplate, wfDagTemplate}
 	wfYaml := strings.Join(wfYamlTmp, "")
+	//追加exitHandlerTemplate内容
+	wfYaml += exitHandlerTemplate
 	//存储工作流模版
 	var flowYaml FlowYaml
 	flowYamlTemp := FlowYaml{FlowId: flow_id, YamlContent: wfYaml}
