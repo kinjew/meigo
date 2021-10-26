@@ -233,7 +233,7 @@ func run(ctx context.Context, rdb *redis.Client, sqlDB *gorm.DB, wfUuid, message
 	}
 	fmt.Println(nodeInfoObj)
 	//处理输入数据源信息
-	if len(messageObj) == 0 || nodeInfoObj.ParentId == "" {
+	if len(messageObj) == 0 || nodeInfoObj.ParentId == "" || message == "" {
 		if nodeInfoObj.ParentId == "" {
 			//输入信息写入redis hash key
 			_, err = rdb.HSet(ctx, wf_prefix+wfUuid, messageObj).Result()
@@ -287,15 +287,20 @@ func run(ctx context.Context, rdb *redis.Client, sqlDB *gorm.DB, wfUuid, message
 		}
 		fmt.Println(9999, nodeInfoObj.IsRepeat, nodeInfoObj.RepeatFreq)
 		//重复执行的执行器需要提交到argo cron
-		if nodeInfoObj.IsRepeat == 1 {
+		//获取当前节点cron的标记信息
+		cronFlag, _ := rdb.Get(ctx, wf_prefix+strconv.Itoa(nodeId)+"_cron_flag").Result()
+		if nodeInfoObj.IsRepeat == 1 && cronFlag != "1" {
 			flag, cronYaml := generateCronYaml(nodeInfoObj, sqlDB)
 			if flag == false {
 				return false
 			}
 			//执行cron工作流
-			if ret, _ := doCron(strconv.Itoa(nodeInfoObj.FlowId), cronYaml, message); ret == false {
+			if ret, _ := doCron(strconv.Itoa(nodeInfoObj.FlowId), cronYaml, string(inputDataSourceInfoStr)); ret == false {
+				//time.Sleep(300 * time.Second)
 				return false
 			}
+			//设置提交cron的标记
+			_ = rdb.Set(ctx, wf_prefix+strconv.Itoa(nodeId)+"_cron_flag", 1, time.Duration(86400*30)*time.Second).Err()
 		}
 		//统一返回
 		return executorRet
@@ -336,6 +341,8 @@ func run(ctx context.Context, rdb *redis.Client, sqlDB *gorm.DB, wfUuid, message
 	}
 	return true
 }
+
+//https://argoproj.github.io/argo-workflows/cron-workflows/#cronworkflow-spec
 func generateCronYaml(nodeInfoObj Node, sqlDB *gorm.DB) (bool, string) {
 	var err error
 	//重复执行的执行器需要提交到argo cron
@@ -346,9 +353,10 @@ metadata:
   name: %s
 spec:
   schedule: "%s"
-  concurrencyPolicy: "Replace"
+  concurrencyPolicy: "Forbid"
   startingDeadlineSeconds: 0
   workflowSpec:
+    serviceAccountName: argo
     entrypoint: wfServer
     arguments:
       parameters:
@@ -390,24 +398,27 @@ spec:
 }
 
 func doCron(FlowId string, cronYaml string, Message string) (flag bool, err error) {
+	fmt.Println("it's a cronjob")
 	//构造yaml文件
 	//操作文件4种方法，https://studygolang.com/articles/2073
 	var randInt = rand.Intn(1000) //生成0-1000之间的随机数
 	var fileName = FlowId + "_cron_" + strconv.Itoa(randInt)
-	fileName = fileName + ".yaml"
+	fileName = "/tmp/" + fileName + ".yaml"
 	err = ioutil.WriteFile(fileName, []byte(cronYaml), 0666) //写入文件(字节数组)
 	if err != nil {
+		fmt.Println("write file error", err)
 		return false, err
 	}
 	//提交执行工作流
 	//	cmd := exec.Command("/usr/local/bin/argo submit", fileName, "-n argo", "-p message="+Message)
 	cmd := exec.Command("argo", "cron", "create", fileName, "-n", "argo", "-p", "message="+Message)
-	_, err = cmd.Output()
-	/*
-		data, err := cmd.Output()
-		fmt.Println(string(data))
-	*/
+	//_, err = cmd.Output()
+
+	data, err := cmd.Output()
+	fmt.Println(string(data), err)
+
 	if err != nil {
+		fmt.Println("can't exec cron in container", err)
 		return false, err
 	}
 	//删除临时文件

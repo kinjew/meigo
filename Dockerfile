@@ -34,6 +34,7 @@ RUN mkdir -p ./runtime && chmod -R 777 ./runtime
 
 COPY --from=build /app/wf-server/bin/ /app/wf-server/bin/
 COPY  conf/ /app/wf-server/conf/
+COPY  argo-linux-amd64 /usr/local/bin/argo
 
 # Run the binary program produced by `go install`
 #ENTRYPOINT ["./bin/mtd"]

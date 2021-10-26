@@ -136,6 +136,7 @@ metadata:
 
 	var WfSpecHeader string = `
 spec:
+  serviceAccountName: argo
   entrypoint: diamond
   onExit: exit-handler                  # invoke exit-handler template at end of the workflow
   templateDefaults:
