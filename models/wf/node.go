@@ -28,6 +28,8 @@ type Node struct {
 	Styles       string `gorm:"column:styles;" json:"styles" form:"styles"`
 	IsRepeat     int    `gorm:"column:is_repeat;" json:"is_repeat" form:"is_repeat"`
 	RepeatFreq   string `gorm:"column:repeat_freq;" json:"repeat_freq" form:"repeat_freq"`
+	Batch        int    `gorm:"column:batch;" json:"batch" form:"batch"`
+	IsLastBatch  int    `gorm:"column:is_last_batch;" json:"is_last_batch" form:"is_last_batch"`
 	Creator      string `gorm:"column:creator;" json:"creator" form:"creator"`
 	Modifier     string `gorm:"column:modifier;" json:"modifier" form:"modifier"`
 	IsDel        int    `gorm:"column:is_del;" json:"is_del" form:"is_del"`
@@ -36,16 +38,19 @@ type Node struct {
 // Flow 实体
 type Flow struct {
 	common.BaseModelV1
-	OrgId        string `gorm:"column:org_id;" json:"org_id" form:"org_id"`
-	FlowName     string `gorm:"column:flow_name;" json:"flow_name" form:"flow_name"`
-	FlowStatus   int    `gorm:"column:flow_status;" json:"flow_status" form:"flow_status"`
-	BeginTime    int    `gorm:"column:begin_time;" json:"begin_time" form:"begin_time"`
-	EndTime      int    `gorm:"column:end_time;" json:"end_time" form:"end_time"`
-	TriggerCount int    `gorm:"column:trigger_count;" json:"trigger_count" form:"trigger_count"`
-	Content      string `gorm:"column:content;" json:"content" form:"content"`
-	Creator      string `gorm:"column:creator;" json:"creator" form:"creator"`
-	Modifier     string `gorm:"column:modifier;" json:"modifier" form:"modifier"`
-	IsDel        int    `gorm:"column:is_del;" json:"is_del" form:"is_del"`
+	OrgId         string `gorm:"column:org_id;" json:"org_id" form:"org_id"`
+	FlowName      string `gorm:"column:flow_name;" json:"flow_name" form:"flow_name"`
+	FlowStatus    int    `gorm:"column:flow_status;" json:"flow_status" form:"flow_status"`
+	BeginTime     int    `gorm:"column:begin_time;" json:"begin_time" form:"begin_time"`
+	EndTime       int    `gorm:"column:end_time;" json:"end_time" form:"end_time"`
+	FlowBeginFlag int    `gorm:"column:flow_begin_flag;" json:"flow_begin_flag" form:"flow_begin_flag"`
+	FlowEndFlag   int    `gorm:"column:flow_end_flag;" json:"flow_end_flag" form:"flow_end_flag"`
+	FlowExecFlag  int    `gorm:"column:flow_exec_flag;" json:"flow_exec_flag" form:"flow_exec_flag"`
+	TriggerCount  int    `gorm:"column:trigger_count;" json:"trigger_count" form:"trigger_count"`
+	CurrentBatch  int    `gorm:"column:current_batch;" json:"current_batch" form:"current_batch"`
+	Creator       string `gorm:"column:creator;" json:"creator" form:"creator"`
+	Modifier      string `gorm:"column:modifier;" json:"modifier" form:"modifier"`
+	IsDel         int    `gorm:"column:is_del;" json:"is_del" form:"is_del"`
 }
 
 // FlowYaml 实体
@@ -103,9 +108,12 @@ func (n *Node) ArgoYaml(c *ctxExt.Context) (flag bool, err error) {
 	if err != nil {
 		return false, err
 	}
+	//工作流信息入redis
+	flow_json_str, _ := json.Marshal(flow)
+	_ = rdb.Set(ctx, wf_prefix+"flow_id_"+strconv.Itoa(flow_id), string(flow_json_str), time.Duration(86400*30)*time.Second).Err()
 	//获取所有工作流的所有节点列表
 	var list []Node
-	err = sqlDB.Table("flow_nodes").Where("flow_id = ?", flow_id).Select("* ").Scan(&list).Error //Map查询
+	err = sqlDB.Table("flow_nodes").Where(map[string]interface{}{"flow_id": flow_id, "batch": flow.CurrentBatch}).Select("* ").Scan(&list).Error //Map查询
 	if err != nil {
 		return false, err
 	}
@@ -402,7 +410,7 @@ spec:
 	//存储工作流模版
 	var flowYaml FlowYaml
 	flowYamlTemp := FlowYaml{FlowId: flow_id, YamlContent: wfYaml}
-	err = sqlDB.Table("flow_yamls").Where("flow_id = ?", flow_id).Where("node_id = ?", 0).Select("* ").First(&flowYaml).Error //Map查询
+	err = sqlDB.Table("flow_yamls").Where(map[string]interface{}{"flow_id": flow_id, "node_id": 0}).Select("* ").First(&flowYaml).Error //Map查询
 	if err == nil && flowYaml.ID > 0 {
 		//更新流程内容
 		flowYamlTemp.UpdatedAt = int(time.Now().Unix())

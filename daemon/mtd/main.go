@@ -15,6 +15,7 @@ import (
 	"meigo/library/log"
 	"net/http"
 	_ "net/http/pprof"
+	"net/url"
 	"os"
 	"os/exec"
 	"path/filepath"
@@ -46,9 +47,29 @@ type Node struct {
 	Styles       string `gorm:"column:styles;" json:"styles" form:"styles"`
 	IsRepeat     int    `gorm:"column:is_repeat;" json:"is_repeat" form:"is_repeat"`
 	RepeatFreq   string `gorm:"column:repeat_freq;" json:"repeat_freq" form:"repeat_freq"`
+	Batch        int    `gorm:"column:batch;" json:"batch" form:"batch"`
+	IsLastBatch  int    `gorm:"column:is_last_batch;" json:"is_last_batch" form:"is_last_batch"`
 	Creator      string `gorm:"column:creator;" json:"creator" form:"creator"`
 	Modifier     string `gorm:"column:modifier;" json:"modifier" form:"modifier"`
 	IsDel        int    `gorm:"column:is_del;" json:"is_del" form:"is_del"`
+}
+
+// Flow 实体
+type Flow struct {
+	common.BaseModelV1
+	OrgId         string `gorm:"column:org_id;" json:"org_id" form:"org_id"`
+	FlowName      string `gorm:"column:flow_name;" json:"flow_name" form:"flow_name"`
+	FlowStatus    int    `gorm:"column:flow_status;" json:"flow_status" form:"flow_status"`
+	BeginTime     int    `gorm:"column:begin_time;" json:"begin_time" form:"begin_time"`
+	EndTime       int    `gorm:"column:end_time;" json:"end_time" form:"end_time"`
+	FlowBeginFlag int    `gorm:"column:flow_begin_flag;" json:"flow_begin_flag" form:"flow_begin_flag"`
+	FlowEndFlag   int    `gorm:"column:flow_end_flag;" json:"flow_end_flag" form:"flow_end_flag"`
+	FlowExecFlag  int    `gorm:"column:flow_exec_flag;" json:"flow_exec_flag" form:"flow_exec_flag"`
+	TriggerCount  int    `gorm:"column:trigger_count;" json:"trigger_count" form:"trigger_count"`
+	CurrentBatch  int    `gorm:"column:current_batch;" json:"current_batch" form:"current_batch"`
+	Creator       string `gorm:"column:creator;" json:"creator" form:"creator"`
+	Modifier      string `gorm:"column:modifier;" json:"modifier" form:"modifier"`
+	IsDel         int    `gorm:"column:is_del;" json:"is_del" form:"is_del"`
 }
 
 // FlowExecStates 实体
@@ -87,9 +108,8 @@ type DelayInfo struct {
 
 // ExecutorInfo 实体
 type ExecutorInfo struct {
-	//单位是秒
-	Duar   int `gorm:"column:duar;" json:"duar" form:"duar"`
-	TimeAt int `gorm:"column:time_at;" json:"time_at" form:"time_at"`
+	ExecutorAction string      `gorm:"column:executor_action;" json:"executor_action" form:"executor_action"`
+	Data           interface{} `gorm:"column:data;" json:"data" form:"data"`
 }
 
 var ExeDir string
@@ -232,6 +252,28 @@ func run(ctx context.Context, rdb *redis.Client, sqlDB *gorm.DB, wfUuid, message
 		}
 	}
 	fmt.Println(nodeInfoObj)
+	//判断当前被执行节点的工作流状态
+	var flow_id = nodeInfoObj.FlowId
+	flowInfoStr, err := rdb.Get(ctx, wf_prefix+"flow_id_"+strconv.Itoa(flow_id)).Result()
+	if err != nil {
+		fmt.Println("readRedis-error: ", err)
+		log.Error("readRedis-error:", err)
+		syscall.Exit(400)
+	} else {
+		flowObj := Flow{}
+		//json解析
+		jsonStr := []byte(flowInfoStr)
+		if err := json.Unmarshal(jsonStr, &flowObj); err != nil {
+			fmt.Println("unmarshal err: ", err)
+			log.Error("unmarshal err: ", err)
+		}
+		//暂定或关闭流程后，设置不再执行后续操作
+		if isStringInSlice(strconv.Itoa(flowObj.FlowStatus), []string{"1", "2"}) && flowObj.FlowExecFlag == 1 {
+			fmt.Println("flow is pending or closed, and no need to exec it afterwards")
+			return false
+		}
+	}
+
 	//处理输入数据源信息
 	if len(messageObj) == 0 || nodeInfoObj.ParentId == "" || message == "" {
 		if nodeInfoObj.ParentId == "" {
@@ -269,8 +311,62 @@ func run(ctx context.Context, rdb *redis.Client, sqlDB *gorm.DB, wfUuid, message
 		}
 		return ruleEnginRet
 	} else if nodeInfoObj.NodeType == "executor" {
-		//调用执行服务获取结果，消息中间件
-		executorRet := callExecutor(nodeInfoObj.Rules, inputDataSourceInfo)
+		executorRet := true
+		//可能会执行多个动作
+		ruleObj := make(map[string][]map[string]interface{})
+		//json解析
+		jsonStr := []byte(nodeInfoObj.Rules)
+		if err := json.Unmarshal(jsonStr, &ruleObj); err != nil {
+			fmt.Println("unmarshal err: ", err)
+			log.Error("unmarshal err: ", err)
+		}
+		constraintsSlice, exists := ruleObj["constraints"]
+		if exists {
+			for _, exectorItem := range constraintsSlice {
+				if exectorItem["executor_action"] == "enter_other_flow" {
+					//interface{}类型强制转换成map[string]interface{}
+					otherFlowId := exectorItem["data"].(map[string]interface{})["flow_id"]
+					//获取配置数据
+					wfTriggerUrl := viper.GetString("const.wfTriggerUrl")
+					otherFlowIdStr := fmt.Sprintf("%v", otherFlowId)
+					//v := reflect.ValueOf(&otherFlowId)
+					wfTriggerUrl = wfTriggerUrl + url.QueryEscape("flow_id="+otherFlowIdStr+"&message="+string(inputDataSourceInfoStr))
+					//调用triger接口
+					//wfTriggerUrl = "http://192.168.0.165:8000/wf/trigger"
+					//定义resp
+					var resp *http.Response
+					//发起get请求
+					client := &http.Client{Timeout: 5 * time.Second}
+					resp, err = client.Get(wfTriggerUrl)
+					var apiRetObj map[string]interface{}
+					if resp != nil {
+						apiRetObj = Transformation(resp)
+						resp.Body.Close()
+					}
+					fmt.Println("wfTriggerUrl:", wfTriggerUrl, "resp", resp, "ret:", apiRetObj)
+					if err != nil || apiRetObj["data"] != "true" {
+						fmt.Println("wfTriggerUrl call fails")
+						log.Error("wfTriggerUrl call fails")
+						executorRet = false
+					} else {
+						fmt.Println("trigger other flow ok")
+						log.Error("trigger other flow ok")
+					}
+				} else if exectorItem["executor_action"] == "exit_flow" {
+					fmt.Println("exit_flow is ok")
+					log.Error("exit_flow is ok")
+					executorRet = false
+				} else {
+					//调用执行服务获取结果，消息中间件
+					executorRet = callExecutor(nodeInfoObj.Rules, inputDataSourceInfo)
+				}
+			}
+
+		} else {
+			fmt.Println("kye constraints is not exists: ")
+			log.Error("kye constraints is not exists:")
+			return false
+		}
 		//存储数据源信息?,不改变数据源数据
 		//如果是同步执行需要更新状态，如果是异步执行，等待状态回调，todo
 		//WfUuid中包含cron字符串的则为定时任务，定时任务不记录执行日志？

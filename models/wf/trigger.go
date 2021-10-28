@@ -113,7 +113,7 @@ func generateYaml(FlowId string, flowYaml FlowYaml, Message string) (flag bool, 
 	//操作文件4种方法，https://studygolang.com/articles/2073
 	var randInt = rand.Intn(1000) //生成0-1000之间的随机数
 	var fileName = FlowId + "_" + strconv.Itoa(randInt)
-	fileName = fileName + ".yaml"
+	fileName = "/tmp/" + fileName + ".yaml"
 	err = ioutil.WriteFile(fileName, []byte(flowYaml.YamlContent), 0666) //写入文件(字节数组)
 	if err != nil {
 		return false, err
@@ -126,11 +126,12 @@ func generateYaml(FlowId string, flowYaml FlowYaml, Message string) (flag bool, 
 		data, err := cmd.Output()
 		fmt.Println(string(data))
 	*/
+	//需要先删除临时文件
+	_ = os.Remove(fileName)
+	//判断执行结果
 	if err != nil {
 		return false, err
 	}
-	//删除临时文件
-	_ = os.Remove(fileName)
 	return true, err
 }
 
