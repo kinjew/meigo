@@ -22,7 +22,7 @@ import (
 )
 
 /*
-ArgoYaml 生产yaml文件
+TrigerProcess 触发流程
 */
 
 func TrigerProcess(c *ctxExt.Context) (flag bool, err error) {

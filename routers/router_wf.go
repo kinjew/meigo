@@ -13,5 +13,6 @@ func wfRouter(giNew *gin.Engine) {
 	{
 		mtd.GET("/node_change", ctxExt.Handle(wfModule.QueryByParams))
 		mtd.GET("/trigger", ctxExt.Handle(wfModule.TriggerProcess))
+		mtd.GET("/cron_delete", ctxExt.Handle(wfModule.CronDeleteProcess))
 	}
 }

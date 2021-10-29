@@ -273,28 +273,39 @@ func run(ctx context.Context, rdb *redis.Client, sqlDB *gorm.DB, wfUuid, message
 			return false
 		}
 	}
-
+	var inputDataSourceInfoStr string
 	//处理输入数据源信息
 	if len(messageObj) == 0 || nodeInfoObj.ParentId == "" || message == "" {
 		if nodeInfoObj.ParentId == "" {
-			//输入信息写入redis hash key
-			_, err = rdb.HSet(ctx, wf_prefix+wfUuid, messageObj).Result()
+			//数据源信息json化
+			messageObjStr, _ := json.Marshal(messageObj)
+			//设置提交cron的标记
+			err = rdb.Set(ctx, wf_prefix+wfUuid, messageObjStr, time.Duration(86400*30)*time.Second).Err()
+			//fmt.Println("the node's parentId:", wf_prefix+wfUuid, err)
 			inputDataSourceInfo = messageObj
+			inputDataSourceInfoStr = string(messageObjStr)
 		} else {
 			//获取数据源信息
-			inputDataSourceInfo, err = rdb.HGetAll(ctx, wf_prefix+wfUuid).Result()
+			inputDataSourceInfoStr, err = rdb.Get(ctx, wf_prefix+wfUuid).Result()
 			if err != nil {
 				fmt.Println("readRedis-error: ", err)
 				log.Error("readRedis-error:", err)
 				//panic(err)
 			}
+			//json解析
+			jsonStr := []byte(inputDataSourceInfoStr)
+			if err := json.Unmarshal(jsonStr, &inputDataSourceInfo); err != nil {
+				fmt.Println("unmarshal err: ", err)
+				log.Error("unmarshal err: ", err)
+				syscall.Exit(400)
+			}
 		}
 
 	} else {
 		inputDataSourceInfo = messageObj
+		messageObjStr, _ := json.Marshal(messageObj)
+		inputDataSourceInfoStr = string(messageObjStr)
 	}
-	//数据源信息json化
-	inputDataSourceInfoStr, _ := json.Marshal(inputDataSourceInfo)
 	//解析依赖节点信息
 	//if isStringInSlice(nodeInfoObj.nodeType, []string{"condition", "executor"}) {
 	if nodeInfoObj.NodeType == "condition" || nodeInfoObj.NodeType == "condition_exclusion" {
@@ -330,9 +341,8 @@ func run(ctx context.Context, rdb *redis.Client, sqlDB *gorm.DB, wfUuid, message
 					wfTriggerUrl := viper.GetString("const.wfTriggerUrl")
 					otherFlowIdStr := fmt.Sprintf("%v", otherFlowId)
 					//v := reflect.ValueOf(&otherFlowId)
-					wfTriggerUrl = wfTriggerUrl + url.QueryEscape("flow_id="+otherFlowIdStr+"&message="+string(inputDataSourceInfoStr))
+					wfTriggerUrl = wfTriggerUrl + "flow_id=" + otherFlowIdStr + "&message=" + url.QueryEscape(string(inputDataSourceInfoStr))
 					//调用triger接口
-					//wfTriggerUrl = "http://192.168.0.165:8000/wf/trigger"
 					//定义resp
 					var resp *http.Response
 					//发起get请求
@@ -343,8 +353,8 @@ func run(ctx context.Context, rdb *redis.Client, sqlDB *gorm.DB, wfUuid, message
 						apiRetObj = Transformation(resp)
 						resp.Body.Close()
 					}
-					fmt.Println("wfTriggerUrl:", wfTriggerUrl, "resp", resp, "ret:", apiRetObj)
-					if err != nil || apiRetObj["data"] != "true" {
+					//fmt.Println("wfTriggerUrl:", wfTriggerUrl, "resp", resp, "ret:", apiRetObj)
+					if err != nil || apiRetObj["data"] != true {
 						fmt.Println("wfTriggerUrl call fails")
 						log.Error("wfTriggerUrl call fails")
 						executorRet = false
