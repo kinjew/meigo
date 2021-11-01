@@ -251,7 +251,7 @@ func run(ctx context.Context, rdb *redis.Client, sqlDB *gorm.DB, wfUuid, message
 			log.Error("unmarshal err: ", err)
 		}
 	}
-	fmt.Println(nodeInfoObj)
+	fmt.Println("nodeInfoObj:", nodeInfoObj)
 	//判断当前被执行节点的工作流状态
 	var flow_id = nodeInfoObj.FlowId
 	flowInfoStr, err := rdb.Get(ctx, wf_prefix+"flow_id_"+strconv.Itoa(flow_id)).Result()
