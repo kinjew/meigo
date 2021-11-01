@@ -184,6 +184,33 @@ http://localhost:8000/wf/trigger?flow_id=1&message={%22test%22:%22hello%20word88
 异常返回示例：
 {"code":400,"data":false,"msg":"modules_wf:flow_id or message is null","ret":0}
 ```
+3.定时任务删除接口
+```
+网址：
+wf/cron_delete
+```
+--------------------
+|  参数名称  | 类型 | 参数含义| 是否必填| 备注|
+|  ----  | ----  |----  |----  |----  |
+|flow_id | string | 流程id| 是|流程id列表，逗号分隔的字符串
+| node_id  | string |节点id|是|节点id列表，逗号分隔的字符串|
+
+```
+请求示例：
+http://localhost:8000/wf/cron_delete?node_id=1
+```
+```
+正常返回示例：
+{"code":200,"data":true,"msg":"succ","ret":1}
+```
+```
+异常返回示例1：
+{"code":400,"data":false,"msg":"modules_wf:flow_id and node_id are both null","ret":0}
+```
+```
+异常返回示例2：
+{"code":400,"data":false,"msg":"modules_wf:exit status 1","ret":0}
+```
 ```
 说明：
 需要提前保证argo命名空间的集群可用，argo命令可执行

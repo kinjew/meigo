@@ -373,8 +373,8 @@ func run(ctx context.Context, rdb *redis.Client, sqlDB *gorm.DB, wfUuid, message
 			}
 
 		} else {
-			fmt.Println("kye constraints is not exists: ")
-			log.Error("kye constraints is not exists:")
+			fmt.Println("key constraints is not exists: ")
+			log.Error("key constraints is not exists:")
 			return false
 		}
 		//存储数据源信息?,不改变数据源数据

@@ -75,6 +75,17 @@ func TrigerProcess(c *ctxExt.Context) (flag bool, err error) {
 			return false, fmt.Errorf("message's value is not json")
 		}
 	}
+	//输入数据源信息判断，与用户相关的字段customerId，mobile，anonymousId不能同时为空
+	_, exists := messageObj["customerId"]
+	if exists == false {
+		_, exists := messageObj["mobile"]
+		if exists == false {
+			_, exists := messageObj["anonymousId"]
+			if exists == false {
+				return false, fmt.Errorf("message's customerId, mobile, anonymousId are null")
+			}
+		}
+	}
 	//获取节点的yaml内容
 	var flowYamls []FlowYaml
 	err = sqlDB.Table("flow_yamls").Where("flow_id in (?)", FlowIdSlice).Where("node_id = ?", 0).Select("* ").Scan(&flowYamls).Error
