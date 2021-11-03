@@ -410,3 +410,32 @@ func arrCombile(arr1, arr2 []int) (arr3 []int) {
 
 }
 */
+
+/*
+func insertSort(arr1 []int, item int) []int {
+	len := len(arr1)
+	var ret []int
+	var flag bool
+	for i := 0; i < len; i++ {
+		if item < arr1[i] {
+			if flag == true {
+				ret = append(ret, item)
+				flag = false
+			}
+			ret = append(ret, arr1[i])
+
+		} else if item == arr1[i] {
+			ret = append(ret, arr1[i])
+			if flag == true {
+				flag = false
+			}
+			ret = append(ret, item)
+		} else if item > arr1[i] {
+			ret = append(ret, arr1[i])
+			flag = true
+			//ret= append(ret, item)
+		}
+	}
+	return ret
+}
+*/
