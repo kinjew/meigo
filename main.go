@@ -439,3 +439,29 @@ func insertSort(arr1 []int, item int) []int {
 	return ret
 }
 */
+
+/*
+runtime.Caller(1)可以查找错误文件地址和错误行号，那么以后进行错误处理可以如下：
+
+err := ...
+if CheckError(err) {
+   //打印或者退出
+}
+这样以后一旦有错误问题马上就可以定位了
+*/
+
+/*
+func CheckError(err error) bool {
+    if err != nil {
+        _, file, line, ok := runtime.Caller(1)
+        if ok {
+            emsg := fmt.Sprintf("file:%s, line:%d, error:%s", file, line, err.Error())
+            logger.Print(emsg)
+        } else {
+            logger.Print(err)
+        }
+        return true
+    }
+    return false
+}
+*/
