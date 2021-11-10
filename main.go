@@ -465,3 +465,64 @@ func CheckError(err error) bool {
     return false
 }
 */
+
+/*
+
+func maxCombile(str string) string {
+	strSlice := strings.Split(str, ",")
+	var strNum []int
+	var max, index int
+	for i := 0; i < len(strSlice); i++ {
+		for j := i + 1; j < len(strSlice); j++ {
+			if isSplitOk(strSlice[i], strSlice[j]) {
+				strNum[i] += 1
+			}
+		}
+		if strNum[i] > max {
+			max = strNum[i]
+			index = i
+		}
+	}
+	return strSlice[index]
+
+}
+
+func isSplitOk(a, b string) bool {
+	//todo
+	return true
+}
+
+func maxCombile2(str string) string {
+	strSlice := strings.Split(str, ",")
+	var retStr []string
+	var retNum = make(map[string]int)
+	for i := 0; i < len(strSlice); i++ {
+		curr := strSlice[i]
+		total := 0
+		for j := i + 1; j < len(strSlice); j++ {
+			curr = curr + strSlice[j]
+			total += 1
+			retStr = append(retStr, curr)
+			retNum[curr] = total
+		}
+	}
+	//求切片交集
+	ret := intersec(strSlice, retStr)
+	var max int
+	var result string
+	for i := 0; i < len(ret); i++ {
+		num, _ := retNum[ret[i]]
+		if num > max {
+			max = num
+			result = ret[i]
+		}
+	}
+	return result
+}
+
+//求切片交集
+func intersec(a, b []string) []string {
+	//todo
+	return []string{"1", "2"}
+}
+*/
