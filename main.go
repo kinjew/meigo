@@ -526,3 +526,10 @@ func intersec(a, b []string) []string {
 	return []string{"1", "2"}
 }
 */
+
+/*
+	var bb bool = true
+	//B to S
+	str4 := strconv.FormatBool(bb)
+	fmt.Println(str4)
+*/
