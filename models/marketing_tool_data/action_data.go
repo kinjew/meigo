@@ -10,8 +10,8 @@ import (
 	"strconv"
 	"strings"
 
-	"github.com/jinzhu/gorm"
 	ctxExt "github.com/kinjew/gin-context-ext"
+	"gorm.io/gorm"
 )
 
 // ActionData 实体

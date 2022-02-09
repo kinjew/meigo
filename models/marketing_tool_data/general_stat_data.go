@@ -5,8 +5,8 @@ import (
 	"meigo/library/log"
 	"strconv"
 
-	"github.com/jinzhu/gorm"
 	ctxExt "github.com/kinjew/gin-context-ext"
+	"gorm.io/gorm"
 )
 
 // GeneralStatData 实体

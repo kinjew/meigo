@@ -1,4 +1,4 @@
-package wf
+package model
 
 import (
 	"meigo/library/db"
@@ -38,7 +38,7 @@ type OperateFormat struct {
 }
 
 // InitPersonDB 初始化数据库
-func InitWfDB() {
+func InitTestDB() {
 	var err error
 	if sqlDB, err = db.ConnDB("test"); err != nil {
 		panic(err)

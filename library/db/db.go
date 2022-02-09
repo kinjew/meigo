@@ -2,12 +2,16 @@ package db
 
 import (
 	"fmt"
-	"time"
+
+	"gorm.io/gorm/schema"
+
+	_ "github.com/go-sql-driver/mysql"
 
 	"meigo/library/log"
 	// MySQL driver.
-	"github.com/jinzhu/gorm"
 	_ "github.com/jinzhu/gorm/dialects/mysql" // 不使用
+	"gorm.io/driver/mysql"
+	"gorm.io/gorm"
 )
 
 // DB is *gorm.DB
@@ -39,19 +43,33 @@ func InitDB(MysqlConf *MySQL) (*gorm.DB, error) {
 		MysqlConf.DBName,
 		MysqlConf.Parameters,
 	)
+
 	//fmt.Println("print:" + MysqlConf.DBType)
-	db, err := gorm.Open(MysqlConf.DBType, config)
+	db, err := gorm.Open(mysql.New(mysql.Config{
+		DSN:                       config, // DSN data source name
+		DefaultStringSize:         256,    // string 类型字段的默认长度
+		DisableDatetimePrecision:  true,   // 禁用 datetime 精度，MySQL 5.6 之前的数据库不支持
+		DontSupportRenameIndex:    true,   // 重命名索引时采用删除并新建的方式，MySQL 5.7 之前的数据库和 MariaDB 不支持重命名索引
+		DontSupportRenameColumn:   true,   // 用 `change` 重命名列，MySQL 8 之前的数据库和 MariaDB 不支持重命名列
+		SkipInitializeWithVersion: false,  // 根据当前 MySQL 版本自动配置
+	}), &gorm.Config{
+		NamingStrategy: schema.NamingStrategy{
+			//TablePrefix:   "it_", // 表名前缀，`Article` 的表名应该是 `it_articles`
+			SingularTable: true, // 使用单数表名，启用该选项，此时，`Article` 的表名应该是 `it_article`
+		},
+	})
 	if err != nil {
 		log.Error("Database connection failed. Database name: %s", MysqlConf.DBName, err)
 		return nil, err
 	}
 
 	// set for db connection
-	setupDB(db)
+	//setupDB(db)
 
 	return db, err
 }
 
+/*
 func setupDB(db *gorm.DB) {
 
 	// 表名单数形式 （默认复数形式）
@@ -69,12 +87,15 @@ func setupDB(db *gorm.DB) {
 	db.DB().SetConnMaxLifetime(time.Duration(7200) * time.Second)
 }
 
+*/
+
 // Close close db
 func Close(db *gorm.DB) {
-	err := db.Close()
-	if err != nil {
-		log.Error("DB close error", err)
-	}
+	/*
+		err := db.Close()
+		if err != nil {
+			log.Error("DB close error", err)
+		}*/
 }
 
 //MyLogger 是一个用户类型

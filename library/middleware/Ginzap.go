@@ -1,6 +1,7 @@
 package middleware
 
 import (
+	"context"
 	"meigo/library/log"
 	"strconv"
 	"time"
@@ -72,5 +73,13 @@ func Ginzap() gin.HandlerFunc {
 				"error:"+c.Errors.String(),
 			)
 		}
+	}
+}
+
+func GinContextToContextMiddleware() gin.HandlerFunc {
+	return func(c *gin.Context) {
+		ctx := context.WithValue(c.Request.Context(), "GinContextKey", c)
+		c.Request = c.Request.WithContext(ctx)
+		c.Next()
 	}
 }

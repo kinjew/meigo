@@ -7,8 +7,8 @@ import (
 	"strconv"
 	"strings"
 
-	"github.com/jinzhu/gorm"
 	ctxExt "github.com/kinjew/gin-context-ext"
+	"gorm.io/gorm"
 )
 
 // GeneralStatAggregationData 实体

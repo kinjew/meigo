@@ -9,7 +9,7 @@ import (
 
 	ctxExt "github.com/kinjew/gin-context-ext"
 
-	"github.com/jinzhu/gorm"
+	"gorm.io/gorm"
 )
 
 // sqlDB 是 *gorm.DB
@@ -31,7 +31,7 @@ var operatorTypeThreeMap = map[string][]string{"nBetween": []string{"<=", ">="},
 
 var page = "1"
 var pageSize = "20"
-var totalCount = 0
+var totalCount = int64(0)
 
 var orderBy = "id desc"
 

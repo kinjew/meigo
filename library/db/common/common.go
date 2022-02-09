@@ -3,8 +3,6 @@ package common
 
 import (
 	"meigo/library/db"
-
-	"github.com/jinzhu/gorm"
 )
 
 // Create insert the value into database
@@ -67,6 +65,7 @@ func DeleteByIDS(model interface{}, ids []uint64) (count int64, err error) {
 	return
 }
 
+/*
 // FirstByID find first record that match given conditions by id, order by primary key
 func FirstByID(out interface{}, id int) (notFound bool, err error) {
 	err = db.DB.First(out, id).Error
@@ -85,6 +84,8 @@ func First(where interface{}, out interface{}) (notFound bool, err error) {
 	return
 }
 
+
+*/
 // Find find records that match given conditions
 func Find(where interface{}, out interface{}, orders ...string) error {
 	mdb := db.DB.Where(where)
@@ -96,6 +97,7 @@ func Find(where interface{}, out interface{}, orders ...string) error {
 	return mdb.Find(out).Error
 }
 
+/*
 // Scan scan value to a struct
 func Scan(model, where interface{}, out interface{}) (notFound bool, err error) {
 	err = db.DB.Model(model).Where(where).Scan(out).Error
@@ -104,6 +106,8 @@ func Scan(model, where interface{}, out interface{}) (notFound bool, err error) 
 	}
 	return
 }
+
+*/
 
 // ScanList scan value to a struct and order
 func ScanList(model, where interface{}, out interface{}, orders ...string) error {
@@ -117,7 +121,7 @@ func ScanList(model, where interface{}, out interface{}, orders ...string) error
 }
 
 // GetPage is get page.
-func GetPage(model, where interface{}, out interface{}, pageIndex, pageSize uint64, totalCount *uint64, whereOrder ...PageWhereOrder) error {
+func GetPage(model, where interface{}, out interface{}, pageIndex, pageSize int, totalCount *int64, whereOrder ...PageWhereOrder) error {
 	mdb := db.DB.Model(model).Where(where)
 	if len(whereOrder) > 0 {
 		for _, wo := range whereOrder {

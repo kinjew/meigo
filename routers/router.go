@@ -35,6 +35,8 @@ func loadMiddle(g *gin.Engine, mw ...gin.HandlerFunc) *gin.Engine {
 
 	g.Use(middleware.Ginzap())
 
+	g.Use(middleware.GinContextToContextMiddleware())
+
 	// 性能分析
 	//pprof.Register(g)
 

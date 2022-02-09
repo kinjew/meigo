@@ -1,6 +1,7 @@
 package init
 
 import (
+	gqlModel "meigo/gqlgen-todos/graph/model"
 	esModel "meigo/library/es"
 	marketingToolDataModel "meigo/models/marketing_tool_data"
 	wfModel "meigo/models/wf"
@@ -17,6 +18,9 @@ func DBInit() {
 
 	// 业务逻辑，初始化 wf 的数据库连接
 	wfModel.InitWfDB()
+
+	// 业务逻辑，初始化 wf 的数据库连接
+	gqlModel.InitTestDB()
 
 	esModel.ESInit()
 
