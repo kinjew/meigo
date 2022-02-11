@@ -132,111 +132,11 @@ git config --global url.ssh://git@go.uber.org/zap.insteadof=https://go.uber.org/
 git config --global url.ssh://git@git.sprucetec.com:50022.insteadof=https://git.sprucetec.com
 ```
 
-## 一、自动化工作流接口
 
-1.工作流或节点变更触发DAG的YAML文件生成接口
-```
-网址：
-wf/node_chang
-```
---------------------
-|  参数名称  | 类型 | 参数含义| 是否必填| 备注|
-|  ----  | ----  |----  |----  |----  |
-|flow_id | int | 流程id| 否|flow_id与node_id不能同时为空| 
-| node_id  | int |节点ID|否|flow_id与node_id不能同时为空|
 
 ```
-请求示例：
-http://localhost:8000/wf/node_change?node_id=1
-```
-```
-正常返回示例：
-{"code":200,"data":true,"msg":"succ","ret":1}
-```
-```
-异常返回示例：
-{"code":400,"data":false,"msg":"modules_wf:record not found","ret":0}
-```
-```
-说明：
-接口会把流程中节点信息存储在redis中，供节点执行服务使用
-```
-2.触发工作流运转接口
-```
-网址：
-wf/trigger
-```
---------------------
-|  参数名称  | 类型 | 参数含义| 是否必填| 备注|
-|  ----  | ----  |----  |----  |----  |
-|flow_id | string | 流程id| 是|流程id列表，逗号分隔的字符串
-| message  | string |输入数据源信息|是|json格式的数据源信息或者数据源信息的键值|
+gqlgen-todos目录中 graghql 代码自动生成（根据schema生成model和），
 
+执行 go generate ./...
+生成某个模型的datalaoder，执行 go run github.com/vektah/dataloaden UserLoader string *meigo/gqlgen-todos/graph/model.User
 ```
-请求示例：
-http://localhost:8000/wf/trigger?flow_id=1&message={%22test%22:%22hello%20word888%22}
-```
-```
-正常返回示例：
-{"code":200,"data":true,"msg":"succ","ret":1}
-```
-```
-异常返回示例：
-{"code":400,"data":false,"msg":"modules_wf:flow_id or message is null","ret":0}
-```
-3.定时任务删除接口
-```
-网址：
-wf/cron_delete
-```
---------------------
-|  参数名称  | 类型 | 参数含义| 是否必填| 备注|
-|  ----  | ----  |----  |----  |----  |
-|flow_id | string | 流程id| 是|流程id列表，逗号分隔的字符串
-| node_id  | string |节点id|是|节点id列表，逗号分隔的字符串|
-
-```
-请求示例：
-http://localhost:8000/wf/cron_delete?node_id=1
-```
-```
-正常返回示例：
-{"code":200,"data":true,"msg":"succ","ret":1}
-```
-```
-异常返回示例1：
-{"code":400,"data":false,"msg":"modules_wf:flow_id and node_id are both null","ret":0}
-```
-```
-异常返回示例2：
-{"code":400,"data":false,"msg":"modules_wf:exit status 1","ret":0}
-```
-```
-说明：
-需要提前保证argo命名空间的集群可用，argo命令可执行
-```
-## 二、自动化工作流服务
-```
-服务使用到数据库：
-mysql，redis
-```
---------------------
-|  客户端参数名称  | 类型 | 参数含义| 是否必填| 备注|
-|  ----  | ----  |----  |----  |----  |
-|wfUuid | string |工作流单词执行的uuid| 是|
-| message  | string |输入数据源信息|否|json格式的数据源信息或者数据源信息的键值|
-| nodeId  | int |节点id|是||
-
-```
-主要功能：
-1.数据源信息存取redis
-2.不同节点类型执行不同处理方式，其中条件类和执行类的节点依赖规则引擎和消息中间件
-3.需要定时执行的节点会生产cronYaml，并提交定时执行
-4.记录节点运行日志
-```
-
-```
-说明：
-根节点需要提供message参数，其他节点如果提供message参数则以参数为准，否则从redis中获取
-```
-## 三、argo环境的安装

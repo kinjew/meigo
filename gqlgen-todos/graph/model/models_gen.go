@@ -11,3 +11,8 @@ type User struct {
 	ID   string `json:"id"`
 	Name string `json:"name"`
 }
+
+type User2 struct {
+	ID   string `json:"id"`
+	Name string `json:"name"`
+}

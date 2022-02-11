@@ -29,3 +29,19 @@ func (t *Todo) FindTodo(c *gin.Context) (todo []*Todo, err error) {
 	//return person, errors.New("test")
 	return todos, err
 }
+
+/*
+FindTodo 查找todo
+*/
+/*
+func (u *User) FindUser(c *gin.Context, obj *Todo) (user *User, err error) {
+
+	sqlDB.Where("id = ?", obj.UserID).First(&user)
+	//return person, errors.New("test")
+	return user, err
+}
+*/
+
+func (u *User) FindUser(c *gin.Context, obj *Todo) (user *User, err error) {
+	return UserByIdLoader.Load(obj.UserID)
+}
