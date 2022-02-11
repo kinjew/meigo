@@ -30,6 +30,30 @@ func (r *mutationResolver) CreateTodo(ctx context.Context, input model.NewTodo) 
 		r.todos = append(r.todos, todo)
 	*/
 	return todo, nil
+
+	/*
+		// Print a formatted string
+		graphql.AddErrorf(ctx, "Error %d", 1)
+
+		// Pass an existing error out
+		graphql.AddError(ctx, gqlerror.Errorf("zzzzzt"))
+
+		// Or fully customize the error
+		graphql.AddError(ctx, &gqlerror.Error{
+			Path:    graphql.GetPath(ctx),
+			Message: "A descriptive error message",
+			Extensions: map[string]interface{}{
+				"code": "10-4",
+			},
+		})
+
+		// And you can still return an error if you need
+		return todo, gqlerror.Errorf("BOOM! Headshot")
+	*/
+}
+
+func (r *mutationResolver) DeleteUser(ctx context.Context, userID string) (*bool, error) {
+	panic(fmt.Errorf("not implemented"))
 }
 
 func (r *queryResolver) Todos(ctx context.Context) ([]*model.Todo, error) {

@@ -9,12 +9,6 @@ type Todo {
   user: User!
 }
 
-type User2 {
-    id: ID!
-    name: String!
-}
-
-
 type User {
   id: ID!
   name: String!
@@ -31,4 +25,12 @@ input NewTodo {
 
 type Mutation {
   createTodo(input: NewTodo!): Todo!
+    deleteUser(userID: ID!): Boolean @hasRole(role: ADMIN)
+}
+
+directive @hasRole(role: Role!) on FIELD_DEFINITION
+
+enum Role {
+    ADMIN
+    USER
 }
