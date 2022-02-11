@@ -5,9 +5,10 @@ import (
 	"meigo/gqlgen-todos/graph/generated"
 	exampleModule "meigo/modules/example"
 
+	"github.com/99designs/gqlgen/graphql/handler"
+
 	"github.com/99designs/gqlgen/graphql/handler/extension"
 
-	"github.com/99designs/gqlgen/graphql/handler"
 	"github.com/99designs/gqlgen/graphql/playground"
 
 	ctxExt "github.com/kinjew/gin-context-ext"
@@ -34,6 +35,23 @@ func graphqlHandler() gin.HandlerFunc {
 	// NewExecutableSchema and Config are in the generated.go file
 	// Resolver is in the resolver.go file
 	h := handler.NewDefaultServer(generated.NewExecutableSchema(generated.Config{Resolvers: &graph.Resolver{}}))
+
+	//// Using schema directives to implement permission checks,example
+	//c := generated.Config{Resolvers: &graph.Resolver{}}
+	//c.Directives.HasRole = func(ctx context.Context, obj interface{}, next graphql.Resolver, role model.Role) (interface{}, error) {
+	//	fmt.Println(role, "input role")
+	//	/*
+	//		if !getCurrentUser(ctx).HasRole(role) {
+	//			// block calling the next resolver
+	//			return nil, fmt.Errorf("Access denied")
+	//		}
+	//	*/
+	//	//return nil, fmt.Errorf("Access denied")
+	//	// or let it pass through
+	//	return next(ctx)
+	//}
+	//h := handler.NewDefaultServer(generated.NewExecutableSchema(c))
+
 	h.Use(extension.FixedComplexityLimit(5)) // This line is key,any query with complexity greater than 5 is rejected by the API.
 	return func(c *gin.Context) {
 		h.ServeHTTP(c.Writer, c.Request)
