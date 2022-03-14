@@ -60,3 +60,19 @@ func main() {
 	}
 
 }
+
+/*
+	var s = "pregnancy_rw:i6ByOV8TKQW50SWy@tcp(mvepya6vcgd4jdlwestf.rwlb.rds.aliyuncs.com:3306)/pregnancy_three?charset=utf8mb4&parseTime=false&loc=Local"
+	//解释正则表达式
+	reg := regexp.MustCompile(`@tcp\((.+)\)\/(.+)\?`)
+	if reg == nil {
+		fmt.Println("MustCompile err")
+		return
+	}
+	//提取关键信息
+	result := reg.FindAllStringSubmatch(s, -1)
+	dsn := result[0][1] + "/" + result[0][2]
+
+	fmt.Println(result)
+	fmt.Println(dsn)
+*/
